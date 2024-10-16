@@ -5,18 +5,13 @@
 
     <parent>
         <groupId>org.dreamabout.sw.frp</groupId>
-        <artifactId>root</artifactId>
+        <artifactId>code</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>code</artifactId>
-    <name>frp-code</name>
-    <description>FRP - code base</description>
+    <artifactId>frontend</artifactId>
+    <name>frp-frontend</name>
+    <description>FRP - backend</description>
     <packaging>pom</packaging>
-
-    <modules>
-        <module>backend</module>
-        <module>frontend</module>
-    </modules>
 
 </project>
