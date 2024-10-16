@@ -1,2 +1,2 @@
 # frp
-Family Resource Planner
+Family Resource Planner and Organizer
