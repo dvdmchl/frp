@@ -1,0 +1,23 @@
+package org.dreamabout.sw.frp.be.module.common.model;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.dreamabout.sw.frp.be.domain.Constant;
+import org.dreamabout.sw.frp.be.model.AuditableEntity;
+
+@Entity
+@Getter
+@Setter
+@Table(name = "frp_schema", schema = Constant.PUBLIC_SCHEMA)
+public class SchemaEntity extends AuditableEntity {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "frp_schema_id_seq")
+    @SequenceGenerator(name = "frp_schema_id_seq", allocationSize = 1, schema = Constant.PUBLIC_SCHEMA)
+    private Long id;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+}

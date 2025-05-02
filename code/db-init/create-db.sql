@@ -1,0 +1,4 @@
+CREATE DATABASE frp_db;
+\CONNECT FRP;
+CREATE SCHEMA frp_public;
+CREATE SCHEMA frp_template;
