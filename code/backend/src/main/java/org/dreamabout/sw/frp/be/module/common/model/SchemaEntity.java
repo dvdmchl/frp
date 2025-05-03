@@ -7,12 +7,14 @@ import lombok.Setter;
 import org.dreamabout.sw.frp.be.domain.Constant;
 import org.dreamabout.sw.frp.be.model.AuditableEntity;
 
+import java.io.Serializable;
+
 @Entity
 @Getter
 @Setter
 @Table(name = "frp_schema", schema = Constant.PUBLIC_SCHEMA)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
-public class SchemaEntity extends AuditableEntity {
+public class SchemaEntity extends AuditableEntity implements Serializable {
 
     @Id
     @Column(name = "id")

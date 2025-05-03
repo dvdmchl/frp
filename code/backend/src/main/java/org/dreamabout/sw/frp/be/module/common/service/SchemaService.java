@@ -2,6 +2,7 @@ package org.dreamabout.sw.frp.be.module.common.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamabout.sw.frp.be.domain.FrpDbException;
 import org.dreamabout.sw.frp.be.module.common.model.SchemaEntity;
 import org.dreamabout.sw.frp.be.module.common.repository.SchemaRepository;
 import org.flywaydb.core.Flyway;
@@ -38,7 +39,7 @@ public class SchemaService {
         try (var connection = dataSource.getConnection(); var stmt = connection.createStatement()) {
             stmt.execute(sql);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create schema: " + schemaName, e);
+            throw new FrpDbException("Failed to create schema: " + schemaName, e);
         }
     }
 

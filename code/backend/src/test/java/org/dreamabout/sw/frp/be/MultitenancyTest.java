@@ -57,7 +57,7 @@ class MultitenancyTest extends AbstractDbTest {
         var schemaRes = schemas.get(0);
         assertThat(schemaRes.getId()).isEqualTo(schema.getId());
 
-        // accounting journal must be stored in frp_test schema
+        // an accounting journal must be stored in frp_test schema
         var accJournals = selectAll(AccJournalEntity.class, schema.getName());
         assertThat(accJournals).hasSize(1);
         var accJournalRes = accJournals.get(0);

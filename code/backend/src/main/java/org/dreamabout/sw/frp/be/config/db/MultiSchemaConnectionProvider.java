@@ -3,6 +3,7 @@ package org.dreamabout.sw.frp.be.config.db;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.MultiTenancySettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
+import org.hibernate.service.UnknownUnwrapTypeException;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
 
@@ -15,9 +16,9 @@ import static org.dreamabout.sw.frp.be.domain.Constant.PUBLIC_SCHEMA;
 
 @Component
 @RequiredArgsConstructor
-public class MultiSchemaConnectionProvider implements MultiTenantConnectionProvider, HibernatePropertiesCustomizer {
+public class MultiSchemaConnectionProvider implements MultiTenantConnectionProvider<TenantIdentifier>, HibernatePropertiesCustomizer {
 
-    private final DataSource dataSource;
+    private final transient DataSource dataSource;
 
     @Override
     public Connection getAnyConnection() throws SQLException {
@@ -30,20 +31,24 @@ public class MultiSchemaConnectionProvider implements MultiTenantConnectionProvi
     }
 
     @Override
-    public Connection getConnection(Object o) throws SQLException {
-        if (o == null) {
+    public Connection getConnection(TenantIdentifier tenantIdentifier) throws SQLException {
+        if (tenantIdentifier == null) {
             throw new IllegalArgumentException("Tenant identifier is null");
         }
-        if (o instanceof TenantIdentifier tenantIdentifier) {
-            var connection = dataSource.getConnection();
+
+        var connection = dataSource.getConnection();
+        try {
             connection.setSchema(tenantIdentifier.getTenantId());
-            return connection;
         }
-        throw new IllegalArgumentException("Tenant identifier not found. Got type: %s instead of TenantIdentifier".formatted(o.getClass().getName()));
+        catch (SQLException e) {
+            connection.close();
+            throw new SQLException("Failed to set schema: " + tenantIdentifier.getTenantId(), e);
+        }
+        return connection;
     }
 
     @Override
-    public void releaseConnection(Object o, Connection connection) throws SQLException {
+    public void releaseConnection(TenantIdentifier o, Connection connection) throws SQLException {
         connection.setSchema(PUBLIC_SCHEMA);
         connection.close();
     }
@@ -55,12 +60,19 @@ public class MultiSchemaConnectionProvider implements MultiTenantConnectionProvi
 
     @Override
     public boolean isUnwrappableAs(Class<?> unwrapType) {
-        return false;
+        return unwrapType.isInstance(this)
+                || MultiTenantConnectionProvider.class.isAssignableFrom(unwrapType);
     }
 
     @Override
-    public <T> T unwrap(Class<T> aClass) {
-        return null;
+    public <T> T unwrap(Class<T> unwrapType) {
+        if (unwrapType.isInstance(this)) {
+            return (T) this;
+        }
+        if (MultiTenantConnectionProvider.class.isAssignableFrom(unwrapType)) {
+            return (T) this;
+        }
+        throw new UnknownUnwrapTypeException(unwrapType);
     }
 
     @Override

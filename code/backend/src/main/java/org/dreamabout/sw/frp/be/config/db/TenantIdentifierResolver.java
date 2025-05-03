@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
+public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver<TenantIdentifier>, HibernatePropertiesCustomizer {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -19,7 +19,7 @@ public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver
      * Resolve the current tenant identifier by UserEntity#schemaId
      */
     @Override
-    public Object resolveCurrentTenantIdentifier() {
+    public TenantIdentifier resolveCurrentTenantIdentifier() {
         var currentTenant = TenantContext.getCurrentTenant();
         if (currentTenant != null) {
             return currentTenant;
