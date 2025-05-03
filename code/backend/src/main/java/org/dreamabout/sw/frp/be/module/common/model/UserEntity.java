@@ -17,6 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name = "frp_user", schema = Constant.PUBLIC_SCHEMA)
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class UserEntity extends AuditableEntity implements UserDetails {
 
     @Id

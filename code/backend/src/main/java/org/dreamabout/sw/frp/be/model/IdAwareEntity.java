@@ -1,8 +1,7 @@
 package org.dreamabout.sw.frp.be.model;
 
-public interface IdAwareEntity {
+import java.io.Serializable;
 
+public interface IdAwareEntity extends Serializable {
     Long getId();
-
-    void setId(Long id);
 }
