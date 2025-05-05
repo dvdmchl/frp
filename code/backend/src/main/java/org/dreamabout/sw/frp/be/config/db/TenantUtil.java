@@ -27,6 +27,13 @@ public class TenantUtil {
     }
 
     private static String getCurrentTenantIdentifierName(JdbcTemplate jdbcTemplate, String userName) {
-        return jdbcTemplate.queryForObject(SELECT_SCHEMA_NAME_BY_USERNAME, String.class, userName);
+        var schemas = jdbcTemplate.queryForList(
+                SELECT_SCHEMA_NAME_BY_USERNAME,
+                String.class,
+                userName
+        );
+        return schemas.isEmpty()
+                ? Constant.TEMPLATE_SCHEMA
+                : schemas.get(0);
     }
 }

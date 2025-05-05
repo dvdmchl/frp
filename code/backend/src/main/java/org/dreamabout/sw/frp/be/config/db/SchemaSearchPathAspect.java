@@ -6,6 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.dreamabout.sw.frp.be.config.context.FrpThreadContext;
 import org.dreamabout.sw.frp.be.domain.Constant;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class SchemaSearchPathAspect {
-
-    private static final ThreadLocal<String> currentPath = new ThreadLocal<>();
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -37,10 +36,10 @@ public class SchemaSearchPathAspect {
                 ? Constant.PUBLIC_SCHEMA
                 : tenantSchema + ", " + Constant.PUBLIC_SCHEMA;
 
-        if (!expectedPath.equals(currentPath.get())) {
+        if (!expectedPath.equals(FrpThreadContext.getCurrentSearchPath())) {
             log.info("Setting search path to {}", expectedPath);
             jdbcTemplate.execute("SET search_path TO " + expectedPath);
-            currentPath.set(expectedPath);
+            FrpThreadContext.setCurrentSearchPath(expectedPath);
         }
 
         return pjp.proceed();

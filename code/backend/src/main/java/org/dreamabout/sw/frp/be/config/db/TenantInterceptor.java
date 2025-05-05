@@ -18,12 +18,5 @@ public class TenantInterceptor implements HandlerInterceptor {
         TenantContext.setCurrentTenant(TenantUtil.getCurrentTenantIdentifier(jdbcTemplate));
         return true;
     }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        TenantContext.clear();
-    }
-
-
 }
 

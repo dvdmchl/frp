@@ -1,21 +1,17 @@
 package org.dreamabout.sw.frp.be.config.db;
 
 import lombok.experimental.UtilityClass;
+import org.dreamabout.sw.frp.be.config.context.FrpThreadContext;
 
 @UtilityClass
 public class TenantContext {
 
-    private static final ThreadLocal<TenantIdentifier> currentTenant = new ThreadLocal<>();
-
     public static void setCurrentTenant(TenantIdentifier tenantIdentifier) {
-        currentTenant.set(tenantIdentifier);
+        FrpThreadContext.setTenantIndentifier(tenantIdentifier);
     }
 
     public static TenantIdentifier getCurrentTenant() {
-        return currentTenant.get();
+        return FrpThreadContext.getTenantIdentifier();
     }
 
-    public static void clear() {
-        currentTenant.remove();
-    }
 }
