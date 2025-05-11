@@ -1,4 +1,4 @@
-package org.dreamabout.sw.frp.be.model;
+package org.dreamabout.sw.frp.be.module.common.model;
 
 import java.io.Serializable;
 

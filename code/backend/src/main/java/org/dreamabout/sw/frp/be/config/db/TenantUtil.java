@@ -12,7 +12,7 @@ public class TenantUtil {
     private static final String SELECT_SCHEMA_NAME_BY_USERNAME = """
                 SELECT s.name FROM frp_user u
                 JOIN frp_schema s ON s.id = u.schema_id 
-                WHERE username = ?
+                WHERE email = ?
             """;
 
     public static TenantIdentifier getCurrentTenantIdentifier(JdbcTemplate jdbcTemplate) {

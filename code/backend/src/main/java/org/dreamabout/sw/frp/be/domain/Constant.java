@@ -9,7 +9,5 @@ public class Constant {
 
     public static final String TEMPLATE_SCHEMA = "frp_template";
 
-    public static final String POSTGRES_VERSION = "17.1";
-
     public static final int ABBREVIATOR_LENGTH = 42;
 }

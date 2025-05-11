@@ -5,7 +5,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.dreamabout.sw.frp.be.domain.Constant;
-import org.dreamabout.sw.frp.be.model.AuditableEntity;
 
 import java.io.Serializable;
 

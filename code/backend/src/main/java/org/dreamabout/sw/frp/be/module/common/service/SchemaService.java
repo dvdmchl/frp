@@ -2,7 +2,7 @@ package org.dreamabout.sw.frp.be.module.common.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dreamabout.sw.frp.be.domain.FrpDbException;
+import org.dreamabout.sw.frp.be.domain.exception.FrpDbException;
 import org.dreamabout.sw.frp.be.module.common.model.SchemaEntity;
 import org.dreamabout.sw.frp.be.module.common.repository.SchemaRepository;
 import org.flywaydb.core.Flyway;

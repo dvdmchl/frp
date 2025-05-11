@@ -4,8 +4,9 @@ create sequence frp_public.frp_user_id_seq
 
 create table frp_public.frp_user (
     id serial primary key,
-    username varchar(255) not null,
-    email varchar(255),
+    full_name varchar(255),
+    password varchar(255) not null,
+    email varchar(255) not null,
     last_login timestamp,
     schema_id bigint,
 

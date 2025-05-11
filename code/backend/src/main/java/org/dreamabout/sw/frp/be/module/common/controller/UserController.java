@@ -1,0 +1,59 @@
+package org.dreamabout.sw.frp.be.module.common.controller;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.dreamabout.sw.frp.be.domain.ApiPath;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
+import org.dreamabout.sw.frp.be.module.common.service.UserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(ApiPath.API_ROOT + ApiPath.USER)
+public class UserController {
+
+    private final UserService userService;
+
+    @Operation(summary = "Register new user", description = "Creates a new user account.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "409", description = "User with email already exists", content = @Content)
+    })
+    @PostMapping(ApiPath.USER_REGISTER)
+    public ResponseEntity<UserDto> register(@Valid @RequestBody UserRegisterRequestDto userRegister) {
+        return ResponseEntity.ok(userService.signup(userRegister));
+    }
+
+    @Operation(summary = "Authenticate user", description = "Logs in a user and returns user info.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successful"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials", content = @Content)
+    })
+    @PostMapping(ApiPath.USER_LOGIN)
+    public ResponseEntity<UserLoginResponseDto> login(@Valid @RequestBody UserLoginRequestDto userLogin) {
+        return ResponseEntity.ok(userService.authenticate(userLogin));
+    }
+
+    @Operation(summary = "Get authenticated user", description = "Returns the currently authenticated user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Authenticated user retrieved successfully"),
+            @ApiResponse(responseCode = "403", description = "User not authenticated", content = @Content)
+    })
+    @GetMapping(ApiPath.USER_ME)
+    public ResponseEntity<UserDto> authenticatedUser() {
+        var userOpt = userService.getAuthenticatedUser();
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(userOpt.get());
+    }
+}

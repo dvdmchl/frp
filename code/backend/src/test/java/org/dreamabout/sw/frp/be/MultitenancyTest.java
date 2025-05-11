@@ -35,7 +35,8 @@ class MultitenancyTest extends AbstractDbTest {
         var schema = schemaService.createSchema("frp_test");
 
         var user = new UserEntity();
-        user.setUsername("test");
+        user.setEmail("test@test.com");
+        user.setPassword("password");
         user.setSchema(schema);
         user = userRepository.save(user);
 

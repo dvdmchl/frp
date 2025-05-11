@@ -2,18 +2,18 @@ package org.dreamabout.sw.frp.be.test;
 
 import jakarta.persistence.Table;
 import org.dreamabout.sw.frp.be.domain.Constant;
-import org.dreamabout.sw.frp.be.model.IdAwareEntity;
+import org.dreamabout.sw.frp.be.module.common.model.IdAwareEntity;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.platform.commons.util.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
@@ -21,26 +21,47 @@ import java.util.List;
 @SpringBootTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = Replace.NONE)
+@AutoConfigureMockMvc
 public abstract class AbstractDbTest {
 
-    private static final String DB_NAME = "db_frp_test";
-    private static final String DB_USER = "sa";
-    private static final String DB_PASSWORD = "sa";
+    private static final String TRUNCATE_SCRIPT = """
+            DO $$
+            DECLARE
+                schema_name text;
+                table_name text;
+            BEGIN
+                FOR schema_name, table_name IN
+                    SELECT schemaname, tablename
+                    FROM pg_tables
+                    WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
+                      AND tablename NOT IN ('flyway_schema_history')
+                LOOP
+                    EXECUTE format('TRUNCATE TABLE %I.%I RESTART IDENTITY CASCADE', schema_name, table_name);
+                END LOOP;
+            END $$;
+            """;
+
+    static final SharedPostgresContainer POSTGRES_CONTAINER = SharedPostgresContainer.getInstance();
+
+    static {
+        POSTGRES_CONTAINER.start();
+    }
 
     @Autowired
     protected JdbcTemplate jdbcTemplate;
-
-    @Container
-    private static final PostgreSQLContainer POSTGRES_CONTAINER = new PostgreSQLContainer("postgres:" + Constant.POSTGRES_VERSION)
-            .withDatabaseName(DB_NAME)
-            .withUsername(DB_USER)
-            .withPassword(DB_PASSWORD);
 
     @DynamicPropertySource
     static void registerPgProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", POSTGRES_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES_CONTAINER::getUsername);
         registry.add("spring.datasource.password", POSTGRES_CONTAINER::getPassword);
+
+        registry.add("JWT_SECRET_KEY", () -> "test-secret-key-123");
+    }
+
+    @BeforeEach
+    void truncateAll() {
+        jdbcTemplate.execute(TRUNCATE_SCRIPT);
     }
 
     protected <T extends IdAwareEntity> List<T> selectAllFromPublicSchema(Class<T> clazz) {
@@ -55,7 +76,7 @@ public abstract class AbstractDbTest {
     }
 
     /**
-     * Return table name from entity class
+     * Return table name from an entity class
      */
     protected String getTableName(Class<?> clazz) {
         Preconditions.notNull(clazz, "Class cannot be null");

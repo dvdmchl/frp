@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.dreamabout.sw.frp.be.model.AuditableEntity;
+import org.dreamabout.sw.frp.be.module.common.model.AuditableEntity;
 
 @Entity
 @Getter

@@ -1,11 +1,9 @@
 package org.dreamabout.sw.frp.be.module.common.model;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.dreamabout.sw.frp.be.domain.Constant;
-import org.dreamabout.sw.frp.be.model.AuditableEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -16,6 +14,9 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "frp_user", schema = Constant.PUBLIC_SCHEMA)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class UserEntity extends AuditableEntity implements UserDetails {
@@ -27,10 +28,13 @@ public class UserEntity extends AuditableEntity implements UserDetails {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "username", unique = true, nullable = false)
-    private String username;
+    @Column(name = "full_name", unique = true)
+    private String fullName;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @Column(name = "last_login")
@@ -46,7 +50,7 @@ public class UserEntity extends AuditableEntity implements UserDetails {
     }
 
     @Override
-    public String getPassword() {
-        return "";
+    public String getUsername() {
+        return email;
     }
 }
