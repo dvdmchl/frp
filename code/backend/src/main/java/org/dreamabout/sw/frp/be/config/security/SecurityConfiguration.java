@@ -30,11 +30,10 @@ public class SecurityConfiguration {
     @Value("${springdoc.swagger-ui.path}")
     private String swaggerUiPath;
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .cors(Customizer.withDefaults()) // ⬅️ to ti propojí CORS config
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(getPublicEndpoints()).permitAll()
@@ -52,8 +51,8 @@ public class SecurityConfiguration {
         return new String[]{
                 ApiPath.USER_REGISTER_FULL,
                 ApiPath.USER_LOGIN_FULL,
-                apiDocsPath,
-                swaggerUiPath,
+                apiDocsPath + "/**",
+                swaggerUiPath + "/**",
         };
     }
 
@@ -61,15 +60,11 @@ public class SecurityConfiguration {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowedOrigins(List.of("http://localhost:8005"));
-        configuration.setAllowedMethods(List.of("GET", "POST"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }

@@ -1,0 +1,22 @@
+{
+  "login": {
+    "title": "Login",
+    "email": "E-mail",
+    "password": "Password",
+    "button": "Login",
+    "button-progress": "Logging in...",
+    "error": "Login failed, please check your credentials."
+  },
+  "register": {
+    "title": "Register",
+    "fullName": "Full Name",
+    "email": "E-mail",
+    "password": "Password",
+    "button": "Register",
+    "button-progress": "Registering...",
+    "error": "Registration failed, please try again.",
+    "error-409": "Email already exists, please use a different email.",
+    "error-400": "Invalid input, please check your details.",
+    "error-unknown": "An unknown error occurred, please try again later."
+  }
+}

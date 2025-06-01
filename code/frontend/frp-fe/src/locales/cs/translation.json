@@ -1,0 +1,22 @@
+{
+  "login": {
+    "title": "Přihlášení",
+    "email": "E-mail",
+    "password": "Heslo",
+    "button": "Přihlásit se",
+    "button-progress": "Probíhá přihlášení...",
+    "error": "Přihlášení selhalo, zkontrolujte údaje."
+  },
+  "register": {
+    "title": "Registrace",
+    "fullName": "Celé jméno",
+    "email": "E-mail",
+    "password": "Heslo",
+    "button": "Zaregistrovat se",
+    "button-progress": "Probíhá registrace...",
+    "error": "Registrace selhala, zkuste to prosím znovu.",
+    "error-409": "E-mail již existuje, použijte prosím jiný e-mail.",
+    "error-400": "Neplatný vstup, zkontrolujte prosím své údaje.",
+    "error-unknown": "Došlo k neznámé chybě, zkuste to prosím později."
+  }
+}
