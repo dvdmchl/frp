@@ -6,6 +6,7 @@ import org.dreamabout.sw.frp.be.module.common.model.dto.UserDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateRequestDto;
 import org.dreamabout.sw.frp.be.test.AbstractDbTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class UserControllerTest extends AbstractDbTest {
@@ -145,6 +147,48 @@ class UserControllerTest extends AbstractDbTest {
     @Test
     void authenticated_user_unauthorized_test() throws Exception {
         mockMvc.perform(get(ApiPath.USER_ME_FULL))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void update_user_ok_test() throws Exception {
+        var email = "upd@test.com";
+        var fullName = "Update Me";
+        var password = "pass";
+        var registerDto = new UserRegisterRequestDto(email, password, fullName);
+        mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerDto)))
+                .andExpect(status().isOk());
+
+        var loginDto = new UserLoginRequestDto(email, password);
+        var loginJson = mockMvc.perform(post(ApiPath.USER_LOGIN_FULL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        var loginResp = objectMapper.readValue(loginJson, UserLoginResponseDto.class);
+        var token = loginResp.token();
+
+        var updateDto = new UserUpdateRequestDto("New Name", "new@email.com", "newpass");
+        var json = mockMvc.perform(put(ApiPath.USER_UPDATE_FULL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + token)
+                        .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        var userDto = objectMapper.readValue(json, UserDto.class);
+        assertThat(userDto.fullName()).isEqualTo("New Name");
+        assertThat(userDto.email()).isEqualTo("new@email.com");
+    }
+
+    @Test
+    void update_user_unauthorized_test() throws Exception {
+        var dto = new UserUpdateRequestDto("Name", "email@test.com", "pwd");
+        mockMvc.perform(put(ApiPath.USER_UPDATE_FULL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isForbidden());
     }
 

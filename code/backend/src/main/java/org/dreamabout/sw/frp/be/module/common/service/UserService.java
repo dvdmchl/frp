@@ -7,6 +7,7 @@ import org.dreamabout.sw.frp.be.module.common.model.dto.UserDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.mapper.UserMapper;
 import org.dreamabout.sw.frp.be.module.common.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -71,5 +72,19 @@ public class UserService {
         var user = (UserEntity) aut.getPrincipal();
         return userRepository.findById(user.getId())
                 .map(userMapper::toDto);
+    }
+
+    public Optional<UserDto> updateAuthenticatedUser(UserUpdateRequestDto update) {
+        var aut = SecurityContextHolder.getContext().getAuthentication();
+        if (aut == null || aut.getPrincipal() == null) {
+            return Optional.empty();
+        }
+        var principal = (UserEntity) aut.getPrincipal();
+        var user = userRepository.findById(principal.getId()).orElseThrow();
+        user.setFullName(update.fullName());
+        user.setEmail(update.email());
+        user.setPassword(passwordEncoder.encode(update.password()));
+        user = userRepository.save(user);
+        return Optional.of(userMapper.toDto(user));
     }
 }

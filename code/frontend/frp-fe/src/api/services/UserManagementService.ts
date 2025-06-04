@@ -6,10 +6,46 @@ import type { UserDto } from '../models/UserDto';
 import type { UserLoginRequestDto } from '../models/UserLoginRequestDto';
 import type { UserLoginResponseDto } from '../models/UserLoginResponseDto';
 import type { UserRegisterRequestDto } from '../models/UserRegisterRequestDto';
+import type { UserUpdateRequestDto } from '../models/UserUpdateRequestDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class UserManagementService {
+    /**
+     * Get authenticated user
+     * Returns the currently authenticated user.
+     * @returns UserDto Authenticated user retrieved successfully
+     * @throws ApiError
+     */
+    public static authenticatedUser(): CancelablePromise<UserDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/user/me',
+            errors: {
+                403: `User not authenticated`,
+            },
+        });
+    }
+    /**
+     * Update authenticated user
+     * Updates the currently authenticated user.
+     * @param requestBody
+     * @returns UserDto User updated successfully
+     * @throws ApiError
+     */
+    public static updateAuthenticatedUser(
+        requestBody: UserUpdateRequestDto,
+    ): CancelablePromise<UserDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/user/me',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                403: `User not authenticated`,
+            },
+        });
+    }
     /**
      * Register new user
      * Creates a new user account.
@@ -48,21 +84,6 @@ export class UserManagementService {
             mediaType: 'application/json',
             errors: {
                 401: `Invalid credentials`,
-            },
-        });
-    }
-    /**
-     * Get authenticated user
-     * Returns the currently authenticated user.
-     * @returns UserDto Authenticated user retrieved successfully
-     * @throws ApiError
-     */
-    public static authenticatedUser(): CancelablePromise<UserDto> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/user/me',
-            errors: {
-                403: `User not authenticated`,
             },
         });
     }

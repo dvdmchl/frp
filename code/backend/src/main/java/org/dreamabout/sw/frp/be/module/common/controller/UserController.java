@@ -12,6 +12,7 @@ import org.dreamabout.sw.frp.be.module.common.model.dto.UserDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateRequestDto;
 import org.dreamabout.sw.frp.be.module.common.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +54,20 @@ public class UserController {
     @GetMapping(ApiPath.USER_ME)
     public ResponseEntity<UserDto> authenticatedUser() {
         var userOpt = userService.getAuthenticatedUser();
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(userOpt.get());
+    }
+
+    @Operation(summary = "Update authenticated user", description = "Updates the currently authenticated user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
+            @ApiResponse(responseCode = "403", description = "User not authenticated", content = @Content)
+    })
+    @PutMapping(ApiPath.USER_UPDATE)
+    public ResponseEntity<UserDto> updateAuthenticatedUser(@Valid @RequestBody UserUpdateRequestDto request) {
+        var userOpt = userService.updateAuthenticatedUser(request);
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(401).build();
         }

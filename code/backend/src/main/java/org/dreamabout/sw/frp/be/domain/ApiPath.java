@@ -20,4 +20,8 @@ public class ApiPath {
     public static final String USER_ME = "/me";
 
     public static final String USER_ME_FULL = API_ROOT + USER + USER_ME;
+
+    public static final String USER_UPDATE = "/me";
+
+    public static final String USER_UPDATE_FULL = API_ROOT + USER + USER_UPDATE;
 }

@@ -11,6 +11,7 @@ export type { UserDto } from './models/UserDto';
 export type { UserLoginRequestDto } from './models/UserLoginRequestDto';
 export type { UserLoginResponseDto } from './models/UserLoginResponseDto';
 export type { UserRegisterRequestDto } from './models/UserRegisterRequestDto';
+export type { UserUpdateRequestDto } from './models/UserUpdateRequestDto';
 
 export { ContextControllerService } from './services/ContextControllerService';
 export { UserManagementService } from './services/UserManagementService';
