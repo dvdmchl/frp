@@ -13,6 +13,7 @@ import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateRequestDto;
+import org.dreamabout.sw.frp.be.module.common.service.JwtService;
 import org.dreamabout.sw.frp.be.module.common.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
 
     @Operation(summary = "Register new user", description = "Creates a new user account.")
     @ApiResponses(value = {
@@ -44,6 +46,16 @@ public class UserController {
     @PostMapping(ApiPath.USER_LOGIN)
     public ResponseEntity<UserLoginResponseDto> login(@Valid @RequestBody UserLoginRequestDto userLogin) {
         return ResponseEntity.ok(userService.authenticate(userLogin));
+    }
+
+    @Operation(summary = "Logout user", description = "Logs out the currently authenticated user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Logout successful"),
+            @ApiResponse(responseCode = "403", description = "User not authenticated", content = @Content)
+    })
+    @PostMapping(ApiPath.USER_LOGOUT)
+    public void logout() {
+        userService.invalidateToken();
     }
 
     @Operation(summary = "Get authenticated user", description = "Returns the currently authenticated user.")

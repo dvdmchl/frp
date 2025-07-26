@@ -1,31 +1,39 @@
 import './App.css'
-import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
-import {LoginForm} from "./components/UserManagement/LoginForm";
-import {RegisterForm} from "./components/UserManagement/RegisterForm";
+import {BrowserRouter} from "react-router-dom";
 import {useState, useEffect} from "react";
 import type {UserDto} from "./api/models/UserDto.ts";
 import type {UserLoginResponseDto} from "./api/models/UserLoginResponseDto";
-import {HomePage} from "./components/HomePage.tsx";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import {OpenAPI, UserManagementService} from "./api";
+import {AppRoutes} from "./AppRoutes.tsx";
+import {Spinner} from "./components/UIComponent/Spinner.tsx";
 
 function App() {
     const [user, setUser] = useState<UserDto | null>(null);
+    const [loadingUser, setLoadingUser] = useState(true);
 
     useEffect(() => {
         const jwt = localStorage.getItem("jwt");
-        if (jwt && !user) {
+        if (jwt) {
             OpenAPI.TOKEN = jwt;
-            // zavolej /me
             UserManagementService.authenticatedUser()
                 .then(u => setUser(u))
                 .catch(() => {
                     setUser(null);
                     localStorage.removeItem("jwt");
+                })
+                .finally(() => {
+                    setLoadingUser(false);
                 });
+        } else {
+            setLoadingUser(false);
         }
     }, []);
+
+    if (loadingUser) {
+        return <Spinner/>;
+    }
 
     const handleLoginSuccess = (loginResp: UserLoginResponseDto) => {
         if (!loginResp.user) {
@@ -49,26 +57,20 @@ function App() {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <Header user={user || undefined} />
-            <main className="flex-grow">
-                <BrowserRouter>
-                    <Routes>
-                        {!user && (
-                            <>
-                                <Route path="/login" element={<LoginForm onLoginSuccess={handleLoginSuccess} />} />
-                                <Route path="/register" element={<RegisterForm onRegisterSuccess={handleRegisterSuccess} />} />
-                                <Route path="*" element={<Navigate to="/login" />} />
-                            </>
-                        )}
-                        {user && (
-                            <>
-                                <Route path="/*" element={<HomePage user={user} />} />
-                            </>
-                        )}
-                    </Routes>
-                </BrowserRouter>
-            </main>
-            <Footer />
+            <BrowserRouter>
+                <Header user={user} onLogout={() => setUser(null)}/>
+                <main className="flex-grow">
+
+                    <AppRoutes
+                        user={user}
+                        onLoginSuccess={handleLoginSuccess}
+                        onRegisterSuccess={handleRegisterSuccess}
+                        setUser={setUser}
+                    />
+
+                </main>
+                <Footer/>
+            </BrowserRouter>
         </div>
     );
 }

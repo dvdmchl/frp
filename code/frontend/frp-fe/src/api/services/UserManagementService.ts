@@ -68,6 +68,21 @@ export class UserManagementService {
         });
     }
     /**
+     * Logout user
+     * Logs out the currently authenticated user.
+     * @returns void
+     * @throws ApiError
+     */
+    public static logout(): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/user/logout',
+            errors: {
+                403: `User not authenticated`,
+            },
+        });
+    }
+    /**
      * Authenticate user
      * Logs in a user and returns user info.
      * @param requestBody

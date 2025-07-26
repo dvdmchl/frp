@@ -2,9 +2,16 @@ import React, {useState} from "react";
 import {UserManagementService} from "../../api/services/UserManagementService";
 import type {UserLoginRequestDto} from "../../api/models/UserLoginRequestDto";
 import type {UserLoginResponseDto} from "../../api/models/UserLoginResponseDto";
+import {InputEmail, InputPassword} from "../UIComponent/Input.tsx";
+import {LoginButton, RegisterButton} from "../UIComponent/Button.tsx";
+import {H2Title, TextError} from "../UIComponent/Text.tsx";
+import {Form} from "../UIComponent/Form.tsx";
 import {useTranslation} from "react-i18next";
 
-export const LoginForm: React.FC<{ onLoginSuccess: (user: UserLoginResponseDto) => void }> = ({onLoginSuccess}) => {
+export const LoginForm: React.FC<{
+    onLoginSuccess: (user: UserLoginResponseDto) => void,
+    onRegisterClick: () => void
+}> = ({onLoginSuccess, onRegisterClick}) => {
     const {t} = useTranslation();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -18,8 +25,9 @@ export const LoginForm: React.FC<{ onLoginSuccess: (user: UserLoginResponseDto) 
         try {
             const data: UserLoginRequestDto = {email, password};
             const response = await UserManagementService.login(data);
-            onLoginSuccess(response); // response je už UserLoginResponseDto
+            onLoginSuccess(response);
         } catch (err: any) {
+            console.error("Login failed", err);
             setError(t("login.error"));
         } finally {
             setLoading(false);
@@ -27,29 +35,25 @@ export const LoginForm: React.FC<{ onLoginSuccess: (user: UserLoginResponseDto) 
     };
 
     return (
-        <form onSubmit={handleSubmit}
-              className="max-w-sm mx-auto mt-8 p-6 bg-white shadow-xl rounded-lg flex flex-col gap-4">
-            <h2 className="text-xl font-semibold text-center">{t("login.title")}</h2>
-            <input
-                className="border rounded p-2"
-                type="email"
-                placeholder={t("login.email")}
+        <Form onSubmit={handleSubmit}>
+            <H2Title>{t("login.title")}</H2Title>
+
+            <InputEmail
                 value={email}
                 required
                 onChange={e => setEmail(e.target.value)}
             />
-            <input
-                className="border rounded p-2"
-                type="password"
-                placeholder={t("login.password")}
+
+            <InputPassword
                 value={password}
                 required
                 onChange={e => setPassword(e.target.value)}
             />
-            {error && <div className="text-red-600 text-sm">{error}</div>}
-            <button type="submit" disabled={loading} className="bg-blue-600 text-white rounded p-2 hover:bg-blue-700">
-                {loading ? t("login.button-progress") : t("login.button")}
-            </button>
-        </form>
+
+            {error && <TextError message={error}/>}
+
+            <LoginButton loading={loading} type="submit"/>
+            <RegisterButton loading={loading} type="button" onClick={onRegisterClick}/>
+        </Form>
     );
 };

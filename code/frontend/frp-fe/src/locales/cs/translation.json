@@ -18,5 +18,21 @@
     "error-409": "E-mail již existuje, použijte prosím jiný e-mail.",
     "error-400": "Neplatný vstup, zkontrolujte prosím své údaje.",
     "error-unknown": "Došlo k neznámé chybě, zkuste to prosím později."
+  },
+  "logout": {
+    "button": "Odhlásit se",
+    "button-progress": "Probíhá odhlašování...",
+    "success": "Byli jste úspěšně odhlášeni.",
+    "error": "Odhlášení selhalo, zkuste to prosím znovu."
+  },
+  "profile": {
+    "title": "Úprava profilu",
+    "fullName": "Celé jméno",
+    "email": "E-mail",
+    "password": "Nové heslo",
+    "button": "Uložit změny",
+    "button-progress": "Aktualizuji...",
+    "success": "Profil byl úspěšně aktualizován",
+    "error": "Nepodařilo se aktualizovat profil"
   }
 }

@@ -87,4 +87,9 @@ public class UserService {
         user = userRepository.save(user);
         return Optional.of(userMapper.toDto(user));
     }
+
+    public void invalidateToken() {
+        SecurityContextHolder.clearContext();
+        // TODO: Implement token invalidation logic, set token is invalid for the user in the database. JWTAuthFilter must then check this flag for every user request.
+    }
 }

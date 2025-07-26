@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { UserManagementService } from "../../api/services/UserManagementService";
 import type { UserRegisterRequestDto } from "../../api/models/UserRegisterRequestDto";
 import type { UserDto } from "../../api/models/UserDto";
+import { Form} from "../UIComponent/Form.tsx";
+import { H2Title, TextError} from "../UIComponent/Text.tsx";
+import { InputText, InputEmail, InputPassword } from "../UIComponent/Input.tsx";
+import {RegisterButton} from "../UIComponent/Button.tsx";
 import {useTranslation} from "react-i18next";
 
 export const RegisterForm: React.FC<{ onRegisterSuccess: (user: UserDto) => void }> = ({ onRegisterSuccess }) => {
@@ -39,36 +43,29 @@ export const RegisterForm: React.FC<{ onRegisterSuccess: (user: UserDto) => void
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-8 p-6 bg-white shadow-xl rounded-lg flex flex-col gap-4">
-            <h2 className="text-xl font-semibold text-center">Registrace</h2>
-            <input
-                className="border rounded p-2"
-                type="text"
-                placeholder={t("register.fullName")}
+        <Form onSubmit={handleSubmit}>
+            <H2Title>{t("register.title")}</H2Title>
+            <InputText
+                id = "fullName"
+                name="fullName"
+                placeholderTranslationKey= "register.fullName"
+                labelTranslationKey="register.fullName"
                 value={fullName}
                 required
                 onChange={e => setFullName(e.target.value)}
             />
-            <input
-                className="border rounded p-2"
-                type="email"
-                placeholder={t("register.email")}
+            <InputEmail
                 value={email}
                 required
                 onChange={e => setEmail(e.target.value)}
             />
-            <input
-                className="border rounded p-2"
-                type="password"
-                placeholder={t("register.password")}
+            <InputPassword
                 value={password}
                 required
                 onChange={e => setPassword(e.target.value)}
             />
-            {error && <div className="text-red-600 text-sm">{error}</div>}
-            <button type="submit" disabled={loading} className="bg-green-600 text-white rounded p-2 hover:bg-green-700">
-                {loading ? t("register.button-progress"): t("register.button")}
-            </button>
-        </form>
+            {error && <TextError message={error} />}
+            <RegisterButton loading={loading} type="submit"/>
+        </Form>
     );
 };

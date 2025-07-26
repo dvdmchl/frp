@@ -18,5 +18,21 @@
     "error-409": "Email already exists, please use a different email.",
     "error-400": "Invalid input, please check your details.",
     "error-unknown": "An unknown error occurred, please try again later."
+  },
+  "logout": {
+    "button": "Logout",
+    "button-progress": "Logging out...",
+    "success": "You have been logged out successfully.",
+    "error": "Logout failed, please try again."
+  },
+  "profile": {
+    "title": "Edit Profile",
+    "fullName": "Full Name",
+    "email": "E-mail",
+    "password": "New Password",
+    "button": "Save Changes",
+    "button-progress": "Updating...",
+    "success": "Profile updated successfully",
+    "error": "Failed to update profile"
   }
 }

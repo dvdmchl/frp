@@ -24,4 +24,6 @@ public class ApiPath {
     public static final String USER_UPDATE = "/me";
 
     public static final String USER_UPDATE_FULL = API_ROOT + USER + USER_UPDATE;
+
+    public static final String USER_LOGOUT = "/logout";
 }
