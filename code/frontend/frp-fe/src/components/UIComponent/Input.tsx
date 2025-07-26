@@ -121,3 +121,51 @@ export function InputNewPassword(
         />
     );
 }
+
+export function InputOldPassword(
+    props: Readonly<Omit<
+        BaseInputProps,
+        | "type"
+        | "labelTranslationKey"
+        | "placeholderTranslationKey"
+        | "name"
+        | "id"
+        | "autoComplete"
+    >>,
+) {
+    return (
+        <BaseInput
+            type="password"
+            labelTranslationKey="profile.oldPassword"
+            placeholderTranslationKey="profile.oldPassword"
+            name="oldPassword"
+            id="oldPassword"
+            autoComplete="current-password"
+            {...props}
+        />
+    );
+}
+
+export function InputConfirmPassword(
+    props: Readonly<Omit<
+        BaseInputProps,
+        | "type"
+        | "labelTranslationKey"
+        | "placeholderTranslationKey"
+        | "name"
+        | "id"
+        | "autoComplete"
+    >>,
+) {
+    return (
+        <BaseInput
+            type="password"
+            labelTranslationKey="profile.confirmPassword"
+            placeholderTranslationKey="profile.confirmPassword"
+            name="confirmPassword"
+            id="confirmPassword"
+            autoComplete="new-password"
+            {...props}
+        />
+    );
+}

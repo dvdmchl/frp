@@ -30,9 +30,16 @@
     "fullName": "Full Name",
     "email": "E-mail",
     "password": "New Password",
+    "oldPassword": "Current Password",
+    "confirmPassword": "Confirm New Password",
+    "personalInfo": "Personal info",
+    "security": "Security",
+    "databaseSchemas": "Database Schemas",
     "button": "Save Changes",
     "button-progress": "Updating...",
-    "success": "Profile updated successfully",
-    "error": "Failed to update profile"
+    "infoSuccess": "Profile updated successfully",
+    "infoError": "Failed to update profile",
+    "passwordSuccess": "Password changed successfully",
+    "passwordError": "Failed to change password"
   }
 }

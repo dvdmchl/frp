@@ -13,6 +13,8 @@ import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateInfoRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserChangePasswordRequestDto;
 import org.dreamabout.sw.frp.be.module.common.service.JwtService;
 import org.dreamabout.sw.frp.be.module.common.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -72,17 +74,35 @@ public class UserController {
         return ResponseEntity.ok(userOpt.get());
     }
 
-    @Operation(summary = "Update authenticated user", description = "Updates the currently authenticated user.")
+    @Operation(summary = "Update personal info", description = "Updates the authenticated user's personal information.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User updated successfully"),
             @ApiResponse(responseCode = "403", description = "User not authenticated", content = @Content)
     })
-    @PutMapping(ApiPath.USER_UPDATE)
-    public ResponseEntity<UserDto> updateAuthenticatedUser(@Valid @RequestBody UserUpdateRequestDto request) {
-        var userOpt = userService.updateAuthenticatedUser(request);
+    @PutMapping(ApiPath.USER_UPDATE_INFO)
+    public ResponseEntity<UserDto> updateAuthenticatedUserInfo(@Valid @RequestBody UserUpdateInfoRequestDto request) {
+        var userOpt = userService.updateAuthenticatedUserInfo(request);
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(401).build();
         }
         return ResponseEntity.ok(userOpt.get());
+    }
+
+    @Operation(summary = "Change password", description = "Changes the authenticated user's password.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "400", description = "Old password does not match", content = @Content),
+            @ApiResponse(responseCode = "403", description = "User not authenticated", content = @Content)
+    })
+    @PutMapping(ApiPath.USER_UPDATE_PASSWORD)
+    public ResponseEntity<Void> changeAuthenticatedUserPassword(@Valid @RequestBody UserChangePasswordRequestDto request) {
+        Boolean result = userService.changeAuthenticatedUserPassword(request);
+        if (result == null) {
+            return ResponseEntity.status(401).build();
+        }
+        if (!result) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok().build();
     }
 }

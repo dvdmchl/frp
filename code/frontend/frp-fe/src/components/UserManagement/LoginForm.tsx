@@ -26,7 +26,7 @@ export const LoginForm: React.FC<{
             const data: UserLoginRequestDto = {email, password};
             const response = await UserManagementService.login(data);
             onLoginSuccess(response);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Login failed", err);
             setError(t("login.error"));
         } finally {

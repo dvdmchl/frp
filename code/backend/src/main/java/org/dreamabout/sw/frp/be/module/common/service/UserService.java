@@ -8,6 +8,8 @@ import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateInfoRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserChangePasswordRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.mapper.UserMapper;
 import org.dreamabout.sw.frp.be.module.common.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -74,7 +76,7 @@ public class UserService {
                 .map(userMapper::toDto);
     }
 
-    public Optional<UserDto> updateAuthenticatedUser(UserUpdateRequestDto update) {
+    public Optional<UserDto> updateAuthenticatedUserInfo(UserUpdateInfoRequestDto update) {
         var aut = SecurityContextHolder.getContext().getAuthentication();
         if (aut == null || aut.getPrincipal() == null) {
             return Optional.empty();
@@ -83,9 +85,23 @@ public class UserService {
         var user = userRepository.findById(principal.getId()).orElseThrow();
         user.setFullName(update.fullName());
         user.setEmail(update.email());
-        user.setPassword(passwordEncoder.encode(update.password()));
         user = userRepository.save(user);
         return Optional.of(userMapper.toDto(user));
+    }
+
+    public Boolean changeAuthenticatedUserPassword(UserChangePasswordRequestDto update) {
+        var aut = SecurityContextHolder.getContext().getAuthentication();
+        if (aut == null || aut.getPrincipal() == null) {
+            return null;
+        }
+        var principal = (UserEntity) aut.getPrincipal();
+        var user = userRepository.findById(principal.getId()).orElseThrow();
+        if (!passwordEncoder.matches(update.oldPassword(), user.getPassword())) {
+            return false;
+        }
+        user.setPassword(passwordEncoder.encode(update.newPassword()));
+        userRepository.save(user);
+        return true;
     }
 
     public void invalidateToken() {
