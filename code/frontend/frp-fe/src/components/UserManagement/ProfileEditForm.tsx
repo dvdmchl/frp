@@ -74,7 +74,7 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
 
     return (
         <div className="flex gap-6">
-            <SideMenu
+            <SideMenu<'info' | 'security' | 'schemas'>
                 items={[
                     { key: 'info', label: t('profile.personalInfo') },
                     { key: 'security', label: t('profile.security') },
@@ -83,6 +83,7 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
                 selected={section}
                 onSelect={setSection}
             />
+
             <div className="flex-1">
                 {section === 'info' && (
                     <Form onSubmit={handleInfoSubmit}>

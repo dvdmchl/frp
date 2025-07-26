@@ -2,8 +2,8 @@ import React, {useState} from "react";
 import {UserManagementService} from "../../api/services/UserManagementService";
 import type {UserLoginRequestDto} from "../../api/models/UserLoginRequestDto";
 import type {UserLoginResponseDto} from "../../api/models/UserLoginResponseDto";
+import { Button } from "flowbite-react";
 import {InputEmail, InputPassword} from "../UIComponent/Input.tsx";
-import {LoginButton, RegisterButton} from "../UIComponent/Button.tsx";
 import {H2Title, TextError} from "../UIComponent/Text.tsx";
 import {Form} from "../UIComponent/Form.tsx";
 import {useTranslation} from "react-i18next";
@@ -52,8 +52,12 @@ export const LoginForm: React.FC<{
 
             {error && <TextError message={error}/>}
 
-            <LoginButton loading={loading} type="submit"/>
-            <RegisterButton loading={loading} type="button" onClick={onRegisterClick}/>
+            <Button type="submit" disabled={loading}>
+                {loading ? t("login.button-progress") : t("login.button")}
+            </Button>
+            <Button type="button" color="green" onClick={onRegisterClick} disabled={loading}>
+                {loading ? t("register.button-progress") : t("register.button")}
+            </Button>
         </Form>
     );
 };

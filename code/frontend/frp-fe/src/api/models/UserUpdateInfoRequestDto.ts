@@ -15,3 +15,4 @@ export type UserUpdateInfoRequestDto = {
      */
     email: string;
 };
+

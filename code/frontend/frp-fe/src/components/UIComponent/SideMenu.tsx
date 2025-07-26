@@ -1,17 +1,15 @@
-import React from 'react';
-
-type Item = {
-    key: string;
+type Item<T extends string> = {
+    key: T;
     label: string;
 };
 
-type SideMenuProps = {
-    items: Item[];
-    selected: string;
-    onSelect: (key: string) => void;
+type SideMenuProps<T extends string> = {
+    items: Item<T>[];
+    selected: T;
+    onSelect: (key: T) => void;
 };
 
-export function SideMenu({ items, selected, onSelect }: Readonly<SideMenuProps>) {
+export function SideMenu<T extends string>({ items, selected, onSelect }: SideMenuProps<T>) {
     return (
         <div className="w-48 flex flex-col bg-bgForm rounded-lg shadow-md">
             {items.map(item => (
@@ -26,3 +24,4 @@ export function SideMenu({ items, selected, onSelect }: Readonly<SideMenuProps>)
         </div>
     );
 }
+

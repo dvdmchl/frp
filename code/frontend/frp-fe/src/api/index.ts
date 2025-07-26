@@ -7,13 +7,12 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { UserChangePasswordRequestDto } from './models/UserChangePasswordRequestDto';
 export type { UserDto } from './models/UserDto';
 export type { UserLoginRequestDto } from './models/UserLoginRequestDto';
 export type { UserLoginResponseDto } from './models/UserLoginResponseDto';
 export type { UserRegisterRequestDto } from './models/UserRegisterRequestDto';
-export type { UserUpdateRequestDto } from './models/UserUpdateRequestDto';
 export type { UserUpdateInfoRequestDto } from './models/UserUpdateInfoRequestDto';
-export type { UserChangePasswordRequestDto } from './models/UserChangePasswordRequestDto';
 
 export { ContextControllerService } from './services/ContextControllerService';
 export { UserManagementService } from './services/UserManagementService';

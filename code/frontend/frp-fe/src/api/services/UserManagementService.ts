@@ -2,35 +2,40 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { UserChangePasswordRequestDto } from '../models/UserChangePasswordRequestDto';
 import type { UserDto } from '../models/UserDto';
 import type { UserLoginRequestDto } from '../models/UserLoginRequestDto';
 import type { UserLoginResponseDto } from '../models/UserLoginResponseDto';
 import type { UserRegisterRequestDto } from '../models/UserRegisterRequestDto';
-import type { UserUpdateRequestDto } from '../models/UserUpdateRequestDto';
 import type { UserUpdateInfoRequestDto } from '../models/UserUpdateInfoRequestDto';
-import type { UserChangePasswordRequestDto } from '../models/UserChangePasswordRequestDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class UserManagementService {
     /**
-     * Get authenticated user
-     * Returns the currently authenticated user.
-     * @returns UserDto Authenticated user retrieved successfully
+     * Change password
+     * Changes the authenticated user's password.
+     * @param requestBody
+     * @returns any Password changed successfully
      * @throws ApiError
      */
-    public static authenticatedUser(): CancelablePromise<UserDto> {
+    public static changeAuthenticatedUserPassword(
+        requestBody: UserChangePasswordRequestDto,
+    ): CancelablePromise<any> {
         return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/user/me',
+            method: 'PUT',
+            url: '/api/user/me/password',
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
+                400: `Old password does not match`,
                 403: `User not authenticated`,
             },
         });
     }
     /**
      * Update personal info
-     * Updates the authenticated user's personal info.
+     * Updates the authenticated user's personal information.
      * @param requestBody
      * @returns UserDto User updated successfully
      * @throws ApiError
@@ -44,28 +49,6 @@ export class UserManagementService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                403: `User not authenticated`,
-            },
-        });
-    }
-
-    /**
-     * Change password
-     * Changes the authenticated user's password.
-     * @param requestBody
-     * @returns void
-     * @throws ApiError
-     */
-    public static changeAuthenticatedUserPassword(
-        requestBody: UserChangePasswordRequestDto,
-    ): CancelablePromise<void> {
-        return __request(OpenAPI, {
-            method: 'PUT',
-            url: '/api/user/me/password',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                400: `Old password does not match`,
                 403: `User not authenticated`,
             },
         });
@@ -123,6 +106,21 @@ export class UserManagementService {
             mediaType: 'application/json',
             errors: {
                 401: `Invalid credentials`,
+            },
+        });
+    }
+    /**
+     * Get authenticated user
+     * Returns the currently authenticated user.
+     * @returns UserDto Authenticated user retrieved successfully
+     * @throws ApiError
+     */
+    public static authenticatedUser(): CancelablePromise<UserDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/user/me',
+            errors: {
+                403: `User not authenticated`,
             },
         });
     }
