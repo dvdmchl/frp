@@ -28,7 +28,7 @@ export const RegisterForm: React.FC<{ onRegisterSuccess: (user: UserDto) => void
             } else {
                 setError(t("register.error"));
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             // openapi-typescript-codegen hází ApiError, můžeš upřesnit detekci chyb:
             if (err?.status === 409) {
                 setError( t("register.error-409"));

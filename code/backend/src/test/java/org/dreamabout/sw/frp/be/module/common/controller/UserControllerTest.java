@@ -6,7 +6,8 @@ import org.dreamabout.sw.frp.be.module.common.model.dto.UserDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateInfoRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserChangePasswordRequestDto;
 import org.dreamabout.sw.frp.be.test.AbstractDbTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,8 +171,8 @@ class UserControllerTest extends AbstractDbTest {
         var loginResp = objectMapper.readValue(loginJson, UserLoginResponseDto.class);
         var token = loginResp.token();
 
-        var updateDto = new UserUpdateRequestDto("New Name", "new@email.com", "newpass");
-        var json = mockMvc.perform(put(ApiPath.USER_UPDATE_FULL)
+        var updateDto = new UserUpdateInfoRequestDto("New Name", "new@email.com");
+        var json = mockMvc.perform(put(ApiPath.USER_UPDATE_INFO_FULL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(updateDto)))
@@ -185,11 +186,37 @@ class UserControllerTest extends AbstractDbTest {
 
     @Test
     void update_user_unauthorized_test() throws Exception {
-        var dto = new UserUpdateRequestDto("Name", "email@test.com", "pwd");
-        mockMvc.perform(put(ApiPath.USER_UPDATE_FULL)
+        var dto = new UserUpdateInfoRequestDto("Name", "email@test.com");
+        mockMvc.perform(put(ApiPath.USER_UPDATE_INFO_FULL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void change_password_ok_test() throws Exception {
+        var email = "pwd@test.com";
+        var fullName = "Pwd User";
+        var password = "pass";
+        mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UserRegisterRequestDto(email, password, fullName))))
+                .andExpect(status().isOk());
+
+        var loginJson = mockMvc.perform(post(ApiPath.USER_LOGIN_FULL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UserLoginRequestDto(email, password))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        var loginResp = objectMapper.readValue(loginJson, UserLoginResponseDto.class);
+        var token = loginResp.token();
+
+        var pwdDto = new UserChangePasswordRequestDto("pass", "newpass");
+        mockMvc.perform(put(ApiPath.USER_UPDATE_PASSWORD_FULL)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pwdDto)))
+                .andExpect(status().isOk());
     }
 
 

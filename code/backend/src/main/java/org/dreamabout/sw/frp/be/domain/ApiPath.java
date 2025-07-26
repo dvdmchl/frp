@@ -21,9 +21,13 @@ public class ApiPath {
 
     public static final String USER_ME_FULL = API_ROOT + USER + USER_ME;
 
-    public static final String USER_UPDATE = "/me";
+    public static final String USER_UPDATE_INFO = "/me/info";
 
-    public static final String USER_UPDATE_FULL = API_ROOT + USER + USER_UPDATE;
+    public static final String USER_UPDATE_INFO_FULL = API_ROOT + USER + USER_UPDATE_INFO;
+
+    public static final String USER_UPDATE_PASSWORD = "/me/password";
+
+    public static final String USER_UPDATE_PASSWORD_FULL = API_ROOT + USER + USER_UPDATE_PASSWORD;
 
     public static final String USER_LOGOUT = "/logout";
 }

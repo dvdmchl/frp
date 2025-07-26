@@ -30,9 +30,16 @@
     "fullName": "Celé jméno",
     "email": "E-mail",
     "password": "Nové heslo",
+    "oldPassword": "Staré heslo",
+    "confirmPassword": "Potvrďte heslo",
+    "personalInfo": "Osobní údaje",
+    "security": "Bezpečnost",
+    "databaseSchemas": "Databázová schémata",
     "button": "Uložit změny",
     "button-progress": "Aktualizuji...",
-    "success": "Profil byl úspěšně aktualizován",
-    "error": "Nepodařilo se aktualizovat profil"
+    "infoSuccess": "Profil byl úspěšně aktualizován",
+    "infoError": "Nepodařilo se aktualizovat profil",
+    "passwordSuccess": "Heslo bylo úspěšně změněno",
+    "passwordError": "Nepodařilo se změnit heslo"
   }
 }

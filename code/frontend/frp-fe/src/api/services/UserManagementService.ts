@@ -7,6 +7,8 @@ import type { UserLoginRequestDto } from '../models/UserLoginRequestDto';
 import type { UserLoginResponseDto } from '../models/UserLoginResponseDto';
 import type { UserRegisterRequestDto } from '../models/UserRegisterRequestDto';
 import type { UserUpdateRequestDto } from '../models/UserUpdateRequestDto';
+import type { UserUpdateInfoRequestDto } from '../models/UserUpdateInfoRequestDto';
+import type { UserChangePasswordRequestDto } from '../models/UserChangePasswordRequestDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -27,21 +29,43 @@ export class UserManagementService {
         });
     }
     /**
-     * Update authenticated user
-     * Updates the currently authenticated user.
+     * Update personal info
+     * Updates the authenticated user's personal info.
      * @param requestBody
      * @returns UserDto User updated successfully
      * @throws ApiError
      */
-    public static updateAuthenticatedUser(
-        requestBody: UserUpdateRequestDto,
+    public static updateAuthenticatedUserInfo(
+        requestBody: UserUpdateInfoRequestDto,
     ): CancelablePromise<UserDto> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/api/user/me',
+            url: '/api/user/me/info',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
+                403: `User not authenticated`,
+            },
+        });
+    }
+
+    /**
+     * Change password
+     * Changes the authenticated user's password.
+     * @param requestBody
+     * @returns void
+     * @throws ApiError
+     */
+    public static changeAuthenticatedUserPassword(
+        requestBody: UserChangePasswordRequestDto,
+    ): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/user/me/password',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Old password does not match`,
                 403: `User not authenticated`,
             },
         });
