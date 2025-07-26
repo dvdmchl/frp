@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { UserManagementService } from "../../api/services/UserManagementService";
 import type { UserDto } from "../../api/models/UserDto";
+import { Form } from "../UIComponent/Form.tsx";
+import { H2Title, TextError, TextSuccess } from "../UIComponent/Text.tsx";
+import { InputText, InputEmail, InputNewPassword } from "../UIComponent/Input.tsx";
+import { ProfileButton } from "../UIComponent/Button.tsx";
 import { useTranslation } from "react-i18next";
 
 export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => void }> = ({ onProfileUpdate }) => {
@@ -42,36 +46,34 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-8 p-6 bg-white shadow-xl rounded-lg flex flex-col gap-4">
-            <h2 className="text-xl font-semibold text-center">{t("profile.title")}</h2>
-            <input
-                className="border rounded p-2"
-                type="text"
-                placeholder={t("profile.fullName")}
+        <Form onSubmit={handleSubmit}>
+            <H2Title>{t("profile.title")}</H2Title>
+
+            <InputText
+                id="fullName"
+                name="fullName"
+                placeholderTranslationKey="profile.fullName"
+                labelTranslationKey="profile.fullName"
                 value={fullName}
                 required
                 onChange={e => setFullName(e.target.value)}
             />
-            <input
-                className="border rounded p-2"
-                type="email"
-                placeholder={t("profile.email")}
+
+            <InputEmail
                 value={email}
                 required
                 onChange={e => setEmail(e.target.value)}
             />
-            <input
-                className="border rounded p-2"
-                type="password"
-                placeholder={t("profile.password")}
+
+            <InputNewPassword
                 value={password}
                 onChange={e => setPassword(e.target.value)}
             />
-            {error && <div className="text-red-600 text-sm">{error}</div>}
-            {success && <div className="text-green-600 text-sm">{success}</div>}
-            <button type="submit" disabled={loading} className="bg-blue-600 text-white rounded p-2 hover:bg-blue-700">
-                {loading ? t("profile.button-progress") : t("profile.button")}
-            </button>
-        </form>
+
+            {error && <TextError message={error} />}
+            {success && <TextSuccess message={success} />}
+
+            <ProfileButton loading={loading} type="submit" />
+        </Form>
     );
 };

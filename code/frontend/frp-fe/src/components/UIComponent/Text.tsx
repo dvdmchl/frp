@@ -33,6 +33,14 @@ export function TextError({message}: Readonly<{ message: string }>) {
     );
 }
 
+export function TextSuccess({message}: Readonly<{ message: string }>) {
+    return (
+        <div className="text-green-600 text-sm text-center my-2">
+            {message}
+        </div>
+    );
+}
+
 export function Paragraph({children}: Readonly<{ children: React.ReactNode }>) {
     return (
         <p className="text-textPrimary text-base leading-relaxed mb-4">

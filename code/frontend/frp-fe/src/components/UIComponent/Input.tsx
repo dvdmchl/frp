@@ -97,3 +97,27 @@ export function InputPassword(
         />
     );
 }
+
+export function InputNewPassword(
+    props: Readonly<Omit<
+        BaseInputProps,
+        | "type"
+        | "labelTranslationKey"
+        | "placeholderTranslationKey"
+        | "name"
+        | "id"
+        | "autoComplete"
+    >>
+) {
+    return (
+        <BaseInput
+            type="password"
+            labelTranslationKey="profile.password"
+            placeholderTranslationKey="profile.password"
+            name="password"
+            id="password"
+            autoComplete="new-password"
+            {...props}
+        />
+    );
+}

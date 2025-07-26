@@ -50,3 +50,12 @@ export function LogoutButton({loading, ...props}: { loading: boolean } & Omit<Bu
         </Button>
     );
 }
+
+export function ProfileButton({loading, ...props}: { loading: boolean } & Omit<ButtonProps, "children">) {
+    const {t} = useTranslation();
+    return (
+        <Button {...props} variant="primary" disabled={loading}>
+            {loading ? t("profile.button-progress") : t("profile.button")}
+        </Button>
+    );
+}
