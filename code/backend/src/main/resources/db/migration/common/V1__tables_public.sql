@@ -9,6 +9,7 @@ create table frp_public.frp_user (
     email varchar(255) not null,
     last_login timestamp,
     schema_id bigint,
+    token_valid boolean not null default true,
 
     created_at timestamp not null default now(),
     created_by_user_id bigint not null,

@@ -44,6 +44,10 @@ public class UserEntity extends AuditableEntity implements UserDetails {
     @JoinColumn(name = "schema_id")
     private SchemaEntity schema;
 
+    @Column(name = "token_valid", nullable = false)
+    @Builder.Default
+    private Boolean tokenValid = true;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();

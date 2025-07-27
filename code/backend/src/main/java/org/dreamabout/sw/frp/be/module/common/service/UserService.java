@@ -3,15 +3,10 @@ package org.dreamabout.sw.frp.be.module.common.service;
 import lombok.RequiredArgsConstructor;
 import org.dreamabout.sw.frp.be.domain.exception.UserAlreadyExistsException;
 import org.dreamabout.sw.frp.be.module.common.model.UserEntity;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateInfoRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserChangePasswordRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.*;
 import org.dreamabout.sw.frp.be.module.common.model.mapper.UserMapper;
 import org.dreamabout.sw.frp.be.module.common.repository.UserRepository;
+import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -27,13 +23,9 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-
     private final AuthenticationManager authenticationManager;
-
     private final JwtService jwtService;
-
     private final UserMapper userMapper;
-
     private final PasswordEncoder passwordEncoder;
 
     public UserDto signup(UserRegisterRequestDto userRegister) {
@@ -49,7 +41,6 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
-    @Transactional(readOnly = true)
     public UserLoginResponseDto authenticate(UserLoginRequestDto userLogin) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -57,23 +48,18 @@ public class UserService {
                         userLogin.password()
                 )
         );
-
         var user = userRepository.findByEmail(userLogin.email())
                 .orElseThrow();
-
+        user.setLastLogin(Instant.now());
+        user.setTokenValid(true);
         var token = jwtService.generateToken(user);
         return new UserLoginResponseDto(token, userMapper.toDto(user));
     }
 
     @Transactional(readOnly = true)
     public Optional<UserDto> getAuthenticatedUser() {
-        var aut = SecurityContextHolder.getContext().getAuthentication();
-        if (aut == null || aut.getPrincipal() == null) {
-            return Optional.empty();
-        }
-        var user = (UserEntity) aut.getPrincipal();
-        return userRepository.findById(user.getId())
-                .map(userMapper::toDto);
+        var user = getCurrentUser();
+        return user.map(userMapper::toDto);
     }
 
     public Optional<UserDto> updateAuthenticatedUserInfo(UserUpdateInfoRequestDto update) {
@@ -89,6 +75,7 @@ public class UserService {
         return Optional.of(userMapper.toDto(user));
     }
 
+    @Nullable
     public Boolean changeAuthenticatedUserPassword(UserChangePasswordRequestDto update) {
         var aut = SecurityContextHolder.getContext().getAuthentication();
         if (aut == null || aut.getPrincipal() == null) {
@@ -105,7 +92,20 @@ public class UserService {
     }
 
     public void invalidateToken() {
+        var user = getCurrentUser();
+        user.ifPresent(u -> {
+            u.setTokenValid(false);
+            userRepository.save(u);
+        });
         SecurityContextHolder.clearContext();
-        // TODO: Implement token invalidation logic, set token is invalid for the user in the database. JWTAuthFilter must then check this flag for every user request.
+    }
+
+    private Optional<UserEntity> getCurrentUser() {
+        var aut = SecurityContextHolder.getContext().getAuthentication();
+        if (aut == null || aut.getPrincipal() == null) {
+            return Optional.empty();
+        }
+        var principal = (UserEntity) aut.getPrincipal();
+        return userRepository.findById(principal.getId());
     }
 }

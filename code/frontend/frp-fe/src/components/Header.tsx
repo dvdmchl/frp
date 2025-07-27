@@ -4,18 +4,15 @@ import {HeaderTitle, LinkText} from "./UIComponent/Text.tsx";
 import {Button} from "flowbite-react";
 import {useState} from "react";
 import {UserManagementService} from "../api/services/UserManagementService";
-import {useNavigate} from "react-router-dom";
 
 type HeaderProps = {
     user?: UserDto | null;
     onLogout?: () => void;
 };
 
-// Pro zjednodušení předpokládáme, že user je předáván přes props nebo context:
 export default function Header({user, onLogout}: Readonly<HeaderProps>) {
     const {t} = useTranslation();
     const {i18n} = useTranslation();
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
     const handleLanguageChange = (lng: string) => {
@@ -31,7 +28,7 @@ export default function Header({user, onLogout}: Readonly<HeaderProps>) {
             if (onLogout) {
                 onLogout();
             }
-            navigate("/login");
+            window.location.href = '/';
         } catch (err) {
             console.error("Logout failed", err);
         } finally {

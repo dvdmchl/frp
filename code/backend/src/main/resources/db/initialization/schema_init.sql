@@ -8,6 +8,7 @@ create table if not exists frp_user (
     id serial primary key,
     username varchar(255) not null,
     email varchar(255) not null,
+    token_valid boolean not null default true,
     last_login timestamp not null default current_timestamp,
     created_at timestamp not null default current_timestamp,
     created_by varchar(255) not null,
