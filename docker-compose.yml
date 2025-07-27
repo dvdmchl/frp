@@ -14,6 +14,29 @@ services:
     ports:
         - "5432:5432"
 
+  backend:
+    build:
+      context: .
+      dockerfile: code/backend/Dockerfile
+    depends_on:
+      - db
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/frp_db
+      DB_USER: sa
+      DB_PASS: postgres
+      JWT_SECRET_KEY: secret-key
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./code/frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
 volumes:
   db_data:
     driver: local
