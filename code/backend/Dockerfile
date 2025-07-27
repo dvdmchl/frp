@@ -2,7 +2,7 @@
 FROM maven:3.9.7-eclipse-temurin-22 AS build
 WORKDIR /build
 COPY . .
-RUN mvn -q -pl code/backend -am package
+RUN mvn -q -pl code/backend -am package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:22-jre

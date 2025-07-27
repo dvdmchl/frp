@@ -28,6 +28,7 @@
         <podam.version>8.0.2.RELEASE</podam.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <maven.compiler.proc>full</maven.compiler.proc>
+        <spring.boot.maven.plugin.version>3.3.2</spring.boot.maven.plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -124,7 +125,6 @@
         </dependency>
 
 
-
         <!-- Tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -182,6 +182,19 @@
                         <arg>-parameters</arg>
                     </compilerArgs>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>
