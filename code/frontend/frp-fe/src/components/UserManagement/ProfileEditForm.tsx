@@ -1,15 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { UserManagementService } from "../../api/services/UserManagementService";
-import type { UserDto } from "../../api/models/UserDto";
-import { Form } from "../UIComponent/Form.tsx";
-import { H2Title, TextError, TextSuccess } from "../UIComponent/Text.tsx";
-import { InputText, InputEmail, InputNewPassword, InputOldPassword, InputConfirmPassword } from "../UIComponent/Input.tsx";
-import { ProfileButton } from "../UIComponent/Button.tsx";
-import { SideMenu } from "../UIComponent/SideMenu.tsx";
-import { useTranslation } from "react-i18next";
+import React, {useEffect, useState} from "react";
+import {UserManagementService} from "../../api/services/UserManagementService";
+import type {UserDto} from "../../api/models/UserDto";
+import {Form} from "../UIComponent/Form.tsx";
+import {H2Title, TextError, TextSuccess} from "../UIComponent/Text.tsx";
+import {
+    InputText,
+    InputEmail,
+    InputNewPassword,
+    InputOldPassword,
+    InputConfirmPassword
+} from "../UIComponent/Input.tsx";
+import {Button, SidebarItemGroup, Sidebar, SidebarItem, SidebarItems} from "flowbite-react";
+import {useTranslation} from "react-i18next";
 
-export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => void }> = ({ onProfileUpdate }) => {
-    const { t } = useTranslation();
+export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => void }> = ({onProfileUpdate}) => {
+    const {t} = useTranslation();
     const [section, setSection] = useState<'info' | 'security' | 'schemas'>('info');
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
@@ -35,7 +40,7 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
         setError(null);
         setSuccess(null);
         try {
-            const user = await UserManagementService.updateAuthenticatedUserInfo({ fullName, email });
+            const user = await UserManagementService.updateAuthenticatedUserInfo({fullName, email});
             if (onProfileUpdate) {
                 onProfileUpdate(user);
             }
@@ -59,7 +64,7 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
             return;
         }
         try {
-            await UserManagementService.changeAuthenticatedUserPassword({ oldPassword, newPassword });
+            await UserManagementService.changeAuthenticatedUserPassword({oldPassword, newPassword});
             setSuccess(t("profile.passwordSuccess"));
             setOldPassword("");
             setNewPassword("");
@@ -74,16 +79,30 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
 
     return (
         <div className="flex gap-6">
-            <SideMenu<'info' | 'security' | 'schemas'>
-                items={[
-                    { key: 'info', label: t('profile.personalInfo') },
-                    { key: 'security', label: t('profile.security') },
-                    { key: 'schemas', label: t('profile.databaseSchemas') },
-                ]}
-                selected={section}
-                onSelect={setSection}
-            />
-
+            <Sidebar aria-label="User Profile Sidebar">
+                <SidebarItems>
+                    <SidebarItemGroup>
+                        <SidebarItem
+                            active={section === 'info'}
+                            onClick={() => setSection('info')}
+                        >
+                            {t('profile.personalInfo')}
+                        </SidebarItem>
+                        <SidebarItem
+                            active={section === 'security'}
+                            onClick={() => setSection('security')}
+                        >
+                            {t('profile.security')}
+                        </SidebarItem>
+                        <SidebarItem
+                            active={section === 'schemas'}
+                            onClick={() => setSection('schemas')}
+                        >
+                            {t('profile.databaseSchemas')}
+                        </SidebarItem>
+                    </SidebarItemGroup>
+                </SidebarItems>
+            </Sidebar>
             <div className="flex-1">
                 {section === 'info' && (
                     <Form onSubmit={handleInfoSubmit}>
@@ -105,10 +124,12 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
                             onChange={e => setEmail(e.target.value)}
                         />
 
-                        {error && <TextError message={error} />}
-                        {success && <TextSuccess message={success} />}
+                        {error && <TextError message={error}/>}
+                        {success && <TextSuccess message={success}/>}
 
-                        <ProfileButton loading={loading} type="submit" />
+                        <Button disabled={loading} type="submit">
+                            {loading ? t("profile.button-progress") : t("profile.button")}
+                        </Button>
                     </Form>
                 )}
 
@@ -132,10 +153,12 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
                             onChange={e => setConfirmPassword(e.target.value)}
                         />
 
-                        {error && <TextError message={error} />}
-                        {success && <TextSuccess message={success} />}
+                        {error && <TextError message={error}/>}
+                        {success && <TextSuccess message={success}/>}
 
-                        <ProfileButton loading={loading} type="submit" />
+                        <Button disabled={loading} type="submit">
+                            {loading ? t("profile.button-progress") : t("profile.button")}
+                        </Button>
                     </Form>
                 )}
 

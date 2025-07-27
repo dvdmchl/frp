@@ -1,7 +1,7 @@
 import {useTranslation} from "react-i18next";
 import type {UserDto} from "../api/models/UserDto";
 import {HeaderTitle, LinkText} from "./UIComponent/Text.tsx";
-import {LogoutButton} from "./UIComponent/Button.tsx";
+import {Button} from "flowbite-react";
 import {useState} from "react";
 import {UserManagementService} from "../api/services/UserManagementService";
 import {useNavigate} from "react-router-dom";
@@ -13,6 +13,7 @@ type HeaderProps = {
 
 // Pro zjednodušení předpokládáme, že user je předáván přes props nebo context:
 export default function Header({user, onLogout}: Readonly<HeaderProps>) {
+    const {t} = useTranslation();
     const {i18n} = useTranslation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -62,7 +63,9 @@ export default function Header({user, onLogout}: Readonly<HeaderProps>) {
                         <span>selected schema</span>
                     </div>
                     <div>
-                        <LogoutButton loading={loading} onClick={onLogoutClick}/>
+                        <Button disabled={loading} onClick={onLogoutClick}>
+                            {loading ? t("logout.button-progress") : t("logout.button")}
+                        </Button>
                     </div>
                 </div>
             </div>

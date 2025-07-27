@@ -7,7 +7,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import {OpenAPI, UserManagementService} from "./api";
 import {AppRoutes} from "./AppRoutes.tsx";
-import {Spinner} from "./components/UIComponent/Spinner.tsx";
+import { Spinner } from "flowbite-react";
 
 function App() {
     const [user, setUser] = useState<UserDto | null>(null);
