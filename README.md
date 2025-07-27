@@ -21,3 +21,21 @@ FRP is a comprehensive application designed to help families efficiently manage 
 - **Front-end**: React
 - **Back-end**: Spring
 - **Database**: PostgreSQL
+
+## Running the Application with Docker Compose
+
+1. Ensure [Docker Compose](https://docs.docker.com/compose/) is installed.
+2. Build the images:
+
+   ```bash
+   docker compose build
+   ```
+
+3. Start the containers:
+
+   ```bash
+   docker compose up
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
