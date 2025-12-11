@@ -17,18 +17,20 @@
     <properties>
         <maven.compiler.release>22</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.boot.version>3.4.5</spring.boot.version>
-        <springdoc.version>2.8.8</springdoc.version>
+        <spring.boot.version>4.0.0</spring.boot.version>
+        <springdoc.version>3.0.0</springdoc.version>
         <lombok.version>1.18.38</lombok.version>
-        <postgresql.version>42.7.7</postgresql.version>
-        <flyway.version>11.8.0</flyway.version>
-        <jjwt.version>0.12.6</jjwt.version>
-        <testcontainers.version>1.21.0</testcontainers.version>
-        <maven.compiler.plugin.version>3.14.0</maven.compiler.plugin.version>
+        <postgresql.version>42.7.8</postgresql.version>
+        <flyway.version>11.19.0</flyway.version>
+        <jjwt.version>0.13.0</jjwt.version>
+        <testcontainers.version>2.0.2</testcontainers.version>
+        <testcontainers.postgres.version>1.9.1</testcontainers.postgres.version>
+        <testcontainers.jupiter.version>1.21.3</testcontainers.jupiter.version>
+        <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
         <podam.version>8.0.2.RELEASE</podam.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <maven.compiler.proc>full</maven.compiler.proc>
-        <spring.boot.maven.plugin.version>3.3.2</spring.boot.maven.plugin.version>
+        <spring.boot.maven.plugin.version>3.5.8</spring.boot.maven.plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -71,6 +73,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-flyway</artifactId>
         </dependency>
 
         <dependency>
@@ -139,14 +146,32 @@
         </dependency>
 
         <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-jdbc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
 

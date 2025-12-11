@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.MultiTenancySettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.service.UnknownUnwrapTypeException;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;

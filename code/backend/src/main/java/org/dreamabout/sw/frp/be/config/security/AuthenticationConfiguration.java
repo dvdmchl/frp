@@ -29,14 +29,13 @@ public class AuthenticationConfiguration {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 
     @Bean
     AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService());
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
