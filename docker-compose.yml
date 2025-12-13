@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: frp-db-1
     image: postgres
     restart: always
     shm_size: 128mb
@@ -7,9 +8,10 @@ services:
     environment:
       POSTGRES_USER: sa
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: frp_db
 
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql
       - ./code/db-init:/docker-entrypoint-initdb.d/
     ports:
         - "5432:5432"
