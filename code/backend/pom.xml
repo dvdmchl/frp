@@ -31,6 +31,7 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <maven.compiler.proc>full</maven.compiler.proc>
         <spring.boot.maven.plugin.version>3.5.8</spring.boot.maven.plugin.version>
+        <test.docker.host>tcp://172.19.62.177:2375</test.docker.host>
     </properties>
 
     <dependencyManagement>
@@ -206,6 +207,16 @@
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <environmentVariables>
+                        <DOCKER_HOST>${test.docker.host}</DOCKER_HOST>
+                    </environmentVariables>
                 </configuration>
             </plugin>
 
