@@ -22,15 +22,22 @@ import java.util.concurrent.Executor;
 @Slf4j
 public class ThreadContextConfiguration implements AsyncConfigurer, SchedulingConfigurer {
 
-    @Value("${app.pool-size:5}")
-    private int poolSize;
+    @Value("${frp.executor.corePoolSize:5}")
+    private int corePoolSize;
+    @Value("${frp.executor.maxPoolSize:5}")
+    private int maxPoolSize;
+    @Value("${frp.executor.queueCapacity:50}")
+    private int queueCapacity;
+
+    @Value("${frp.scheduler.poolSize:5}")
+    private int schedulerPoolSize;
 
     @Bean("frpExecutor")
     public ThreadPoolTaskExecutor taskExecutor(TaskDecorator decorator) {
         ThreadPoolTaskExecutor tx = new ThreadPoolTaskExecutor();
-        tx.setCorePoolSize(poolSize);
-        tx.setMaxPoolSize(poolSize);
-        tx.setQueueCapacity(50);
+        tx.setCorePoolSize(corePoolSize);
+        tx.setMaxPoolSize(maxPoolSize);
+        tx.setQueueCapacity(queueCapacity);
         tx.setTaskDecorator(decorator);
         tx.initialize();
         return tx;
@@ -39,7 +46,7 @@ public class ThreadContextConfiguration implements AsyncConfigurer, SchedulingCo
     @Bean("frpScheduler")
     public ThreadPoolTaskScheduler taskScheduler(TaskDecorator decorator) {
         ThreadPoolTaskScheduler ts = new ThreadPoolTaskScheduler();
-        ts.setPoolSize(poolSize);
+        ts.setPoolSize(schedulerPoolSize);
         ts.setTaskDecorator(decorator);
         ts.initialize();
         return ts;

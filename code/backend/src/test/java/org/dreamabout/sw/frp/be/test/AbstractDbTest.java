@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -22,6 +23,7 @@ import java.util.List;
 @Testcontainers
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public abstract class AbstractDbTest {
 
     private static final String TRUNCATE_SCRIPT = """
@@ -70,8 +72,9 @@ public abstract class AbstractDbTest {
         registry.add("spring.datasource.url", POSTGRES_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES_CONTAINER::getUsername);
         registry.add("spring.datasource.password", POSTGRES_CONTAINER::getPassword);
+        registry.add("frp.flyway.clean", () -> "true");
 
-        registry.add("JWT_SECRET_KEY", () -> "test-secret-key-123");
+        registry.add("security.jwt.secret-key", () -> "test-secret-key-123-test-secret-key-123");
     }
 
     @BeforeEach

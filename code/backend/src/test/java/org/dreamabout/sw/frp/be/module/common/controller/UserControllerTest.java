@@ -212,5 +212,29 @@ class UserControllerTest extends AbstractDbTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void login_with_invalid_token_header_should_succeed() throws Exception {
+        // This test ensures that sending a malformed/invalid token to a public endpoint (login)
+        // does not cause a 500 error or rejection, but proceeds anonymously.
+        
+        var email = "badtoken@test.com";
+        var fullName = "Bad Token User";
+        var password = "password";
+        
+        // 1. Register
+        mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UserRegisterRequestDto(email, password, fullName))))
+                .andExpect(status().isOk());
+
+        // 2. Login with INVALID token header
+        var loginDto = new UserLoginRequestDto(email, password);
+        mockMvc.perform(post(ApiPath.USER_LOGIN_FULL)
+                        .header("Authorization", "Bearer invalid.token.signature")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isOk()); // Should still accept the credentials
+    }
+
 
 }

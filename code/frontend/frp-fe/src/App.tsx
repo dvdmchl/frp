@@ -22,6 +22,7 @@ function App() {
                 .catch(() => {
                     setUser(null);
                     localStorage.removeItem("jwt");
+                    OpenAPI.TOKEN = undefined;
                 })
                 .finally(() => {
                     setLoadingUser(false);
