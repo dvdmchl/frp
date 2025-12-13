@@ -41,6 +41,21 @@ public abstract class AbstractDbTest {
             END $$;
             """;
 
+    private static final String DROP_SCHEMAS_SCRIPT = """
+            DO $$
+            DECLARE
+                schema_name text;
+            BEGIN
+                FOR schema_name IN
+                    SELECT nspname
+                    FROM pg_namespace
+                    WHERE nspname !~ '^pg_' AND nspname != 'information_schema' AND nspname != 'frp_public'
+                LOOP
+                    EXECUTE format('DROP SCHEMA IF EXISTS %I CASCADE', schema_name);
+                END LOOP;
+            END $$;
+            """;
+
     static final SharedPostgresContainer POSTGRES_CONTAINER = SharedPostgresContainer.getInstance();
 
     static {
@@ -60,8 +75,9 @@ public abstract class AbstractDbTest {
     }
 
     @BeforeEach
-    void truncateAll() {
+    void truncateAndDropAll() {
         jdbcTemplate.execute(TRUNCATE_SCRIPT);
+        jdbcTemplate.execute(DROP_SCHEMAS_SCRIPT);
     }
 
     protected <T extends IdAwareEntity> List<T> selectAllFromPublicSchema(Class<T> clazz) {
