@@ -32,6 +32,8 @@ class SchemaControllerTest extends AbstractDbTest {
 
     private String token;
 
+    private UserDto currentUser;
+
     @BeforeEach
     void setUp() throws Exception {
         var email = "schema@tester.com";
