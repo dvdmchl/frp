@@ -57,7 +57,7 @@ export default function Header({user, onLogout}: Readonly<HeaderProps>) {
                         {user && <LinkText to="/profile">{user.fullName}</LinkText>}
                     </div>
                     <div>
-                        <span>selected schema</span>
+                        <span>{user?.activeSchema}</span>
                     </div>
                     <div>
                         <Button disabled={loading} onClick={onLogoutClick}>

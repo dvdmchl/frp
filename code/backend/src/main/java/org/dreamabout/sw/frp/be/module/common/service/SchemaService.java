@@ -39,11 +39,7 @@ public class SchemaService {
 
         runFlywayMigrations(schemaName);
 
-        SchemaEntity schemaEntity = new SchemaEntity();
-        schemaEntity.setName(schemaName);
-        var schema = schemaRepository.save(schemaEntity);
-        log.info("Schema {} created", schemaName);
-        return schema;
+        return createSchemaEntity(schemaName, "Schema {} created");
     }
 
     @Transactional(readOnly = true)
@@ -70,9 +66,7 @@ public class SchemaService {
         copyAllTablesWithData(sourceSchema, targetSchema);
 
         // persist SchemaEntity for target
-        var entity = new SchemaEntity();
-        entity.setName(targetSchema);
-        return schemaRepository.save(entity);
+        return createSchemaEntity(targetSchema, "Schema {} copied");
     }
 
     @Transactional
@@ -106,6 +100,14 @@ public class SchemaService {
         userRepository.save(user);
     }
 
+    private SchemaEntity createSchemaEntity(String schemaName, String logMessage) {
+        SchemaEntity schemaEntity = new SchemaEntity();
+        schemaEntity.setName(schemaName);
+        var schema = schemaRepository.save(schemaEntity);
+        log.info(logMessage, schemaName);
+        return schema;
+    }
+
     private void validateSchemaName(String schemaName) {
         if (schemaName == null || schemaName.isBlank() || !SCHEMA_NAME_PATTERN.matcher(schemaName).matches()) {
             throw new FrpDbException("Invalid schema name");
@@ -128,24 +130,35 @@ public class SchemaService {
 
     private void copyAllTablesWithData(String sourceSchema, String targetSchema) {
         try (var connection = dataSource.getConnection()) {
-            // list user tables in source schema
+            // Disable FK checks for the session to allow arbitrary insertion order
+            try (var stmt = connection.createStatement()) {
+                stmt.execute("SET session_replication_role = 'replica'");
+            }
+
             try (var listStmt = connection.prepareStatement(
-                    "SELECT table_name FROM information_schema.tables WHERE table_schema = ? AND table_type='BASE TABLE'")) {
+                    "SELECT table_name FROM information_schema.tables WHERE table_schema = ? AND table_type='BASE TABLE' AND table_name != 'flyway_schema_history'")) {
                 listStmt.setString(1, sourceSchema);
                 try (var rs = listStmt.executeQuery()) {
                     while (rs.next()) {
                         var table = rs.getString(1);
-                        // Create same table structure
-                        var createSql = "CREATE TABLE " + targetSchema + "." + table + " (LIKE " + sourceSchema + "." + table + " INCLUDING ALL)";
-                        try (var createStmt = connection.createStatement()) {
-                            createStmt.execute(createSql);
+                        
+                        // Truncate target table to ensure clean state (Flyway might have seeded data)
+                        var truncateSql = "TRUNCATE TABLE " + targetSchema + "." + table + " CASCADE";
+                        try (var truncateStmt = connection.createStatement()) {
+                             truncateStmt.execute(truncateSql);
                         }
+
                         // Copy data
                         var copySql = "INSERT INTO " + targetSchema + "." + table + " SELECT * FROM " + sourceSchema + "." + table;
                         try (var copyStmt = connection.createStatement()) {
                             copyStmt.executeUpdate(copySql);
                         }
                     }
+                }
+            } finally {
+                // Re-enable FK checks
+                try (var stmt = connection.createStatement()) {
+                    stmt.execute("SET session_replication_role = 'origin'");
                 }
             }
         } catch (Exception e) {

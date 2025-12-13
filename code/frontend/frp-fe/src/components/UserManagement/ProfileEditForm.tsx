@@ -12,6 +12,7 @@ import {
 } from "../UIComponent/Input.tsx";
 import {Button, SidebarItemGroup, Sidebar, SidebarItem, SidebarItems} from "flowbite-react";
 import {useTranslation} from "react-i18next";
+import {SchemaManager} from "./SchemaManager";
 
 export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => void }> = ({onProfileUpdate}) => {
     const {t} = useTranslation();
@@ -24,10 +25,12 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [userDto, setUserDto] = useState<UserDto | null>(null);
 
     useEffect(() => {
         UserManagementService.authenticatedUser()
             .then(user => {
+                setUserDto(user);
                 if (user.fullName) setFullName(user.fullName);
                 if (user.email) setEmail(user.email);
             })
@@ -44,12 +47,20 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
             if (onProfileUpdate) {
                 onProfileUpdate(user);
             }
+            setUserDto(user);
             setSuccess(t("profile.infoSuccess"));
         } catch (err) {
             console.error("Profile update failed", err);
             setError(t("profile.infoError"));
         } finally {
             setLoading(false);
+        }
+    };
+    
+    const handleUserUpdate = (updatedUser: UserDto) => {
+        setUserDto(updatedUser);
+        if (onProfileUpdate) {
+            onProfileUpdate(updatedUser);
         }
     };
 
@@ -163,10 +174,9 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
                 )}
 
                 {section === 'schemas' && (
-                    <Form onSubmit={e => e.preventDefault()}>
-                        <H2Title>{t('profile.databaseSchemas')}</H2Title>
-                        <p className="text-textPrimary">Test</p>
-                    </Form>
+                     <div className="max-w-4xl mx-auto mt-12 p-8 bg-bgForm rounded-2xl shadow-2xl">
+                         <SchemaManager user={userDto} onUserUpdate={handleUserUpdate} />
+                     </div>
                 )}
             </div>
         </div>

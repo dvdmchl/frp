@@ -41,5 +41,24 @@
     "infoError": "Failed to update profile",
     "passwordSuccess": "Password changed successfully",
     "passwordError": "Failed to change password"
+  },
+  "schema": {
+    "listTitle": "Your Schemas",
+    "createTitle": "Create New Schema",
+    "copyTitle": "Copy Schema",
+    "active": "Active",
+    "name": "Schema Name",
+    "source": "Source Schema",
+    "target": "Target Schema",
+    "create": "Create",
+    "copy": "Copy",
+    "delete": "Delete",
+    "switch": "Switch",
+    "createSuccess": "Schema created successfully",
+    "copySuccess": "Schema copied successfully",
+    "deleteSuccess": "Schema deleted successfully",
+    "switchSuccess": "Active schema switched successfully",
+    "error": "Operation failed",
+    "deleteConfirm": "Are you sure you want to delete this schema?"
   }
 }

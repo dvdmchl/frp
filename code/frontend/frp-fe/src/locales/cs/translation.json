@@ -41,5 +41,24 @@
     "infoError": "Nepodařilo se aktualizovat profil",
     "passwordSuccess": "Heslo bylo úspěšně změněno",
     "passwordError": "Nepodařilo se změnit heslo"
+  },
+  "schema": {
+    "listTitle": "Vaše schémata",
+    "createTitle": "Vytvořit nové schéma",
+    "copyTitle": "Kopírovat schéma",
+    "active": "Aktivní",
+    "name": "Název schématu",
+    "source": "Zdrojové schéma",
+    "target": "Cílové schéma",
+    "create": "Vytvořit",
+    "copy": "Kopírovat",
+    "delete": "Smazat",
+    "switch": "Přepnout",
+    "createSuccess": "Schéma úspěšně vytvořeno",
+    "copySuccess": "Schéma úspěšně zkopírováno",
+    "deleteSuccess": "Schéma úspěšně smazáno",
+    "switchSuccess": "Aktivní schéma úspěšně přepnuto",
+    "error": "Operace selhala",
+    "deleteConfirm": "Opravdu chcete smazat toto schéma?"
   }
 }
