@@ -2,7 +2,10 @@ import React, {useEffect, useState} from "react";
 import {UserManagementService} from "../../api/services/UserManagementService";
 import type {UserDto} from "../../api/models/UserDto";
 import {Form} from "../UIComponent/Form.tsx";
-import {H2Title, TextError, TextSuccess} from "../UIComponent/Text.tsx";
+import {H2Title, TextSuccess} from "../UIComponent/Text.tsx";
+import {ApiError} from "../../api/core/ApiError";
+import {ErrorDisplay} from "../UIComponent/ErrorDisplay.tsx";
+import type {ErrorDto} from "../../api/models/ErrorDto";
 import {
     InputText,
     InputEmail,
@@ -23,7 +26,7 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [apiError, setApiError] = useState<ErrorDto | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [userDto, setUserDto] = useState<UserDto | null>(null);
 
@@ -34,13 +37,20 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
                 if (user.fullName) setFullName(user.fullName);
                 if (user.email) setEmail(user.email);
             })
-            .catch(() => setError(t("profile.error")));
+            .catch((err: unknown) => {
+                console.error("Failed to load user", err);
+                if (err instanceof ApiError && err.errorDto) {
+                    setApiError(err.errorDto);
+                } else {
+                    setApiError({type: "ClientError", message: t("profile.error"), stackTrace: undefined});
+                }
+            });
     }, [t]);
 
     const handleInfoSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
+        setApiError(null);
         setSuccess(null);
         try {
             const user = await UserManagementService.updateAuthenticatedUserInfo({fullName, email});
@@ -49,9 +59,13 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
             }
             setUserDto(user);
             setSuccess(t("profile.infoSuccess"));
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Profile update failed", err);
-            setError(t("profile.infoError"));
+            if (err instanceof ApiError && err.errorDto) {
+                setApiError(err.errorDto);
+            } else {
+                setApiError({type: "ClientError", message: t("profile.infoError"), stackTrace: undefined});
+            }
         } finally {
             setLoading(false);
         }
@@ -67,10 +81,10 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
     const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
+        setApiError(null);
         setSuccess(null);
         if (newPassword !== confirmPassword) {
-            setError(t("profile.passwordError"));
+            setApiError({type: "ClientError", message: t("profile.passwordError"), stackTrace: undefined});
             setLoading(false);
             return;
         }
@@ -80,9 +94,13 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
             setOldPassword("");
             setNewPassword("");
             setConfirmPassword("");
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Password change failed", err);
-            setError(t("profile.passwordError"));
+            if (err instanceof ApiError && err.errorDto) {
+                setApiError(err.errorDto);
+            } else {
+                setApiError({type: "ClientError", message: t("profile.passwordError"), stackTrace: undefined});
+            }
         } finally {
             setLoading(false);
         }
@@ -135,7 +153,7 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
                             onChange={e => setEmail(e.target.value)}
                         />
 
-                        {error && <TextError message={error}/>}
+                        {apiError && <ErrorDisplay error={apiError} />}
                         {success && <TextSuccess message={success}/>}
 
                         <Button disabled={loading} type="submit">
@@ -164,7 +182,7 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
                             onChange={e => setConfirmPassword(e.target.value)}
                         />
 
-                        {error && <TextError message={error}/>}
+                        {apiError && <ErrorDisplay error={apiError} />}
                         {success && <TextSuccess message={success}/>}
 
                         <Button disabled={loading} type="submit">

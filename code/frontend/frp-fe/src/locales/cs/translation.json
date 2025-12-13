@@ -60,5 +60,10 @@
     "switchSuccess": "Aktivní schéma úspěšně přepnuto",
     "error": "Operace selhala",
     "deleteConfirm": "Opravdu chcete smazat toto schéma?"
+  },
+  "error": {
+    "unknown": "Došlo k neznámé chybě.",
+    "showStackTrace": "Zobrazit detaily",
+    "hideStackTrace": "Skrýt detaily"
   }
 }

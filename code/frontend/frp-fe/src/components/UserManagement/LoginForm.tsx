@@ -1,34 +1,44 @@
 import React, {useState} from "react";
 import {UserManagementService} from "../../api/services/UserManagementService";
-import type {UserLoginRequestDto} from "../../api/models/UserLoginRequestDto";
 import type {UserLoginResponseDto} from "../../api/models/UserLoginResponseDto";
-import { Button } from "flowbite-react";
-import {InputEmail, InputPassword} from "../UIComponent/Input.tsx";
-import {H2Title, TextError} from "../UIComponent/Text.tsx";
 import {Form} from "../UIComponent/Form.tsx";
+import {H1Title} from "../UIComponent/Text.tsx";
+import {InputEmail, InputPassword} from "../UIComponent/Input.tsx";
+import {Button} from "flowbite-react";
 import {useTranslation} from "react-i18next";
+import {ApiError} from "../../api/core/ApiError";
+import {ErrorDisplay} from "../UIComponent/ErrorDisplay.tsx";
+import type {ErrorDto} from "../../api/models/ErrorDto"; // Import ErrorDto
 
-export const LoginForm: React.FC<{
-    onLoginSuccess: (user: UserLoginResponseDto) => void,
-    onRegisterClick: () => void
-}> = ({onLoginSuccess, onRegisterClick}) => {
+type LoginFormProps = {
+    onLoginSuccess: (user: UserLoginResponseDto) => void;
+    onRegisterClick: () => void;
+};
+
+export const LoginForm: React.FC<LoginFormProps> = ({onLoginSuccess, onRegisterClick}) => {
     const {t} = useTranslation();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [apiError, setApiError] = useState<ErrorDto | null>(null); // Use ErrorDto
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
+        setApiError(null);
         try {
-            const data: UserLoginRequestDto = {email, password};
-            const response = await UserManagementService.login(data);
+            const response = await UserManagementService.login({email, password});
+            if (response.token) {
+                localStorage.setItem("jwt", response.token);
+            }
             onLoginSuccess(response);
-        } catch (err: unknown) {
+        } catch (err) {
             console.error("Login failed", err);
-            setError(t("login.error"));
+            if (err instanceof ApiError && err.errorDto) {
+                setApiError(err.errorDto);
+            } else {
+                setApiError({type: "ClientError", message: t("login.error"), stackTrace: undefined});
+            }
         } finally {
             setLoading(false);
         }
@@ -36,27 +46,18 @@ export const LoginForm: React.FC<{
 
     return (
         <Form onSubmit={handleSubmit}>
-            <H2Title>{t("login.title")}</H2Title>
+            <H1Title>{t('login.title')}</H1Title>
 
-            <InputEmail
-                value={email}
-                required
-                onChange={e => setEmail(e.target.value)}
-            />
+            <InputEmail value={email} onChange={e => setEmail(e.target.value)} required/>
+            <InputPassword value={password} onChange={e => setPassword(e.target.value)} required/>
 
-            <InputPassword
-                value={password}
-                required
-                onChange={e => setPassword(e.target.value)}
-            />
+            {apiError && <ErrorDisplay error={apiError} />}
 
-            {error && <TextError message={error}/>}
-
-            <Button type="submit" disabled={loading}>
+            <Button disabled={loading} type="submit">
                 {loading ? t("login.button-progress") : t("login.button")}
             </Button>
-            <Button type="button" color="green" onClick={onRegisterClick} disabled={loading}>
-                {loading ? t("register.button-progress") : t("register.button")}
+            <Button color="light" onClick={onRegisterClick} className="w-full">
+                {t("register.title")}
             </Button>
         </Form>
     );

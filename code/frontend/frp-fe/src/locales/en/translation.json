@@ -60,5 +60,10 @@
     "switchSuccess": "Active schema switched successfully",
     "error": "Operation failed",
     "deleteConfirm": "Are you sure you want to delete this schema?"
+  },
+  "error": {
+    "unknown": "An unknown error occurred.",
+    "showStackTrace": "Show Details",
+    "hideStackTrace": "Hide Details"
   }
 }
