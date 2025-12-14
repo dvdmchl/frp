@@ -8,13 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.dreamabout.sw.frp.be.domain.ApiPath;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateInfoRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserChangePasswordRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.*;
 import org.dreamabout.sw.frp.be.module.common.service.JwtService;
 import org.dreamabout.sw.frp.be.module.common.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -96,11 +90,11 @@ public class UserController {
     })
     @PutMapping(ApiPath.USER_UPDATE_PASSWORD)
     public ResponseEntity<Void> changeAuthenticatedUserPassword(@Valid @RequestBody UserChangePasswordRequestDto request) {
-        Boolean result = userService.changeAuthenticatedUserPassword(request);
-        if (result == null) {
+        var result = userService.changeAuthenticatedUserPassword(request);
+        if (result.isEmpty()) {
             return ResponseEntity.status(401).build();
         }
-        if (!result) {
+        if (!result.get()) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok().build();

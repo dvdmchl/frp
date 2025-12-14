@@ -2,6 +2,7 @@ package org.dreamabout.sw.frp.be.config;
 
 import jakarta.validation.ConstraintViolationException;
 import org.dreamabout.sw.frp.be.domain.exception.UserAlreadyExistsException;
+import org.dreamabout.sw.frp.be.module.common.model.dto.ErrorDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -11,54 +12,56 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class RestExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(err ->
-                errors.put(err.getField(), err.getDefaultMessage())
-        );
-        return ResponseEntity.badRequest().body(errors);
+    public ResponseEntity<ErrorDto> handleValidationErrors(MethodArgumentNotValidException ex) {
+        String errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        ErrorDto errorDto = new ErrorDto("Validation Error", "Validation failed: " + errors, null);
+        return ResponseEntity.badRequest().body(errorDto);
     }
 
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<Map<String, String>> handleBindException(BindException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(err ->
-                errors.put(err.getField(), err.getDefaultMessage())
-        );
-        return ResponseEntity.badRequest().body(errors);
+    public ResponseEntity<ErrorDto> handleBindException(BindException ex) {
+        String errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        ErrorDto errorDto = new ErrorDto("Bind Error", "Binding failed: " + errors, null);
+        return ResponseEntity.badRequest().body(errorDto);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<String> handleConstraintViolation(ConstraintViolationException ex) {
-        return ResponseEntity.badRequest().body("Constraint violation: " + ex.getMessage());
+    public ResponseEntity<ErrorDto> handleConstraintViolation(ConstraintViolationException ex) {
+        ErrorDto errorDto = new ErrorDto("ConstraintViolation", ex.getMessage(), null);
+        return ResponseEntity.badRequest().body(errorDto);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<String> handleBadCredentials(BadCredentialsException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+    public ResponseEntity<ErrorDto> handleBadCredentials(BadCredentialsException ex) {
+        ErrorDto errorDto = new ErrorDto("AuthenticationError", "Invalid email or password", null);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<String> handleUserAlreadyExists(UserAlreadyExistsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    public ResponseEntity<ErrorDto> handleUserAlreadyExists(UserAlreadyExistsException ex) {
+        ErrorDto errorDto = new ErrorDto("UserAlreadyExists", ex.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorDto);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleOtherExceptions(Exception ex) {
+    public ResponseEntity<ErrorDto> handleOtherExceptions(Exception ex) {
         String stackTrace = Arrays.stream(ex.getStackTrace())
                 .map(StackTraceElement::toString)
                 .collect(Collectors.joining("\n"));
 
-        String message = "Unexpected error: " + ex.getMessage() + "\n" + stackTrace;
+        String msg = ex.getMessage() != null ? ex.getMessage() : "Unexpected error of type: " + ex.getClass().getSimpleName();
+        ErrorDto errorDto = new ErrorDto(ex.getClass().getSimpleName(), msg, stackTrace);
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDto);
     }
 }

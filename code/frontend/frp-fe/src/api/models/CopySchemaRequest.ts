@@ -2,10 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type UserDto = {
-    id?: number;
-    email?: string;
-    fullName?: string;
-    activeSchema?: string;
+export type CopySchemaRequest = {
+    source: string;
+    target: string;
 };
 

@@ -6,12 +6,13 @@ import org.dreamabout.sw.frp.be.module.common.model.IdAwareEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.platform.commons.util.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -22,6 +23,7 @@ import java.util.List;
 @Testcontainers
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public abstract class AbstractDbTest {
 
     private static final String TRUNCATE_SCRIPT = """
@@ -41,6 +43,21 @@ public abstract class AbstractDbTest {
             END $$;
             """;
 
+    private static final String DROP_SCHEMAS_SCRIPT = """
+            DO $$
+            DECLARE
+                schema_name text;
+            BEGIN
+                FOR schema_name IN
+                    SELECT nspname
+                    FROM pg_namespace
+                    WHERE nspname !~ '^pg_' AND nspname != 'information_schema' AND nspname != 'frp_public'
+                LOOP
+                    EXECUTE format('DROP SCHEMA IF EXISTS %I CASCADE', schema_name);
+                END LOOP;
+            END $$;
+            """;
+
     static final SharedPostgresContainer POSTGRES_CONTAINER = SharedPostgresContainer.getInstance();
 
     static {
@@ -55,13 +72,15 @@ public abstract class AbstractDbTest {
         registry.add("spring.datasource.url", POSTGRES_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES_CONTAINER::getUsername);
         registry.add("spring.datasource.password", POSTGRES_CONTAINER::getPassword);
+        registry.add("frp.flyway.clean", () -> "true");
 
-        registry.add("JWT_SECRET_KEY", () -> "test-secret-key-123");
+        registry.add("security.jwt.secret-key", () -> "test-secret-key-123-test-secret-key-123");
     }
 
     @BeforeEach
-    void truncateAll() {
+    void truncateAndDropAll() {
         jdbcTemplate.execute(TRUNCATE_SCRIPT);
+        jdbcTemplate.execute(DROP_SCHEMAS_SCRIPT);
     }
 
     protected <T extends IdAwareEntity> List<T> selectAllFromPublicSchema(Class<T> clazz) {

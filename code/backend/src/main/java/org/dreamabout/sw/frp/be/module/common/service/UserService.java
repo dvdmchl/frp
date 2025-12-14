@@ -6,7 +6,6 @@ import org.dreamabout.sw.frp.be.module.common.model.UserEntity;
 import org.dreamabout.sw.frp.be.module.common.model.dto.*;
 import org.dreamabout.sw.frp.be.module.common.model.mapper.UserMapper;
 import org.dreamabout.sw.frp.be.module.common.repository.UserRepository;
-import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -75,20 +74,19 @@ public class UserService {
         return Optional.of(userMapper.toDto(user));
     }
 
-    @Nullable
-    public Boolean changeAuthenticatedUserPassword(UserChangePasswordRequestDto update) {
+    public Optional<Boolean> changeAuthenticatedUserPassword(UserChangePasswordRequestDto update) {
         var aut = SecurityContextHolder.getContext().getAuthentication();
         if (aut == null || aut.getPrincipal() == null) {
-            return null;
+            return Optional.empty();
         }
         var principal = (UserEntity) aut.getPrincipal();
         var user = userRepository.findById(principal.getId()).orElseThrow();
         if (!passwordEncoder.matches(update.oldPassword(), user.getPassword())) {
-            return false;
+            return Optional.of(false);
         }
         user.setPassword(passwordEncoder.encode(update.newPassword()));
         userRepository.save(user);
-        return true;
+        return Optional.of(true);
     }
 
     public void invalidateToken() {

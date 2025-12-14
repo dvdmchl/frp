@@ -5,11 +5,10 @@ import org.dreamabout.sw.frp.be.module.common.service.ExampleService;
 import org.dreamabout.sw.frp.be.test.AbstractDbTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
@@ -17,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -74,9 +74,10 @@ class ThreadContextIntegrationTests extends AbstractDbTest {
     }
 
     @Test
-    @WithMockUser(username = "testuser")
     void httpFilter_setsAndClearsContext() throws Exception {
-        mvc.perform(get("/api/context").header("X-Frp-Context", "test123"))
+        mvc.perform(get("/api/context")
+                        .header("X-Frp-Context", "test123")
+                        .with(user("testuser")))
                 .andExpect(status().isOk())
                 .andExpect(content().string("test123"));
         var storedValue = FrpThreadContext.get("frpHeader");

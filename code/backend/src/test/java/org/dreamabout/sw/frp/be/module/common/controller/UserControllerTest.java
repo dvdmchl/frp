@@ -1,23 +1,16 @@
 package org.dreamabout.sw.frp.be.module.common.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dreamabout.sw.frp.be.domain.ApiPath;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateInfoRequestDto;
-import org.dreamabout.sw.frp.be.module.common.model.dto.UserChangePasswordRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.*;
 import org.dreamabout.sw.frp.be.test.AbstractDbTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class UserControllerTest extends AbstractDbTest {
@@ -217,6 +210,30 @@ class UserControllerTest extends AbstractDbTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(pwdDto)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void login_with_invalid_token_header_should_succeed() throws Exception {
+        // This test ensures that sending a malformed/invalid token to a public endpoint (login)
+        // does not cause a 500 error or rejection, but proceeds anonymously.
+        
+        var email = "badtoken@test.com";
+        var fullName = "Bad Token User";
+        var password = "password";
+        
+        // 1. Register
+        mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UserRegisterRequestDto(email, password, fullName))))
+                .andExpect(status().isOk());
+
+        // 2. Login with INVALID token header
+        var loginDto = new UserLoginRequestDto(email, password);
+        mockMvc.perform(post(ApiPath.USER_LOGIN_FULL)
+                        .header("Authorization", "Bearer invalid.token.signature")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isOk()); // Should still accept the credentials
     }
 
 

@@ -3,11 +3,13 @@ import {UserManagementService} from "../../api/services/UserManagementService";
 import type {UserRegisterRequestDto} from "../../api/models/UserRegisterRequestDto";
 import type {UserDto} from "../../api/models/UserDto";
 import {Form} from "../UIComponent/Form.tsx";
-import {H2Title, TextError} from "../UIComponent/Text.tsx";
+import {H2Title} from "../UIComponent/Text.tsx";
 import {InputText, InputEmail, InputPassword} from "../UIComponent/Input.tsx";
 import {Button} from "flowbite-react";
 import {useTranslation} from "react-i18next";
-import {ApiError} from "../../api/core/ApiError.ts";
+import {ApiError} from "../../api/core/ApiError";
+import {ErrorDisplay} from "../UIComponent/ErrorDisplay.tsx";
+import type {ErrorDto} from "../../api/models/ErrorDto";
 
 export const RegisterForm: React.FC<{ onRegisterSuccess: (user: UserDto) => void }> = ({onRegisterSuccess}) => {
     const {t} = useTranslation();
@@ -15,32 +17,26 @@ export const RegisterForm: React.FC<{ onRegisterSuccess: (user: UserDto) => void
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [apiError, setApiError] = useState<ErrorDto | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
+        setApiError(null);
         try {
             const data: UserRegisterRequestDto = {fullName, email, password};
             const response = await UserManagementService.register(data);
             if (response) {
                 onRegisterSuccess(response);
             } else {
-                setError(t("register.error"));
+                setApiError({type: "ClientError", message: t("register.error"), stackTrace: undefined});
             }
         } catch (err: unknown) {
             console.error("Registration failed", err);
-            if (err instanceof ApiError) {
-                if (err.status === 409) {
-                    setError(t("register.error-409"));
-                } else if (err.status === 400) {
-                    setError(t("register.error-400"));
-                } else {
-                    setError(t("register.error-unknown"));
-                }
+            if (err instanceof ApiError && err.errorDto) {
+                setApiError(err.errorDto);
             } else {
-                setError(t("register.error-unknown"));
+                setApiError({type: "ClientError", message: t("register.error-unknown"), stackTrace: undefined});
             }
         } finally {
             setLoading(false);
@@ -69,7 +65,7 @@ export const RegisterForm: React.FC<{ onRegisterSuccess: (user: UserDto) => void
                 required
                 onChange={e => setPassword(e.target.value)}
             />
-            {error && <TextError message={error}/>}
+            {apiError && <ErrorDisplay error={apiError}/>}
             <Button type="submit" color="green" disabled={loading}>
                 {loading ? t("register.button-progress") : t("register.button")}
             </Button>
