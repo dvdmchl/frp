@@ -127,6 +127,9 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
 
 ## Best Practices for Agent
 
+-   **Commitment**: Never commit changes using `git`. The user will always commit changes manually.
+-   **Local Server Management**: Never attempt to start the database server or backend application automatically. The user will start these components manually upon request.
+
 -   **Tests**: Always write tests for new features. Always check `AbstractDbTest` for integration testing patterns. Use `SharedPostgresContainer`.
 -   **UI Components**: Reuse existing components in `src/components/UIComponent` (`Text.tsx`, `Input.tsx`, `Form.tsx`, `ErrorDisplay.tsx`).
 -   **Translations**: Always add user-facing strings to `src/locales/en/translation.json` and `cs/translation.json`. Use `t('key')`.
