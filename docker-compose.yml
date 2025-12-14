@@ -2,7 +2,7 @@ services:
   db:
     container_name: frp-db-1
     image: postgres
-    restart: always
+    restart: no
     shm_size: 128mb
 
     environment:
