@@ -129,7 +129,7 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
 
 -   **Commitment**: Never commit changes using `git`. The user will always commit changes manually.
 -   **Local Server Management**: Never attempt to start the database server or backend application automatically. The user will start these components manually upon request.
--   **Git Operations**: Never use `git add` or `git stash`. The user will handle these operations manually.
+-   **Git Operations**: Never use `git add`, `git stash`, or `git checkout`. The user will handle these operations manually.
 
 -   **Tests**: Always write tests for new features. Always check `AbstractDbTest` for integration testing patterns. Use `SharedPostgresContainer`.
 -   **UI Components**: Reuse existing components in `src/components/UIComponent` (`Text.tsx`, `Input.tsx`, `Form.tsx`, `ErrorDisplay.tsx`).
