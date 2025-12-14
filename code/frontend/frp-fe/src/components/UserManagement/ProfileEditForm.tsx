@@ -16,10 +16,15 @@ import {
 import {Button, SidebarItemGroup, Sidebar, SidebarItem, SidebarItems} from "flowbite-react";
 import {useTranslation} from "react-i18next";
 import {SchemaManager} from "./SchemaManager";
+import {Link, useParams} from "react-router-dom";
 
 export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => void }> = ({onProfileUpdate}) => {
     const {t} = useTranslation();
-    const [section, setSection] = useState<'info' | 'security' | 'schemas'>('info');
+    const { section: urlSection } = useParams<{ section: string }>();
+
+    const section = (urlSection === 'security' ? 'security' :
+        urlSection === 'database-schemas' ? 'schemas' : 'info');
+
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [oldPassword, setOldPassword] = useState("");
@@ -113,19 +118,28 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
                     <SidebarItemGroup>
                         <SidebarItem
                             active={section === 'info'}
-                            onClick={() => setSection('info')}
+                            as={Link}
+                            // @ts-expect-error: flowbite-react polymorphic type issue
+                            to="/profile/personal-info"
+                            className="cursor-pointer"
                         >
                             {t('profile.personalInfo')}
                         </SidebarItem>
                         <SidebarItem
                             active={section === 'security'}
-                            onClick={() => setSection('security')}
+                            as={Link}
+                            // @ts-expect-error: flowbite-react polymorphic type issue
+                            to="/profile/security"
+                            className="cursor-pointer"
                         >
                             {t('profile.security')}
                         </SidebarItem>
                         <SidebarItem
                             active={section === 'schemas'}
-                            onClick={() => setSection('schemas')}
+                            as={Link}
+                            // @ts-expect-error: flowbite-react polymorphic type issue
+                            to="/profile/database-schemas"
+                            className="cursor-pointer"
                         >
                             {t('profile.databaseSchemas')}
                         </SidebarItem>

@@ -42,7 +42,8 @@ export function AppRoutes({ user, onLoginSuccess, onRegisterSuccess, setUser } :
             ) : (
                 <>
                     <Route path="/" element={<HomePage user={user} />} />
-                    <Route path="/profile" element={<ProfileEditForm onProfileUpdate={setUser} />} />
+                    <Route path="/profile" element={<Navigate to="/profile/personal-info" replace />} />
+                    <Route path="/profile/:section" element={<ProfileEditForm onProfileUpdate={setUser} />} />
                     <Route path="*" element={<Navigate to="/" />} />
                 </>
             )}
