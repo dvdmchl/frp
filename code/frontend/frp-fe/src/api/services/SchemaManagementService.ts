@@ -23,6 +23,12 @@ export class SchemaManagementService {
             url: '/api/schema/active',
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
+            },
         });
     }
     /**
@@ -34,6 +40,12 @@ export class SchemaManagementService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/schema',
+            errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
+            },
         });
     }
     /**
@@ -55,6 +67,12 @@ export class SchemaManagementService {
             },
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
+            },
         });
     }
     /**
@@ -71,6 +89,12 @@ export class SchemaManagementService {
             url: '/api/schema/copy',
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
+            },
         });
     }
     /**
@@ -87,6 +111,12 @@ export class SchemaManagementService {
             url: '/api/schema/{name}',
             path: {
                 'name': name,
+            },
+            errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
             },
         });
     }

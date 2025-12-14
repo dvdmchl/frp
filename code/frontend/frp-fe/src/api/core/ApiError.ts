@@ -23,10 +23,10 @@ export class ApiError extends Error {
         this.statusText = response.statusText;
         this.body = response.body;
         this.request = request;
-
         if (this.body && typeof this.body === 'object' && ('message' in this.body || 'type' in this.body || 'stackTrace' in this.body)) {
             this.errorDto = this.body as ErrorDto;
             this.message = this.errorDto.message || message;
         }
+    
     }
 }

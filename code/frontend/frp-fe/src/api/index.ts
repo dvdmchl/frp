@@ -9,6 +9,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { CopySchemaRequest } from './models/CopySchemaRequest';
 export type { CreateSchemaRequest } from './models/CreateSchemaRequest';
+export type { ErrorDto } from './models/ErrorDto';
 export type { SetActiveSchemaRequest } from './models/SetActiveSchemaRequest';
 export type { UserChangePasswordRequestDto } from './models/UserChangePasswordRequestDto';
 export type { UserDto } from './models/UserDto';

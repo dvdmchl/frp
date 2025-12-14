@@ -14,6 +14,12 @@ export class ContextControllerService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/context',
+            errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
+            },
         });
     }
 }

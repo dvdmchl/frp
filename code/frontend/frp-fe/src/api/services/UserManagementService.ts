@@ -29,7 +29,10 @@ export class UserManagementService {
             mediaType: 'application/json',
             errors: {
                 400: `Old password does not match`,
+                401: `Unauthorized`,
                 403: `User not authenticated`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -49,7 +52,11 @@ export class UserManagementService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
                 403: `User not authenticated`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -70,7 +77,9 @@ export class UserManagementService {
             mediaType: 'application/json',
             errors: {
                 400: `Invalid input`,
+                401: `Unauthorized`,
                 409: `User with email already exists`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -85,7 +94,11 @@ export class UserManagementService {
             method: 'POST',
             url: '/api/user/logout',
             errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
                 403: `User not authenticated`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -105,7 +118,10 @@ export class UserManagementService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
+                400: `Bad Request`,
                 401: `Invalid credentials`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -120,7 +136,11 @@ export class UserManagementService {
             method: 'GET',
             url: '/api/user/me',
             errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
                 403: `User not authenticated`,
+                409: `Conflict`,
+                500: `Internal Server Error`,
             },
         });
     }
