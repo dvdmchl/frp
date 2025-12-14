@@ -131,7 +131,8 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
 -   **Local Server Management**: Never attempt to start the database server or backend application automatically. The user will start these components manually upon request.
 -   **Git Operations**: Never use `git add`, `git stash`, or `git checkout`. The user will handle these operations manually.
 
--   **Tests**: Always write tests for new features. Always check `AbstractDbTest` for integration testing patterns. Use `SharedPostgresContainer`.
+-   **Backend Testing Policy**: Always write tests for new features. Always check `AbstractDbTest` for integration testing patterns. Use `SharedPostgresContainer`.
+-   **Frontend Testing Policy**: All new frontend code (features, components, bug fixes) must include corresponding unit or integration tests, aiming for a minimum of 70% test coverage. Utilize Vitest and React Testing Library (RTL).
 -   **UI Components**: Reuse existing components in `src/components/UIComponent` (`Text.tsx`, `Input.tsx`, `Form.tsx`, `ErrorDisplay.tsx`).
 -   **Translations**: Always add user-facing strings to `src/locales/en/translation.json` and `cs/translation.json`. Use `t('key')`.
 -   **Strict Types**: Use `import type` for interfaces/types in TypeScript to avoid compilation errors with `verbatimModuleSyntax`.
