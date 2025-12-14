@@ -17,5 +17,20 @@ export default defineConfig({
                 inline: ['parse5'],
             },
         },
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'json', 'html'],
+            include: ['src/**/*.{ts,tsx}'],
+            exclude: [
+                'src/api/**',
+                'src/test/**',
+                'src/vite-env.d.ts',
+                'src/main.tsx',
+                '**/*.d.ts',
+                '**/*.test.{ts,tsx}',
+                '**/*.spec.{ts,tsx}',
+                '.eslintrc.cjs',
+            ],
+        },
     },
 })

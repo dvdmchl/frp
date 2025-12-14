@@ -33,7 +33,7 @@ function App() {
     }, []);
 
     if (loadingUser) {
-        return <Spinner/>;
+        return <Spinner aria-label="Loading..."/>;
     }
 
     const handleLoginSuccess = (loginResp: UserLoginResponseDto) => {

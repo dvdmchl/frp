@@ -174,9 +174,11 @@ export const SchemaManager: React.FC<SchemaManagerProps> = ({user, onUserUpdate}
 
             <Table>
                 <TableHead>
-                    <TableHeadCell>{t('schema.name')}</TableHeadCell>
-                    <TableHeadCell>{t('schema.active')}</TableHeadCell>
-                    <TableHeadCell>Actions</TableHeadCell>
+                    <TableRow>
+                        <TableHeadCell>{t('schema.name')}</TableHeadCell>
+                        <TableHeadCell>{t('schema.active')}</TableHeadCell>
+                        <TableHeadCell>Actions</TableHeadCell>
+                    </TableRow>
                 </TableHead>
                 <TableBody className="divide-y">
                     {schemas.map(schema => (

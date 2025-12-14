@@ -12,6 +12,7 @@ node
 dist
 dist-ssr
 *.local
+coverage
 
 # env files
 .env*
