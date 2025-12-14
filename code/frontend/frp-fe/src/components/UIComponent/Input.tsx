@@ -2,53 +2,48 @@ import React from "react";
 import {useTranslation} from "react-i18next";
 
 type BaseInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
-    type: string;
     labelTranslationKey: string; // pro label
     placeholderTranslationKey: string; // pro placeholder
     name: string;
     id: string;
-    autoComplete: string;
 };
 
-function BaseInput({
-                       labelTranslationKey,
-                       placeholderTranslationKey,
-                       ...props
-                   }: BaseInputProps) {
-    const {t} = useTranslation();
+const BaseInput = React.forwardRef<HTMLInputElement, BaseInputProps>(
+    ({labelTranslationKey, placeholderTranslationKey, ...props}, ref) => {
+        const {t} = useTranslation();
 
-    return (
-        <div className="flex flex-col">
-            <label
-                htmlFor={props.id}
-                className="font-semibold mb-2 text-textLight"
-            >
-                {t(labelTranslationKey)}
-            </label>
-            <input
-                placeholder={t(placeholderTranslationKey)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                {...props}
-            />
-        </div>
-    );
-}
+        return (
+            <div className="flex flex-col">
+                <label
+                    htmlFor={props.id}
+                    className="font-semibold mb-2 text-textLight"
+                >
+                    {t(labelTranslationKey)}
+                </label>
+                <input
+                    ref={ref}
+                    placeholder={t(placeholderTranslationKey)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    {...props}
+                />
+            </div>
+        );
+    }
+);
 
-export function InputText(
-    props: Readonly<Omit<
-        BaseInputProps,
-        | "type"
-        | "autoComplete"
-    >>
-) {
+export const InputText = React.forwardRef<
+    HTMLInputElement,
+    Omit<BaseInputProps, "type" | "autoComplete">
+>(({ ...props }, ref) => {
     return (
         <BaseInput
+            ref={ref}
             type="text"
-            autoComplete=""
+            autoComplete="off"
             {...props}
         />
     );
-}
+});
 
 export function InputEmail(
     props: Readonly<Omit<

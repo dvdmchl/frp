@@ -1,4 +1,5 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import type {MutableRefObject} from "react";
 import {useTranslation} from "react-i18next";
 import {SchemaManagementService} from "../../api/services/SchemaManagementService";
 import {UserManagementService} from "../../api/services/UserManagementService";
@@ -33,8 +34,9 @@ export const SchemaManager: React.FC<SchemaManagerProps> = ({user, onUserUpdate}
     const [copyTarget, setCopyTarget] = useState("");
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showCopyModal, setShowCopyModal] = useState(false);
+    const copyTargetInputRef: MutableRefObject<HTMLInputElement | null> = useRef(null);
 
-    const loadSchemas = async () => {
+    const loadSchemas = useCallback(async () => {
         try {
             const list = await SchemaManagementService.listMySchemas();
             setSchemas(list);
@@ -46,11 +48,22 @@ export const SchemaManager: React.FC<SchemaManagerProps> = ({user, onUserUpdate}
                 setApiError({type: "ClientError", message: t("schema.error"), stackTrace: undefined});
             }
         }
-    };
+    }, [t]);
 
     useEffect(() => {
         loadSchemas();
-    }, []);
+    }, [loadSchemas]);
+
+    useEffect(() => {
+        if (showCopyModal) {
+            const timer = setTimeout(() => {
+                if (copyTargetInputRef.current) {
+                    copyTargetInputRef.current.focus();
+                }
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [showCopyModal]);
 
     const handleCreate = async () => {
         setLoading(true);
@@ -143,13 +156,17 @@ export const SchemaManager: React.FC<SchemaManagerProps> = ({user, onUserUpdate}
         }
     };
 
+    const handleOpenCopyModal = (schema: string) => {
+        setCopySource(schema);
+        setShowCopyModal(true);
+    };
+
     return (
         <div className="flex flex-col gap-4">
             <H2Title>{t('schema.listTitle')}</H2Title>
 
             <div className="flex gap-2 mb-4">
                 <Button onClick={() => setShowCreateModal(true)}>{t('schema.createTitle')}</Button>
-                <Button onClick={() => setShowCopyModal(true)} color="light">{t('schema.copyTitle')}</Button>
             </div>
 
             {apiError && <ErrorDisplay error={apiError}/>}
@@ -177,6 +194,9 @@ export const SchemaManager: React.FC<SchemaManagerProps> = ({user, onUserUpdate}
                                             {t('schema.switch')}
                                         </Button>
                                     )}
+                                    <Button size="xs" color="light" onClick={() => handleOpenCopyModal(schema)}>
+                                        {t('schema.copy')}
+                                    </Button>
                                     <Button size="xs" color="failure" onClick={() => handleDelete(schema)}>
                                         {t('schema.delete')}
                                     </Button>
@@ -229,6 +249,7 @@ export const SchemaManager: React.FC<SchemaManagerProps> = ({user, onUserUpdate}
                             labelTranslationKey="schema.target"
                             value={copyTarget}
                             onChange={e => setCopyTarget(e.target.value)}
+                            ref={copyTargetInputRef}
                         />
                         {copyError && <ErrorDisplay error={copyError} />}
                     </div>
