@@ -40,5 +40,10 @@ FRP is a comprehensive application designed to help families efficiently manage 
 - **Back-end**: Spring Boot, Hibernate
 - **Database**: PostgreSQL
 
+## License
 
+This project is licensed under the GNU AGPLv3.
 
+**Note:** The name "FRP" and the project logo are trademarks and are not covered by the AGPL license. You may not use these names in a way that suggests your fork or service is an official product of, or endorsed by, the original project. The project logo and specific visual design elements are reserved and may not be used for commercial products or derivative works without explicit written permission.
+
+By contributing to this project, you agree to the terms of the Contributor License Agreement (CLA) as described in [CONTRIBUTING.md](CONTRIBUTING.md).
