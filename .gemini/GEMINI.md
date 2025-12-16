@@ -25,6 +25,10 @@ FRP is a comprehensive application for managing family tasks, resources, calenda
     -   Axios (HTTP Client)
     -   i18next (Internationalization)
 
+## Repository
+Hosted on GitHub.
+URL: https://github.com/dvdmchl/frp
+
 ## Project Structure
 
 -   `code/backend`: Maven project for the Spring Boot application.
