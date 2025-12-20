@@ -34,11 +34,9 @@
         <archunit.version>1.4.1</archunit.version>
         <jacoco.version>0.8.14</jacoco.version>
         <sonar.version>5.5.0.6356</sonar.version>
-        <sonar.host.url>http://localhost:9000</sonar.host.url>
         <sonar.token>${env.SONAR_TOKEN}</sonar.token>
         <sonar.projectKey>frp-backend</sonar.projectKey>
         <sonar.projectName>FRP Backend</sonar.projectName>
-        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
         <test.docker.host>tcp://172.19.62.177:2375</test.docker.host>
         <checkstyle-maven-plugin.version>3.6.0</checkstyle-maven-plugin.version>
         <checkstyle.version>12.3.0</checkstyle.version>
@@ -264,14 +262,6 @@
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>${sonar.version}</version>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sonar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
@@ -358,6 +348,15 @@
             <id>prod</id>
             <properties>
                 <spring.profiles.active>prod</spring.profiles.active>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>sonar</id>
+            <properties>
+                <sonar.host.url>http://localhost:9000</sonar.host.url>
+                <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+                <sonar.skip>false</sonar.skip>
             </properties>
         </profile>
     </profiles>

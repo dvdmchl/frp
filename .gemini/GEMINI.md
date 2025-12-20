@@ -157,13 +157,15 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
 
 -   **Sonar Analysis**:
 
-    -   Analysis runs automatically in the CI pipeline (GitHub Actions) AND locally during `mvn verify`.
-
-    -   **Quality Gate**: The project enforces a "zero new issues" policy. Any new bugs, vulnerabilities, or code smells will fail the build.
-
-    -   **Local Development**: Ensure `sonarqube` container is running (`docker compose up -d sonarqube`) before running `mvn verify`.
-
-    -   **Action**: Sonar findings must be fixed, not ignored or marked as false positives unless absolutely necessary and justified.
+    -   **Execution**: SonarQube runs locally and **explicitly**. It is NOT triggered by default build commands.
+    -   **Command**: To run Sonar analysis, use:
+        ```bash
+        mvn verify -Psonar sonar:sonar -pl code/backend
+        ```
+    -   **Prerequisites**: Ensure `sonarqube` container is running (`docker compose up -d sonarqube`) before running analysis.
+    -   **Quality Gate**: The project enforces a **Strict Quality Gate**. The build **will fail** if the Quality Gate is not passed.
+    -   **Rule**: **SonarQube analysis is part of backend verification.** Any duplication, code smell, bug, or Quality Gate failure must be fixed immediately.
+    -   **AI Agent Policy**: AI agents must reuse existing services and logic. **Duplicate logic is a severe violation** caught by Sonar and must be rectified instantly.
 
 -   **Static Analysis (Checkstyle & SpotBugs)**:
     -   **Checkstyle**: Enforces coding style and specific best practices (e.g., explicit visibility, no field injection, no magic strings in controllers). Configuration is in `code/backend/checkstyle.xml`.
