@@ -2,14 +2,18 @@ package org.dreamabout.sw.frp.be.module.common.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dreamabout.sw.frp.be.module.common.model.SchemaEntity;
+import org.dreamabout.sw.frp.be.module.common.model.*;
+import org.dreamabout.sw.frp.be.module.common.repository.SchemaAccessRepository;
 import org.dreamabout.sw.frp.be.module.common.repository.SchemaRepository;
+import org.dreamabout.sw.frp.be.module.common.repository.UserRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,8 +21,9 @@ import java.util.regex.Pattern;
 public class SchemaService {
 
     private final SchemaRepository schemaRepository;
+    private final SchemaAccessRepository schemaAccessRepository;
     private final JdbcTemplate jdbcTemplate;
-    private final org.dreamabout.sw.frp.be.module.common.repository.UserRepository userRepository;
+    private final UserRepository userRepository;
     private final SchemaInitializationService schemaInitializationService;
 
     private static final Pattern SCHEMA_NAME_PATTERN = Pattern.compile("^[a-z][a-z0-9_]*$");
@@ -32,24 +37,40 @@ public class SchemaService {
         }
 
         log.info("Creating new schema: {}", schemaName);
-        
+
         schemaInitializationService.initSchema(schemaName);
 
-        var schema = new SchemaEntity();
-        schema.setName(schemaName);
-        schema.setOwnerId(ownerId);
-        
-        return schemaRepository.save(schema);
+        var schema = saveSchemaEntity(schemaName, ownerId);
+        grantOwnerAccess(schema, ownerId);
+
+        return schema;
     }
 
+    @Transactional(readOnly = true)
     public List<SchemaEntity> listMySchemas(Long userId) {
-        return schemaRepository.findAllByOwnerId(userId);
+        var user = getUserWithGroups(userId);
+        var groupIds = getGroupIds(user);
+
+        return groupIds.isEmpty()
+                ? schemaAccessRepository.findDirectAvailableSchemas(userId)
+                : schemaAccessRepository.findAvailableSchemas(userId, groupIds);
     }
 
     @Transactional
     public void setActiveSchema(String schemaName, Long userId) {
-        var user = userRepository.findById(userId).orElseThrow();
-        var schema = schemaRepository.findByName(schemaName).orElseThrow(() -> new IllegalArgumentException("Schema not found"));
+        var user = getUserWithGroups(userId);
+        var groupIds = getGroupIds(user);
+
+        var accessList = groupIds.isEmpty()
+                ? schemaAccessRepository.findDirectAccess(schemaName, userId)
+                : schemaAccessRepository.findAccess(schemaName, userId, groupIds);
+
+        if (accessList.isEmpty()) {
+            throw new IllegalArgumentException("You do not have access to schema " + schemaName);
+        }
+
+        var schema = schemaRepository.findByName(schemaName)
+                .orElseThrow(() -> new IllegalArgumentException("Schema not found: " + schemaName));
         user.setSchema(schema);
         userRepository.save(user);
     }
@@ -61,9 +82,7 @@ public class SchemaService {
         var sourceSchema = schemaRepository.findByName(source)
                 .orElseThrow(() -> new IllegalArgumentException("Source schema not found: " + source));
 
-        if (!sourceSchema.getOwnerId().equals(userId)) {
-            throw new IllegalArgumentException("You are not the owner of the source schema.");
-        }
+        checkAccess(sourceSchema, userId, AccessLevel.OWNER);
 
         if (schemaRepository.findByName(target).isPresent()) {
             throw new IllegalArgumentException("Target schema already exists: " + target);
@@ -71,19 +90,64 @@ public class SchemaService {
 
         log.info("Copying schema from {} to {} for user {}", source, target, userId);
 
-        // 1. Initialize target database schema
         schemaInitializationService.initSchema(target);
 
-        // 2. Create Schema record in public schema
-        var schemaEntity = new SchemaEntity();
-        schemaEntity.setName(target);
-        schemaEntity.setOwnerId(userId);
-        schemaEntity = schemaRepository.save(schemaEntity);
+        var schemaEntity = saveSchemaEntity(target, userId);
+        grantOwnerAccess(schemaEntity, userId);
 
-        // 3. Copy data and update sequences
         copyData(source, target);
 
         return schemaEntity;
+    }
+
+    private UserEntity getUserWithGroups(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+    }
+
+    private Set<Long> getGroupIds(UserEntity user) {
+        return user.getGroups().stream()
+                .map(GroupEntity::getId)
+                .collect(Collectors.toSet());
+    }
+
+    private SchemaEntity saveSchemaEntity(String name, Long ownerId) {
+        var schemaEntity = new SchemaEntity();
+        schemaEntity.setName(name);
+        schemaEntity.setOwnerId(ownerId);
+        return schemaRepository.save(schemaEntity);
+    }
+
+    private void grantOwnerAccess(SchemaEntity schema, Long userId) {
+        var user = getUserWithGroups(userId);
+        var access = SchemaAccessEntity.builder()
+                .schema(schema)
+                .user(user)
+                .accessLevel(AccessLevel.OWNER)
+                .build();
+        schemaAccessRepository.save(access);
+    }
+
+    private void checkAccess(SchemaEntity schema, Long userId, AccessLevel requiredLevel) {
+        var user = getUserWithGroups(userId);
+        var groupIds = getGroupIds(user);
+
+        var accessList = groupIds.isEmpty()
+                ? schemaAccessRepository.findDirectAccess(schema.getName(), userId)
+                : schemaAccessRepository.findAccess(schema.getName(), userId, groupIds);
+
+        boolean hasAccess = accessList.stream().anyMatch(a -> hasLevel(a.getAccessLevel(), requiredLevel));
+
+        if (!hasAccess) {
+            throw new IllegalArgumentException("Insufficient access level for schema " + schema.getName());
+        }
+    }
+
+    private boolean hasLevel(AccessLevel current, AccessLevel required) {
+        if (current == AccessLevel.OWNER) return true;
+        if (current == AccessLevel.EDITOR && (required == AccessLevel.EDITOR || required == AccessLevel.VIEWER))
+            return true;
+        return current == AccessLevel.VIEWER && required == AccessLevel.VIEWER;
     }
 
     private void copyData(String source, String target) {
@@ -138,11 +202,16 @@ public class SchemaService {
 
     @Transactional
     public void deleteSchema(String schemaName, Long userId) {
-        var schema = schemaRepository.findByName(schemaName).orElseThrow();
-        if (!schema.getCreatedByUserId().equals(userId)) {
-             throw new IllegalArgumentException("Not allowed to delete this schema");
-        }
+        var schema = schemaRepository.findByName(schemaName)
+                .orElseThrow(() -> new IllegalArgumentException("Schema not found"));
+
+        checkAccess(schema, userId, AccessLevel.OWNER);
+
         jdbcTemplate.execute("DROP SCHEMA " + schemaName + " CASCADE");
+
+        var accessRecords = schemaAccessRepository.findAllBySchema(schema);
+        schemaAccessRepository.deleteAll(accessRecords);
+
         schemaRepository.delete(schema);
     }
 

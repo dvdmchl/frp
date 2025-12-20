@@ -31,20 +31,24 @@ public class SecurityConfiguration {
     private String swaggerUiPath;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(getPublicEndpoints()).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(sess -> sess
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+        try {
+            return http
+                    .cors(Customizer.withDefaults())
+                    .csrf(csrf -> csrf.disable())
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers(getPublicEndpoints()).permitAll()
+                            .anyRequest().authenticated()
+                    )
+                    .sessionManagement(sess -> sess
+                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    )
+                    .authenticationProvider(authenticationProvider)
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                    .build();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to configure security filter chain", e);
+        }
     }
 
     private String[] getPublicEndpoints() {

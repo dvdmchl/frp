@@ -56,7 +56,7 @@ public class UserService {
     }
 
     private String sanitizeSchemaName(String name) {
-        String sanitized = name.replaceAll("[^a-zA-Z0-9_]", "").toLowerCase();
+        String sanitized = name.replaceAll("\\W", "").toLowerCase();
         if (sanitized.isEmpty() || !Character.isLetter(sanitized.charAt(0))) {
             return "u_" + sanitized;
         }
@@ -86,30 +86,28 @@ public class UserService {
 
     public Optional<UserDto> updateAuthenticatedUserInfo(UserUpdateInfoRequestDto update) {
         var aut = securityContextService.getAuthentication();
-        if (aut == null || aut.getPrincipal() == null) {
-            return Optional.empty();
+        if (aut != null && aut.getPrincipal() instanceof UserEntity principal) {
+            var user = userRepository.findById(principal.getId()).orElseThrow();
+            user.setFullName(update.fullName());
+            user.setEmail(update.email());
+            user = userRepository.save(user);
+            return Optional.of(userMapper.toDto(user));
         }
-        var principal = (UserEntity) aut.getPrincipal();
-        var user = userRepository.findById(principal.getId()).orElseThrow();
-        user.setFullName(update.fullName());
-        user.setEmail(update.email());
-        user = userRepository.save(user);
-        return Optional.of(userMapper.toDto(user));
+        return Optional.empty();
     }
 
     public Optional<Boolean> changeAuthenticatedUserPassword(UserChangePasswordRequestDto update) {
         var aut = securityContextService.getAuthentication();
-        if (aut == null || aut.getPrincipal() == null) {
-            return Optional.empty();
+        if (aut != null && aut.getPrincipal() instanceof UserEntity principal) {
+            var user = userRepository.findById(principal.getId()).orElseThrow();
+            if (!passwordEncoder.matches(update.oldPassword(), user.getPassword())) {
+                return Optional.of(false);
+            }
+            user.setPassword(passwordEncoder.encode(update.newPassword()));
+            userRepository.save(user);
+            return Optional.of(true);
         }
-        var principal = (UserEntity) aut.getPrincipal();
-        var user = userRepository.findById(principal.getId()).orElseThrow();
-        if (!passwordEncoder.matches(update.oldPassword(), user.getPassword())) {
-            return Optional.of(false);
-        }
-        user.setPassword(passwordEncoder.encode(update.newPassword()));
-        userRepository.save(user);
-        return Optional.of(true);
+        return Optional.empty();
     }
 
     public void invalidateToken() {
@@ -128,10 +126,9 @@ public class UserService {
 
     private Optional<UserEntity> getCurrentUser() {
         var aut = securityContextService.getAuthentication();
-        if (aut == null || aut.getPrincipal() == null) {
-            return Optional.empty();
+        if (aut != null && aut.getPrincipal() instanceof UserEntity principal) {
+            return userRepository.findById(principal.getId());
         }
-        var principal = (UserEntity) aut.getPrincipal();
-        return userRepository.findById(principal.getId());
+        return Optional.empty();
     }
 }

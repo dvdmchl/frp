@@ -26,8 +26,6 @@ class SchemaControllerTest extends AbstractDbTest {
 
     private String token;
 
-    private UserDto currentUser;
-
     @BeforeEach
     void setUp() throws Exception {
         var email = "schema@tester.com";
@@ -47,7 +45,6 @@ class SchemaControllerTest extends AbstractDbTest {
 
         var loginDto = objectMapper.readValue(loginResp, UserLoginResponseDto.class);
         this.token = loginDto.token();
-        this.currentUser = loginDto.user();
     }
 
     @Test
@@ -153,7 +150,7 @@ class SchemaControllerTest extends AbstractDbTest {
                 .andReturn().getResponse().getContentAsString();
         
         List<String> schemas = objectMapper.readValue(listResp, List.class);
-        assertThat(schemas).doesNotContain("delete_me");
+        assertThat(schemas).isNotEmpty().doesNotContain("delete_me");
     }
 
     @Test

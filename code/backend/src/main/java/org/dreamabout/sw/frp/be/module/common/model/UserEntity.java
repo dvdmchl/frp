@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -47,6 +48,16 @@ public class UserEntity extends AuditableEntity implements UserDetails {
     @Column(name = "token_valid", nullable = false)
     @Builder.Default
     private Boolean tokenValid = true;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "frp_user_group",
+            schema = Constant.PUBLIC_SCHEMA,
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id")
+    )
+    @Builder.Default
+    private Set<GroupEntity> groups = new java.util.HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

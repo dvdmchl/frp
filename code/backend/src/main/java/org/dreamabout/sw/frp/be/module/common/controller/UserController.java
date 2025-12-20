@@ -94,7 +94,7 @@ public class UserController {
         if (result.isEmpty()) {
             return ResponseEntity.status(401).build();
         }
-        if (!result.get()) {
+        if (Boolean.FALSE.equals(result.get())) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok().build();

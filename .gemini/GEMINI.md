@@ -102,6 +102,11 @@ docker compose up -d db
 
 ## Key Workflows & Commands
 
+### Tool Execution Rules
+
+- **Docker**: All `docker` or `docker compose` commands **MUST** be prefixed with `wsl` (e.g., `wsl docker compose ps`).
+- **curl**: `curl` commands should be executed **natively** (without `wsl`).
+
 ### 1. Generating Frontend API Client
 
 When the Backend API changes (Controllers, DTOs), update the Frontend client:
