@@ -3,13 +3,12 @@ package org.dreamabout.sw.frp.be.module.common.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.dreamabout.sw.frp.be.module.common.model.UserEntity;
 import org.dreamabout.sw.frp.be.module.common.model.dto.SchemaCopyRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.SchemaCreateRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.SchemaSetActiveRequestDto;
 import org.dreamabout.sw.frp.be.module.common.service.SchemaService;
+import org.dreamabout.sw.frp.be.module.common.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,11 +21,12 @@ import java.util.Map;
 public class SchemaController {
 
     private final SchemaService schemaService;
+    private final UserService userService;
 
     @GetMapping
     @Operation(summary = "List my schemas")
     public ResponseEntity<List<String>> listMySchemas() {
-        var user = currentUser();
+        var user = userService.getPrincipal();
         var schemas = schemaService.listMySchemas(user.getId())
                 .stream().map(s -> s.getName()).toList();
         return ResponseEntity.ok(schemas);
@@ -37,9 +37,10 @@ public class SchemaController {
     @Operation(summary = "Create new schema")
     public ResponseEntity<Map<String, String>> createSchema(@RequestBody SchemaCreateRequestDto req,
                                                             @RequestParam(name = "setActive", defaultValue = "false") boolean setActive) {
-        var schema = schemaService.createSchema(req.name(), currentUser().getId());
+        var user = userService.getPrincipal();
+        var schema = schemaService.createSchema(req.name(), user.getId());
         if (setActive) {
-            schemaService.setActiveSchema(schema.getName(), currentUser().getId());
+            schemaService.setActiveSchema(schema.getName(), user.getId());
         }
         return ResponseEntity.ok(Map.of("name", schema.getName()));
     }
@@ -47,7 +48,7 @@ public class SchemaController {
     @PostMapping("/copy")
     @Operation(summary = "Copy schema")
     public ResponseEntity<Map<String, String>> copySchema(@RequestBody SchemaCopyRequestDto req) {
-        var user = currentUser();
+        var user = userService.getPrincipal();
         var schema = schemaService.copySchema(req.source(), req.target(), user.getId());
         return ResponseEntity.ok(Map.of("name", schema.getName()));
     }
@@ -55,7 +56,7 @@ public class SchemaController {
     @DeleteMapping("/{name}")
     @Operation(summary = "Delete schema")
     public ResponseEntity<Void> deleteSchema(@PathVariable("name") String name) {
-        var user = currentUser();
+        var user = userService.getPrincipal();
         schemaService.deleteSchema(name, user.getId());
         return ResponseEntity.noContent().build();
     }
@@ -63,16 +64,8 @@ public class SchemaController {
     @PutMapping("/active")
     @Operation(summary = "Set active schema")
     public ResponseEntity<Void> setActiveSchema(@RequestBody SchemaSetActiveRequestDto req) {
-        var user = currentUser();
+        var user = userService.getPrincipal();
         schemaService.setActiveSchema(req.name(), user.getId());
         return ResponseEntity.ok().build();
-    }
-
-    private UserEntity currentUser() {
-        var aut = SecurityContextHolder.getContext().getAuthentication();
-        if (aut == null || aut.getPrincipal() == null || !(aut.getPrincipal() instanceof UserEntity)) {
-            throw new IllegalStateException("User not authenticated");
-        }
-        return (UserEntity) aut.getPrincipal();
     }
 }

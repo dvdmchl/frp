@@ -31,6 +31,7 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <maven.compiler.proc>full</maven.compiler.proc>
         <spring.boot.maven.plugin.version>3.5.8</spring.boot.maven.plugin.version>
+        <archunit.version>1.4.1</archunit.version>
         <test.docker.host>tcp://172.19.62.177:2375</test.docker.host>
     </properties>
 
@@ -173,6 +174,13 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <version>${archunit.version}</version>
             <scope>test</scope>
         </dependency>
 

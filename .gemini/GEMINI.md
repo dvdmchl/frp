@@ -131,6 +131,7 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
 
 ## Best Practices for Agent
 
+-   **Duplicities** Before creating any new method that retrieves or manipulates domain entities, always check if an existing service provides this functionality. Do not duplicate logic. Always reuse existing methods.
 -   **Commitment**: Never commit changes using `git`. The user will always commit changes manually.
 -   **Local Server Management**: Never attempt to start the database server or backend application automatically. The user will start these components manually upon request.
 -   **Git Operations**: Never use `git add`, `git stash`, or `git checkout`. The user will handle these operations manually.
@@ -140,4 +141,10 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
 -   **UI Components**: Reuse existing components in `src/components/UIComponent` (`Text.tsx`, `Input.tsx`, `Form.tsx`, `ErrorDisplay.tsx`).
 -   **Translations**: Always add user-facing strings to `src/locales/en/translation.json` and `cs/translation.json`. Use `t('key')`.
 -   **Strict Types**: Use `import type` for interfaces/types in TypeScript to avoid compilation errors with `verbatimModuleSyntax`.
--   **DTOs**: Always implement Data Transfer Objects as Java `record`s. Place them in a `model.dto` package within the relevant module. Append `Dto` to the class name (e.g., `SchemaCreateRequestDto`). Avoid inner static classes for DTOs.
+
+### Architecture & Code Quality
+
+-   **Architecture Tests**: Backend architecture is enforced by ArchUnit (`ArchitectureTest.java`). Violations cause test failures. These tests ensure the codebase remains maintainable and consistent.
+    -   **DTOs**: Must be immutable Java `record`s residing in `..model.dto` packages. Inner classes for DTOs are forbidden.
+    -   **Controllers**: Must not be inner classes. Must not access `SecurityContextHolder` or Repositories directly. Must only depend on Services, DTOs, and Constants.
+    -   **Layering**: Strict layering is enforced: Controller -> Service -> Repository. No skipping layers or reverse dependencies.

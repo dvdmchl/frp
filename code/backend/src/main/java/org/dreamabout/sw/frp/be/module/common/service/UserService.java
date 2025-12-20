@@ -120,6 +120,14 @@ public class UserService {
         SecurityContextHolder.clearContext();
     }
 
+    public UserEntity getPrincipal() {
+        var aut = SecurityContextHolder.getContext().getAuthentication();
+        if (aut == null || aut.getPrincipal() == null || !(aut.getPrincipal() instanceof UserEntity)) {
+            throw new IllegalStateException("User not authenticated");
+        }
+        return (UserEntity) aut.getPrincipal();
+    }
+
     private Optional<UserEntity> getCurrentUser() {
         var aut = SecurityContextHolder.getContext().getAuthentication();
         if (aut == null || aut.getPrincipal() == null) {
