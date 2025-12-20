@@ -95,7 +95,7 @@ describe('SchemaManager Component', () => {
     await waitFor(() => screen.getByText('public'))
 
     const rows = screen.getAllByRole('row')
-    const publicRow = rows.find((row) => row.textContent?.includes('public'))
+    const publicRow = rows.find((row: HTMLElement) => row.textContent?.includes('public'))
     const copyButton = within(publicRow!).getByText('schema.copy')
 
     fireEvent.click(copyButton)
@@ -135,7 +135,7 @@ describe('SchemaManager Component', () => {
 
     // private schema should have switch button
     const rows = screen.getAllByRole('row')
-    const privateRow = rows.find((row) => row.textContent?.includes('private'))
+    const privateRow = rows.find((row: HTMLElement) => row.textContent?.includes('private'))
     const switchButton = within(privateRow!).getByText('schema.switch')
 
     fireEvent.click(switchButton)
@@ -153,7 +153,7 @@ describe('SchemaManager Component', () => {
     await waitFor(() => screen.getByText('private'))
 
     const rows = screen.getAllByRole('row')
-    const privateRow = rows.find((row) => row.textContent?.includes('private'))
+    const privateRow = rows.find((row: HTMLElement) => row.textContent?.includes('private'))
     fireEvent.click(within(privateRow!).getByText('schema.switch'))
 
     await waitFor(() => {
@@ -166,7 +166,7 @@ describe('SchemaManager Component', () => {
     await waitFor(() => screen.getByText('private'))
 
     const rows = screen.getAllByRole('row')
-    const privateRow = rows.find((row) => row.textContent?.includes('private'))
+    const privateRow = rows.find((row: HTMLElement) => row.textContent?.includes('private'))
     const deleteButton = within(privateRow!).getByText('schema.delete')
 
     fireEvent.click(deleteButton)
@@ -183,7 +183,7 @@ describe('SchemaManager Component', () => {
     await waitFor(() => screen.getByText('private'))
 
     const rows = screen.getAllByRole('row')
-    const privateRow = rows.find((row) => row.textContent?.includes('private'))
+    const privateRow = rows.find((row: HTMLElement) => row.textContent?.includes('private'))
     fireEvent.click(within(privateRow!).getByText('schema.delete'))
 
     await waitFor(() => {

@@ -153,7 +153,12 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
         -   Run tests with coverage: `npm run test:coverage`.
         -   Coverage violation will fail the build/CI.
 
--   **UI Components**: Reuse existing components in `src/components/UIComponent` (`Text.tsx`, `Input.tsx`, `Form.tsx`, `ErrorDisplay.tsx`).
+-   **UI Components**:
+    -   Reuse existing components in `src/components/UIComponent` (`Text.tsx`, `Input.tsx`, `Form.tsx`, `ErrorDisplay.tsx`).
+    -   **Rule**: AI **MUST NOT** create new low-level components (inputs, buttons, typography) if a corresponding one exists in `UIComponent`.
+    -   **No Custom Styles**: Inline styles (`style={{...}}`) and custom CSS classes (outside of Tailwind) are strictly forbidden in feature components. All styling must be handled via Tailwind or by extending `UIComponent` library.
+    -   **Storybook**: All components in `UIComponent` **MUST** have a corresponding `.stories.tsx` file. ESLint enforces valid story configurations.
+
 -   **Translations**: Always add user-facing strings to `src/locales/en/translation.json` and `cs/translation.json`. Use `t('key')`.
 -   **Strict Types**: Use `import type` for interfaces/types in TypeScript to avoid compilation errors with `verbatimModuleSyntax`.
 

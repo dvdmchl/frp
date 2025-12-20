@@ -28,6 +28,7 @@ export default defineConfig({
         'src/main.tsx',
         '**/*.d.ts',
         '**/*.test.{ts,tsx}',
+        '**/*.stories.{ts,tsx}',
         '**/*.spec.{ts,tsx}',
         '.eslintrc.cjs',
       ],
