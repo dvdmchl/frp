@@ -4,14 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamabout.sw.frp.be.module.common.model.SchemaEntity;
 import org.dreamabout.sw.frp.be.module.common.repository.SchemaRepository;
-import org.flywaydb.core.Flyway;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 @Service
@@ -21,12 +17,8 @@ public class SchemaService {
 
     private final SchemaRepository schemaRepository;
     private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
     private final org.dreamabout.sw.frp.be.module.common.repository.UserRepository userRepository;
-    
-    @org.springframework.beans.factory.annotation.Autowired
-    @org.springframework.context.annotation.Lazy
-    private SchemaService self;
+    private final SchemaInitializationService schemaInitializationService;
 
     private static final Pattern SCHEMA_NAME_PATTERN = Pattern.compile("^[a-z][a-z0-9_]*$");
 
@@ -40,26 +32,13 @@ public class SchemaService {
 
         log.info("Creating new schema: {}", schemaName);
         
-        self.initSchema(schemaName);
+        schemaInitializationService.initSchema(schemaName);
 
         var schema = new SchemaEntity();
         schema.setName(schemaName);
         schema.setOwnerId(ownerId);
         
         return schemaRepository.save(schema);
-    }
-
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void initSchema(String schemaName) {
-        log.info("Running migrations for schema: {}", schemaName);
-        Flyway.configure()
-                .dataSource(dataSource)
-                .schemas(schemaName)
-                .createSchemas(true)
-                .locations("classpath:db/migration/modules")
-                .placeholders(Map.of("schema", schemaName))
-                .load()
-                .migrate();
     }
 
     public java.util.List<SchemaEntity> listMySchemas(Long userId) {

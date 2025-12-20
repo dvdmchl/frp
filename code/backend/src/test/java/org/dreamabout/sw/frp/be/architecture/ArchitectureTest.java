@@ -1,12 +1,17 @@
 package org.dreamabout.sw.frp.be.architecture;
 
+import com.tngtech.archunit.core.domain.JavaField;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
+import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 
 @AnalyzeClasses(packages = "org.dreamabout.sw.frp.be", importOptions = ImportOption.DoNotIncludeTests.class)
 public class ArchitectureTest {
@@ -78,4 +83,36 @@ public class ArchitectureTest {
             .that().doNotHaveFullyQualifiedName("org.dreamabout.sw.frp.be.config.security.SecurityContextService")
             .should().onlyAccessClassesThat()
             .doNotHaveFullyQualifiedName("org.springframework.security.core.context.SecurityContextHolder");
+
+    @ArchTest
+    static final ArchRule services_must_not_use_lazy_autowired_fields =
+            fields()
+                    .that().areDeclaredInClassesThat().areAnnotatedWith(Service.class)
+                    .should().notBeAnnotatedWith(Lazy.class);
+
+
+    @ArchTest
+    static final ArchRule services_must_not_inject_themselves =
+            fields()
+                    .that().areDeclaredInClassesThat().areAnnotatedWith(Service.class)
+                    .should(notInjectItself());
+
+
+    private static ArchCondition<JavaField> notInjectItself() {
+        return new ArchCondition<>("not inject itself") {
+            @Override
+            public void check(JavaField field, ConditionEvents events) {
+                if (field.getRawType().equals(field.getOwner())) {
+                    String message = String.format(
+                            "Field %s in %s injects itself",
+                            field.getName(),
+                            field.getOwner().getFullName()
+                    );
+                    events.add(SimpleConditionEvent.violated(field, message));
+                }
+            }
+        };
+    }
+
+
 }
