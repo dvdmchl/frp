@@ -1,6 +1,7 @@
 package org.dreamabout.sw.frp.be.module.common.service;
 
 import lombok.RequiredArgsConstructor;
+import org.dreamabout.sw.frp.be.config.security.SecurityContextService;
 import org.dreamabout.sw.frp.be.domain.exception.UserAlreadyExistsException;
 import org.dreamabout.sw.frp.be.module.common.model.UserEntity;
 import org.dreamabout.sw.frp.be.module.common.model.dto.*;
@@ -8,7 +9,6 @@ import org.dreamabout.sw.frp.be.module.common.model.mapper.UserMapper;
 import org.dreamabout.sw.frp.be.module.common.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +27,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final SchemaService schemaService;
+    private final SecurityContextService securityContextService;
 
     public UserDto signup(UserRegisterRequestDto userRegister) {
         if (userRepository.findByEmail(userRegister.email()).isPresent()) {
@@ -84,7 +85,7 @@ public class UserService {
     }
 
     public Optional<UserDto> updateAuthenticatedUserInfo(UserUpdateInfoRequestDto update) {
-        var aut = SecurityContextHolder.getContext().getAuthentication();
+        var aut = securityContextService.getAuthentication();
         if (aut == null || aut.getPrincipal() == null) {
             return Optional.empty();
         }
@@ -97,7 +98,7 @@ public class UserService {
     }
 
     public Optional<Boolean> changeAuthenticatedUserPassword(UserChangePasswordRequestDto update) {
-        var aut = SecurityContextHolder.getContext().getAuthentication();
+        var aut = securityContextService.getAuthentication();
         if (aut == null || aut.getPrincipal() == null) {
             return Optional.empty();
         }
@@ -117,19 +118,16 @@ public class UserService {
             u.setTokenValid(false);
             userRepository.save(u);
         });
-        SecurityContextHolder.clearContext();
+        securityContextService.clearContext();
     }
 
+    @Transactional(readOnly = true)
     public UserEntity getPrincipal() {
-        var aut = SecurityContextHolder.getContext().getAuthentication();
-        if (aut == null || aut.getPrincipal() == null || !(aut.getPrincipal() instanceof UserEntity)) {
-            throw new IllegalStateException("User not authenticated");
-        }
-        return (UserEntity) aut.getPrincipal();
+        return securityContextService.getPrincipal();
     }
 
     private Optional<UserEntity> getCurrentUser() {
-        var aut = SecurityContextHolder.getContext().getAuthentication();
+        var aut = securityContextService.getAuthentication();
         if (aut == null || aut.getPrincipal() == null) {
             return Optional.empty();
         }

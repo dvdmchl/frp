@@ -1,13 +1,18 @@
 package org.dreamabout.sw.frp.be.config.db;
 
-import lombok.experimental.UtilityClass;
+import lombok.RequiredArgsConstructor;
+import org.dreamabout.sw.frp.be.config.security.SecurityContextService;
 import org.dreamabout.sw.frp.be.domain.Constant;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
-@UtilityClass
+@Component
+@RequiredArgsConstructor
 public class TenantUtil {
+
+    private final JdbcTemplate jdbcTemplate;
+    private final SecurityContextService securityContextService;
 
     private static final String SELECT_SCHEMA_NAME_BY_USERNAME = """
                 SELECT s.name FROM frp_user u
@@ -15,18 +20,18 @@ public class TenantUtil {
                 WHERE email = ?
             """;
 
-    public static TenantIdentifier getCurrentTenantIdentifier(JdbcTemplate jdbcTemplate) {
+    public TenantIdentifier getCurrentTenantIdentifier() {
 
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var authentication = securityContextService.getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails userDetails) {
             var username = userDetails.getUsername();
-            var schemaName = getCurrentTenantIdentifierName(jdbcTemplate, username);
+            var schemaName = getCurrentTenantIdentifierName(username);
             return TenantIdentifier.of(schemaName);
         }
         return TenantIdentifier.of(Constant.TEMPLATE_SCHEMA);
     }
 
-    private static String getCurrentTenantIdentifierName(JdbcTemplate jdbcTemplate, String userName) {
+    private String getCurrentTenantIdentifierName(String userName) {
         var schemas = jdbcTemplate.queryForList(
                 SELECT_SCHEMA_NAME_BY_USERNAME,
                 String.class,

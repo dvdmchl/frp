@@ -2,6 +2,7 @@ package org.dreamabout.sw.frp.be;
 
 import org.dreamabout.sw.frp.be.config.db.TenantContext;
 import org.dreamabout.sw.frp.be.config.db.TenantUtil;
+import org.dreamabout.sw.frp.be.config.security.SecurityContextService;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccJournalEntity;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccJournalRepository;
 import org.dreamabout.sw.frp.be.module.common.model.SchemaEntity;
@@ -12,7 +13,6 @@ import org.dreamabout.sw.frp.be.test.AbstractDbTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -29,6 +29,12 @@ class MultitenancyTest extends AbstractDbTest {
     @Autowired
     private AccJournalRepository accJournalRepository;
 
+    @Autowired
+    private TenantUtil tenantUtil;
+
+    @Autowired
+    private SecurityContextService securityContextService;
+
 
     @Test
     void correctSchemaUsingTest() {
@@ -42,10 +48,10 @@ class MultitenancyTest extends AbstractDbTest {
         user.setSchema(schema);
         user = userRepository.save(user);
 
-        SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
+        securityContextService.clearContext();
         var auth = new TestingAuthenticationToken(user, null, List.of());
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        TenantContext.setCurrentTenant(TenantUtil.getCurrentTenantIdentifier(jdbcTemplate));
+        securityContextService.setAuthentication(auth);
+        TenantContext.setCurrentTenant(tenantUtil.getCurrentTenantIdentifier());
         var accJournal = new AccJournalEntity();
         accJournal = accJournalRepository.save(accJournal);
 

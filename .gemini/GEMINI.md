@@ -129,6 +129,12 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
 -   **Backend**: Use `@Transactional`.
 -   **Caution**: For manual JDBC operations (e.g., in `SchemaService`), inject `JdbcTemplate` to ensure participation in the Spring transaction. Do NOT use `dataSource.getConnection()` directly as it bypasses the transaction manager.
 
+### 5. Security rules
+
+- Services **MUST NOT** access SecurityContextHolder directly
+- Authenticated user is accessed only via **CurrentUserProvider**
+- Security-related logic lives in security module only
+
 ## Best Practices for Agent
 
 -   **Duplicities** Before creating any new method that retrieves or manipulates domain entities, always check if an existing service provides this functionality. Do not duplicate logic. Always reuse existing methods.

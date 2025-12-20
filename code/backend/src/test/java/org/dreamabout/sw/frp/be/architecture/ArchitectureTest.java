@@ -71,4 +71,11 @@ public class ArchitectureTest {
             .should().dependOnClassesThat().resideInAPackage("..controller..")
             .because("Services must not depend on controllers");
 
+    // --- Service Rules ---
+
+    @ArchTest
+    static final ArchRule only_security_context_service_can_access_security_context = classes()
+            .that().doNotHaveFullyQualifiedName("org.dreamabout.sw.frp.be.config.security.SecurityContextService")
+            .should().onlyAccessClassesThat()
+            .doNotHaveFullyQualifiedName("org.springframework.security.core.context.SecurityContextHolder");
 }

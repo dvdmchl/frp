@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.MultiTenancySettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -13,7 +12,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver<TenantIdentifier>, HibernatePropertiesCustomizer {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final TenantUtil tenantUtil;
 
     /**
      * Resolve the current tenant identifier by UserEntity#schemaId
@@ -24,7 +23,7 @@ public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver
         if (currentTenant != null) {
             return currentTenant;
         }
-        return TenantUtil.getCurrentTenantIdentifier(jdbcTemplate);
+        return tenantUtil.getCurrentTenantIdentifier();
     }
 
     @Override
