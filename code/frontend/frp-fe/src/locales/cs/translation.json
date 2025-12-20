@@ -65,5 +65,36 @@
     "unknown": "Došlo k neznámé chybě.",
     "showStackTrace": "Zobrazit detaily",
     "hideStackTrace": "Skrýt detaily"
+  },
+  "common": {
+    "search": "Hledat",
+    "reset": "Reset",
+    "actions": "Akce",
+    "details": "Detaily",
+    "close": "Zavřít",
+    "none": "Žádné",
+    "id": "ID"
+  },
+  "user": {
+    "fullName": "Celé jméno",
+    "email": "E-mail",
+    "activeSchema": "Aktivní schéma"
+  },
+  "admin": {
+    "userManagement": {
+      "title": "Správa uživatelů",
+      "searchPlaceholder": "Hledat podle jména nebo e-mailu...",
+      "status": "Stav",
+      "role": "Role",
+      "active": "Aktivní",
+      "inactive": "Neaktivní",
+      "admin": "Administrátor",
+      "user": "Uživatel",
+      "activate": "Aktivovat",
+      "deactivate": "Deaktivovat",
+      "userDetails": "Detail uživatele",
+      "activeAccount": "Aktivní účet",
+      "adminPrivileges": "Administrátorská práva"
+    }
   }
 }

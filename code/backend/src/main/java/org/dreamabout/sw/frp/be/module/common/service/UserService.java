@@ -6,6 +6,7 @@ import org.dreamabout.sw.frp.be.domain.exception.UserAlreadyExistsException;
 import org.dreamabout.sw.frp.be.module.common.model.UserEntity;
 import org.dreamabout.sw.frp.be.module.common.model.dto.*;
 import org.dreamabout.sw.frp.be.module.common.model.mapper.UserMapper;
+import org.dreamabout.sw.frp.be.module.common.repository.GroupRepository;
 import org.dreamabout.sw.frp.be.module.common.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -22,12 +25,52 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final GroupRepository groupRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final SchemaService schemaService;
     private final SecurityContextService securityContextService;
+
+    @Transactional(readOnly = true)
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserDto> searchUsers(String query) {
+        return userRepository.findByEmailContainingIgnoreCaseOrFullNameContainingIgnoreCase(query, query).stream()
+                .map(userMapper::toDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<UserDto> getUserById(Long id) {
+        return userRepository.findById(id).map(userMapper::toDto);
+    }
+
+    public UserDto updateUserActiveStatus(Long id, boolean active) {
+        var user = userRepository.findById(id).orElseThrow();
+        user.setActive(active);
+        return userMapper.toDto(userRepository.save(user));
+    }
+
+    public UserDto updateUserAdminStatus(Long id, boolean admin) {
+        var user = userRepository.findById(id).orElseThrow();
+        user.setAdmin(admin);
+        return userMapper.toDto(userRepository.save(user));
+    }
+
+    public UserDto updateUserGroups(Long id, Set<Long> groupIds) {
+        var user = userRepository.findById(id).orElseThrow();
+        var groups = groupRepository.findAllById(groupIds);
+        user.getGroups().clear();
+        user.getGroups().addAll(groups);
+        return userMapper.toDto(userRepository.save(user));
+    }
 
     public UserDto signup(UserRegisterRequestDto userRegister) {
         if (userRepository.findByEmail(userRegister.email()).isPresent()) {

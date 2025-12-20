@@ -65,5 +65,36 @@
     "unknown": "An unknown error occurred.",
     "showStackTrace": "Show Details",
     "hideStackTrace": "Hide Details"
+  },
+  "common": {
+    "search": "Search",
+    "reset": "Reset",
+    "actions": "Actions",
+    "details": "Details",
+    "close": "Close",
+    "none": "None",
+    "id": "ID"
+  },
+  "user": {
+    "fullName": "Full Name",
+    "email": "E-mail",
+    "activeSchema": "Active Schema"
+  },
+  "admin": {
+    "userManagement": {
+      "title": "User Management",
+      "searchPlaceholder": "Search by name or email...",
+      "status": "Status",
+      "role": "Role",
+      "active": "Active",
+      "inactive": "Inactive",
+      "admin": "Admin",
+      "user": "User",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "userDetails": "User Details",
+      "activeAccount": "Active Account",
+      "adminPrivileges": "Admin Privileges"
+    }
   }
 }

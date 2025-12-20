@@ -59,7 +59,7 @@ class UserServiceUnitTest {
         });
         when(userMapper.toDto(any(UserEntity.class))).thenAnswer(invocation -> {
             UserEntity u = invocation.getArgument(0);
-            return new UserDto(u.getId(), u.getEmail(), u.getFullName(), u.getSchema().getName());
+            return new UserDto(u.getId(), u.getEmail(), u.getFullName(), u.getSchema().getName(), u.getActive(), u.getAdmin());
         });
 
         // When
@@ -89,7 +89,7 @@ class UserServiceUnitTest {
         });
         when(userMapper.toDto(any(UserEntity.class))).thenAnswer(invocation -> {
             UserEntity u = invocation.getArgument(0);
-            return new UserDto(u.getId(), u.getEmail(), u.getFullName(), u.getSchema().getName());
+            return new UserDto(u.getId(), u.getEmail(), u.getFullName(), u.getSchema().getName(), u.getActive(), u.getAdmin());
         });
 
         // When
@@ -117,7 +117,7 @@ class UserServiceUnitTest {
         });
         when(userMapper.toDto(any(UserEntity.class))).thenAnswer(invocation -> {
             UserEntity u = invocation.getArgument(0);
-            return new UserDto(u.getId(), u.getEmail(), u.getFullName(), u.getSchema().getName());
+            return new UserDto(u.getId(), u.getEmail(), u.getFullName(), u.getSchema().getName(), u.getActive(), u.getAdmin());
         });
 
         // When

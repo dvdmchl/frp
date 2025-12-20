@@ -4,6 +4,8 @@ public record UserDto(
         Long id,
         String email,
         String fullName,
-        String activeSchema
+        String activeSchema,
+        boolean active,
+        boolean admin
 ) {
 }

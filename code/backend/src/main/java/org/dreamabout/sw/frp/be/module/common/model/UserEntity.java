@@ -49,6 +49,14 @@ public class UserEntity extends AuditableEntity implements UserDetails {
     @Builder.Default
     private Boolean tokenValid = true;
 
+    @Column(name = "active", nullable = false)
+    @Builder.Default
+    private Boolean active = true;
+
+    @Column(name = "admin", nullable = false)
+    @Builder.Default
+    private Boolean admin = false;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "frp_user_group",
@@ -61,6 +69,9 @@ public class UserEntity extends AuditableEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (Boolean.TRUE.equals(admin)) {
+            return List.of((GrantedAuthority) () -> "ROLE_ADMIN");
+        }
         return List.of();
     }
 

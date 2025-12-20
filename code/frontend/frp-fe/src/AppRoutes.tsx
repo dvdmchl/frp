@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { LoginForm } from './components/UserManagement/LoginForm'
 import { RegisterForm } from './components/UserManagement/RegisterForm'
 import { ProfileEditForm } from './components/UserManagement/ProfileEditForm'
+import { UserManagementAdmin } from './components/UserManagement/UserManagementAdmin'
 import { HomePage } from './components/HomePage'
 import type { UserLoginResponseDto } from './api/models/UserLoginResponseDto'
 import type { UserDto } from './api/models/UserDto'
@@ -43,6 +44,7 @@ export function AppRoutes({ user, onLoginSuccess, onRegisterSuccess, setUser }: 
       ) : (
         <>
           <Route path={Paths.HOME} element={<HomePage user={user} />} />
+          <Route path={Paths.ADMIN_USERS} element={<UserManagementAdmin />} />
           <Route path={Paths.PROFILE} element={<Navigate to={Paths.PROFILE_PERSONAL_INFO} replace />} />
           <Route path={Paths.PROFILE_SECTION} element={<ProfileEditForm onProfileUpdate={setUser} />} />
           <Route path={Paths.WILDCARD} element={<Navigate to={Paths.HOME} />} />

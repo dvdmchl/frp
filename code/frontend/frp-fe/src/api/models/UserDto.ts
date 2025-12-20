@@ -7,5 +7,7 @@ export type UserDto = {
     email?: string;
     fullName?: string;
     activeSchema?: string;
+    active?: boolean;
+    admin?: boolean;
 };
 
