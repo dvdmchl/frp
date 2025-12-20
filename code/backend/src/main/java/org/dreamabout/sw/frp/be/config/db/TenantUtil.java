@@ -3,13 +3,15 @@ package org.dreamabout.sw.frp.be.config.db;
 import lombok.RequiredArgsConstructor;
 import org.dreamabout.sw.frp.be.config.security.SecurityContextService;
 import org.dreamabout.sw.frp.be.domain.Constant;
+import org.dreamabout.sw.multitenancy.core.TenantIdentifier;
+import org.dreamabout.sw.multitenancy.core.TenantResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TenantUtil {
+public class TenantUtil implements TenantResolver {
 
     private final JdbcTemplate jdbcTemplate;
     private final SecurityContextService securityContextService;
@@ -20,6 +22,7 @@ public class TenantUtil {
                 WHERE email = ?
             """;
 
+    @Override
     public TenantIdentifier getCurrentTenantIdentifier() {
 
         var authentication = securityContextService.getAuthentication();

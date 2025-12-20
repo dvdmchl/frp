@@ -1,51 +1,43 @@
 package org.dreamabout.sw.frp.be.config.context;
 
 import lombok.experimental.UtilityClass;
-import org.dreamabout.sw.frp.be.config.db.TenantIdentifier;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.dreamabout.sw.multitenancy.core.MultitenancyThreadContext;
+import org.dreamabout.sw.multitenancy.core.TenantIdentifier;
 
 /**
  * Thread-local context for storing and retrieving data.
+ * Wraps MultitenancyThreadContext from the library.
  */
 @UtilityClass
 public class FrpThreadContext {
 
-    private static final Map<Long, Map<String, Object>> STORAGE = new ConcurrentHashMap<>();
-
-    public static void init() {
-        STORAGE.computeIfAbsent(Thread.currentThread().threadId(), id -> new ConcurrentHashMap<>());
-    }
-
     public static void set(String key, Object value) {
-        init();
-        STORAGE.get(Thread.currentThread().threadId()).put(key, value);
+        MultitenancyThreadContext.set(key, value);
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T get(String key) {
-        Map<String, Object> ctx = STORAGE.get(Thread.currentThread().threadId());
-        return ctx != null ? (T) ctx.get(key) : null;
+        return MultitenancyThreadContext.get(key);
     }
 
     public static void clear() {
-        STORAGE.remove(Thread.currentThread().threadId());
+        MultitenancyThreadContext.clear();
     }
 
     public static String getCurrentSearchPath() {
-        return get("currentSearchPath");
+        return MultitenancyThreadContext.getCurrentSearchPath();
     }
 
     public static void setCurrentSearchPath(String searchPath) {
-        set("currentSearchPath", searchPath);
+        MultitenancyThreadContext.setCurrentSearchPath(searchPath);
     }
 
     public static void setTenantIndentifier(TenantIdentifier tenantIdentifier) {
-        set("tenantIdentifier", tenantIdentifier);
+        MultitenancyThreadContext.setTenantIdentifier(tenantIdentifier);
     }
 
     public static TenantIdentifier getTenantIdentifier() {
-        return get("tenantIdentifier");
+        return MultitenancyThreadContext.getTenantIdentifier();
     }
 }
+

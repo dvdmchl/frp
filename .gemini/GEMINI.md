@@ -35,6 +35,9 @@ URL: https://github.com/dvdmchl/frp
     -   `src/main/java`: Source code.
     -   `src/test/java`: Tests (Unit and Integration).
     -   `src/main/resources`: Configuration (`application.properties`) and SQL migrations (`db/migration`).
+-   `code/multitenancy-lib`: Reusable Spring Boot library for PostgreSQL multitenancy.
+    -   Used by `backend` for tenant context, Hibernate integration, and schema-based isolation.
+    -   Provides `@Multitenant` annotation for repositories.
 -   `code/frontend/frp-fe`: Node.js project for the React application.
     -   `src/api`: Generated API client (do not edit manually unless necessary, generated via `npm run generate-api`).
     -   `src/components`: React components (`UIComponent`, `UserManagement`, etc.).

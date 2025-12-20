@@ -1,6 +1,5 @@
 package org.dreamabout.sw.frp.be;
 
-import org.dreamabout.sw.frp.be.config.db.TenantContext;
 import org.dreamabout.sw.frp.be.config.db.TenantUtil;
 import org.dreamabout.sw.frp.be.config.security.SecurityContextService;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccJournalEntity;
@@ -10,6 +9,7 @@ import org.dreamabout.sw.frp.be.module.common.model.UserEntity;
 import org.dreamabout.sw.frp.be.module.common.repository.UserRepository;
 import org.dreamabout.sw.frp.be.module.common.service.SchemaService;
 import org.dreamabout.sw.frp.be.test.AbstractDbTest;
+import org.dreamabout.sw.multitenancy.core.TenantContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.TestingAuthenticationToken;

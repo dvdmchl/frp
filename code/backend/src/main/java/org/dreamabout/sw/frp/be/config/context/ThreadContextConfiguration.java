@@ -1,6 +1,7 @@
 package org.dreamabout.sw.frp.be.config.context;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dreamabout.sw.multitenancy.core.MultitenancyTaskDecorator;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -52,7 +53,7 @@ public class ThreadContextConfiguration implements AsyncConfigurer, SchedulingCo
 
     @Bean
     public TaskDecorator taskDecorator() {
-        return new FrpTaskDecorator();
+        return new MultitenancyTaskDecorator();
     }
 
     // Pro @Async

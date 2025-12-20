@@ -1,6 +1,9 @@
-package org.dreamabout.sw.frp.be.config.db;
+package org.dreamabout.sw.multitenancy.hibernate;
 
 import lombok.RequiredArgsConstructor;
+import org.dreamabout.sw.multitenancy.core.TenantContext;
+import org.dreamabout.sw.multitenancy.core.TenantIdentifier;
+import org.dreamabout.sw.multitenancy.core.TenantResolver;
 import org.hibernate.cfg.MultiTenancySettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
@@ -12,18 +15,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver<TenantIdentifier>, HibernatePropertiesCustomizer {
 
-    private final TenantUtil tenantUtil;
+    private final TenantResolver tenantResolver;
 
-    /**
-     * Resolve the current tenant identifier by UserEntity#schemaId
-     */
     @Override
     public TenantIdentifier resolveCurrentTenantIdentifier() {
         var currentTenant = TenantContext.getCurrentTenant();
         if (currentTenant != null) {
             return currentTenant;
         }
-        return tenantUtil.getCurrentTenantIdentifier();
+        return tenantResolver.getCurrentTenantIdentifier();
     }
 
     @Override

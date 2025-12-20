@@ -1,6 +1,8 @@
-package org.dreamabout.sw.frp.be.config.db;
+package org.dreamabout.sw.multitenancy.hibernate;
 
 import lombok.RequiredArgsConstructor;
+import org.dreamabout.sw.multitenancy.config.MultitenancyProperties;
+import org.dreamabout.sw.multitenancy.core.TenantIdentifier;
 import org.hibernate.cfg.MultiTenancySettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.service.UnknownUnwrapTypeException;
@@ -12,17 +14,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
-import static org.dreamabout.sw.frp.be.domain.Constant.PUBLIC_SCHEMA;
-
 @Component
 @RequiredArgsConstructor
 public class MultiSchemaConnectionProvider implements MultiTenantConnectionProvider<TenantIdentifier>, HibernatePropertiesCustomizer {
 
     private final transient DataSource dataSource;
+    private final MultitenancyProperties properties;
 
     @Override
     public Connection getAnyConnection() throws SQLException {
-        return getConnection(TenantIdentifier.of(PUBLIC_SCHEMA));
+        return getConnection(TenantIdentifier.of(properties.getDefaultSchema()));
     }
 
     @Override
@@ -49,7 +50,7 @@ public class MultiSchemaConnectionProvider implements MultiTenantConnectionProvi
 
     @Override
     public void releaseConnection(TenantIdentifier o, Connection connection) throws SQLException {
-        connection.setSchema(PUBLIC_SCHEMA);
+        connection.setSchema(properties.getDefaultSchema());
         connection.close();
     }
 

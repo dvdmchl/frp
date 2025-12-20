@@ -1,4 +1,4 @@
-package org.dreamabout.sw.frp.be.config.db;
+package org.dreamabout.sw.multitenancy.core;
 
 public interface TenantIdentifier {
     String getTenantId();
