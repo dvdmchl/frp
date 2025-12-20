@@ -7,6 +7,9 @@ export const Paths = {
   PROFILE_SECTION: '/profile/:section',
   DATABASE_SCHEMAS: '/profile/database-schemas',
   SECURITY: '/profile/security',
+  ADMIN: '/admin',
+  ADMIN_SECTION: '/admin/:section',
   ADMIN_USERS: '/admin/users',
+  ADMIN_MAINTENANCE: '/admin/maintenance',
   WILDCARD: '*',
 } as const

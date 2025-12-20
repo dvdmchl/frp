@@ -81,6 +81,7 @@
     "activeSchema": "Active Schema"
   },
   "admin": {
+    "title": "Admin",
     "userManagement": {
       "title": "User Management",
       "searchPlaceholder": "Search by name or email...",
@@ -95,6 +96,15 @@
       "userDetails": "User Details",
       "activeAccount": "Active Account",
       "adminPrivileges": "Admin Privileges"
+    },
+    "maintenance": {
+      "title": "Database Maintenance",
+      "orphanSchemas": "Orphan Schemas",
+      "orphanSchemasDescription": "These schemas exist in the database but are not tracked in the application's metadata. They might be leftovers from deleted accounts or failed operations.",
+      "noOrphanSchemas": "No orphan schemas found.",
+      "dropSelected": "Drop Selected Schemas",
+      "dropConfirm": "Are you sure you want to drop the selected schemas? This action is irreversible and will delete all data in those schemas.",
+      "dropSuccess": "Selected schemas dropped successfully."
     }
   }
 }

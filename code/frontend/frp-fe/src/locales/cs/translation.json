@@ -81,6 +81,7 @@
     "activeSchema": "Aktivní schéma"
   },
   "admin": {
+    "title": "Administrace",
     "userManagement": {
       "title": "Správa uživatelů",
       "searchPlaceholder": "Hledat podle jména nebo e-mailu...",
@@ -95,6 +96,15 @@
       "userDetails": "Detail uživatele",
       "activeAccount": "Aktivní účet",
       "adminPrivileges": "Administrátorská práva"
+    },
+    "maintenance": {
+      "title": "Údržba databáze",
+      "orphanSchemas": "Sirotčí schémata",
+      "orphanSchemasDescription": "Tato schémata existují v databázi, ale nejsou sledována v metadatech aplikace. Mohou to být zbytky po smazaných účtech nebo nezdařených operacích.",
+      "noOrphanSchemas": "Žádná sirotčí schémata nebyla nalezena.",
+      "dropSelected": "Smazat vybraná schémata",
+      "dropConfirm": "Opravdu chcete smazat vybraná schémata? Tato akce je nevratná a smaže všechna data v těchto schématech.",
+      "dropSuccess": "Vybraná schémata byla úspěšně smazána."
     }
   }
 }

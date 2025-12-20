@@ -59,7 +59,7 @@ export default function Header({ user, onLogout }: Readonly<HeaderProps>) {
           <div>{user && <LinkText to={Paths.PROFILE}>{user.fullName}</LinkText>}</div>
           {user?.admin && (
             <div>
-              <LinkText to={Paths.ADMIN_USERS}>{t('admin.userManagement.title')}</LinkText>
+              <LinkText to={Paths.ADMIN}>{t('admin.title')}</LinkText>
             </div>
           )}
           <div>

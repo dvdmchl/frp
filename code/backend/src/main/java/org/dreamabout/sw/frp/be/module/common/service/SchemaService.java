@@ -2,6 +2,7 @@ package org.dreamabout.sw.frp.be.module.common.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamabout.sw.frp.be.domain.Constant;
 import org.dreamabout.sw.frp.be.module.common.model.*;
 import org.dreamabout.sw.frp.be.module.common.repository.SchemaAccessRepository;
 import org.dreamabout.sw.frp.be.module.common.repository.SchemaRepository;
@@ -213,6 +214,31 @@ public class SchemaService {
         schemaAccessRepository.deleteAll(accessRecords);
 
         schemaRepository.delete(schema);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getOrphanSchemas() {
+        String sql = """
+                SELECT schema_name
+                FROM information_schema.schemata
+                WHERE schema_name NOT IN ('information_schema', 'pg_catalog', 'pg_toast', 'public', '%s', '%s')
+                  AND schema_name NOT IN (SELECT name FROM %s.frp_schema)
+                """.formatted(Constant.PUBLIC_SCHEMA,
+                Constant.TEMPLATE_SCHEMA,
+                Constant.PUBLIC_SCHEMA);
+        return jdbcTemplate.queryForList(sql, String.class);
+    }
+
+    @Transactional
+    public void dropOrphanSchemas(List<String> schemaNames) {
+        List<String> orphanSchemas = getOrphanSchemas();
+        for (String name : schemaNames) {
+            if (!orphanSchemas.contains(name)) {
+                throw new IllegalArgumentException("Schema " + name + " is not an orphan schema or doesn't exist.");
+            }
+            log.info("Dropping orphan schema: {}", name);
+            jdbcTemplate.execute("DROP SCHEMA \"" + name + "\" CASCADE");
+        }
     }
 
     private void validateSchemaName(String schemaName) {

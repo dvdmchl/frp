@@ -20,6 +20,7 @@ export type { UserUpdateGroupsRequestDto } from './models/UserUpdateGroupsReques
 export type { UserUpdateInfoRequestDto } from './models/UserUpdateInfoRequestDto';
 
 export { ContextControllerService } from './services/ContextControllerService';
+export { MaintenanceAdminService } from './services/MaintenanceAdminService';
 export { SchemaManagementService } from './services/SchemaManagementService';
 export { UserManagementService } from './services/UserManagementService';
 export { UserManagementAdminService } from './services/UserManagementAdminService';

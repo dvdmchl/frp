@@ -35,6 +35,10 @@ public class ApiPath {
     public static final String ADMIN_USERS = ADMIN + "/users";
     public static final String ADMIN_USERS_FULL = API_ROOT + ADMIN_USERS;
 
+    public static final String MAINTENANCE = ADMIN + "/maintenance";
+    public static final String MAINTENANCE_FULL = API_ROOT + MAINTENANCE;
+    public static final String ORPHAN_SCHEMAS = "/orphan-schemas";
+
     public static final String ID_PARAM = "/{id}";
     public static final String ID_ACTIVE = ID_PARAM + "/active";
     public static final String ID_ADMIN = ID_PARAM + "/admin";
