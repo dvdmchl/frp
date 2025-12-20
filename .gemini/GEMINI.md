@@ -150,6 +150,11 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
     -   **Layering**: Strict layering is enforced: Controller -> Service -> Repository. No skipping layers or reverse dependencies.
 
 -   **Sonar Analysis**:
-    -   Analysis runs automatically in the CI pipeline (GitHub Actions).
-    -   **Quality Gate**: The project enforces a "zero new issues" policy. Any new bugs, vulnerabilities, or code smells will cause the pipeline to fail.
+
+    -   Analysis runs automatically in the CI pipeline (GitHub Actions) AND locally during `mvn verify`.
+
+    -   **Quality Gate**: The project enforces a "zero new issues" policy. Any new bugs, vulnerabilities, or code smells will fail the build.
+
+    -   **Local Development**: Ensure `sonarqube` container is running (`docker compose up -d sonarqube`) before running `mvn verify`.
+
     -   **Action**: Sonar findings must be fixed, not ignored or marked as false positives unless absolutely necessary and justified.
