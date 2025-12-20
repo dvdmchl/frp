@@ -92,8 +92,6 @@ class SchemaControllerTest extends AbstractDbTest {
 
     @Test
     void copy_schema_ok_test() throws Exception {
-        // Disabled: Copy schema not implemented yet
-        if (true) return;
         // Create source
         var createReq = new SchemaCreateRequestDto("source_schema");
         mockMvc.perform(post("/api/schema")
@@ -101,6 +99,9 @@ class SchemaControllerTest extends AbstractDbTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createReq)))
                 .andExpect(status().isOk());
+
+        // Insert some data into source
+        jdbcTemplate.execute("INSERT INTO source_schema.acc_journal (created_by_user_id, updated_by_user_id) VALUES (1, 1)");
 
         // Copy
         var copyReq = new SchemaCopyRequestDto("source_schema", "target_schema");
@@ -119,6 +120,15 @@ class SchemaControllerTest extends AbstractDbTest {
         
         List<String> schemas = objectMapper.readValue(listResp, List.class);
         assertThat(schemas).contains("source_schema", "target_schema");
+
+        // Verify data was copied
+        Integer count = jdbcTemplate.queryForObject("SELECT count(*) FROM target_schema.acc_journal", Integer.class);
+        assertThat(count).isEqualTo(1);
+
+        // Verify sequence was updated by inserting another record and checking ID
+        jdbcTemplate.execute("INSERT INTO target_schema.acc_journal (created_by_user_id, updated_by_user_id) VALUES (1, 1)");
+        Integer nextId = jdbcTemplate.queryForObject("SELECT max(id) FROM target_schema.acc_journal", Integer.class);
+        assertThat(nextId).isEqualTo(2);
     }
 
     @Test

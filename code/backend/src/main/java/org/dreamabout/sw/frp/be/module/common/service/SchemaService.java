@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 @Service
@@ -41,7 +42,7 @@ public class SchemaService {
         return schemaRepository.save(schema);
     }
 
-    public java.util.List<SchemaEntity> listMySchemas(Long userId) {
+    public List<SchemaEntity> listMySchemas(Long userId) {
         return schemaRepository.findAllByOwnerId(userId);
     }
 
@@ -55,8 +56,84 @@ public class SchemaService {
 
     @Transactional
     public SchemaEntity copySchema(String source, String target, Long userId) {
-        // TODO: Implement copy logic
-        throw new UnsupportedOperationException("Copy schema not implemented yet");
+        validateSchemaName(target);
+
+        var sourceSchema = schemaRepository.findByName(source)
+                .orElseThrow(() -> new IllegalArgumentException("Source schema not found: " + source));
+
+        if (!sourceSchema.getOwnerId().equals(userId)) {
+            throw new IllegalArgumentException("You are not the owner of the source schema.");
+        }
+
+        if (schemaRepository.findByName(target).isPresent()) {
+            throw new IllegalArgumentException("Target schema already exists: " + target);
+        }
+
+        log.info("Copying schema from {} to {} for user {}", source, target, userId);
+
+        // 1. Initialize target database schema
+        schemaInitializationService.initSchema(target);
+
+        // 2. Create Schema record in public schema
+        var schemaEntity = new SchemaEntity();
+        schemaEntity.setName(target);
+        schemaEntity.setOwnerId(userId);
+        schemaEntity = schemaRepository.save(schemaEntity);
+
+        // 3. Copy data and update sequences
+        copyData(source, target);
+
+        return schemaEntity;
+    }
+
+    private void copyData(String source, String target) {
+        // Get all base tables from source (excluding flyway history)
+        List<String> tables = jdbcTemplate.queryForList(
+                "SELECT table_name FROM information_schema.tables WHERE table_schema = ? AND table_type = 'BASE TABLE' AND table_name != 'flyway_schema_history'",
+                String.class, source);
+
+        for (String table : tables) {
+            String sourceTable = "\"" + source + "\".\"" + table + "\"";
+            String targetTable = "\"" + target + "\".\"" + table + "\"";
+
+            log.debug("Copying data from {} to {}", sourceTable, targetTable);
+
+            jdbcTemplate.execute("INSERT INTO " + targetTable + " SELECT * FROM " + sourceTable);
+        }
+
+        updateSequences(target);
+    }
+
+    private void updateSequences(String schemaName) {
+        // Query to find all sequences in the schema and update them to the max value of the column they are associated with
+        String sql = """
+                DO $$
+                DECLARE
+                    r RECORD;
+                BEGIN
+                    FOR r IN
+                        SELECT
+                            s.nspname AS table_schema,
+                            t.relname AS table_name,
+                            a.attname AS column_name,
+                            c.relname AS sequence_name
+                        FROM pg_class c
+                        JOIN pg_namespace s ON s.oid = c.relnamespace
+                        JOIN pg_depend d ON d.objid = c.oid AND d.deptype = 'a'
+                        JOIN pg_attribute a ON a.attrelid = d.refobjid AND a.attnum = d.refobjsubid
+                        JOIN pg_class t ON t.oid = d.refobjid
+                        WHERE c.relkind = 'S'
+                          AND s.nspname = '%s'
+                    LOOP
+                        EXECUTE format('SELECT setval(%%L, (SELECT COALESCE(MAX(%%I), 0) + 1 FROM %%I.%%I), false)',
+                                       r.table_schema || '.' || r.sequence_name,
+                                       r.column_name,
+                                       r.table_schema,
+                                       r.table_name);
+                    END LOOP;
+                END $$;
+                """.formatted(schemaName);
+        jdbcTemplate.execute(sql);
     }
 
     @Transactional
