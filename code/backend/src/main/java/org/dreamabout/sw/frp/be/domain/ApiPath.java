@@ -30,4 +30,14 @@ public class ApiPath {
     public static final String USER_UPDATE_PASSWORD_FULL = API_ROOT + USER + USER_UPDATE_PASSWORD;
 
     public static final String USER_LOGOUT = "/logout";
+
+    public static final String CONTEXT = "/context";
+    public static final String CONTEXT_FULL = API_ROOT + CONTEXT;
+
+    public static final String SCHEMA = "/schema";
+    public static final String SCHEMA_FULL = API_ROOT + SCHEMA;
+
+    public static final String COPY = "/copy";
+    public static final String ACTIVE = "/active";
+    public static final String NAME_PARAM = "/{name}";
 }

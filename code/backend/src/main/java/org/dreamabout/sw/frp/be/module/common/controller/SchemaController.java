@@ -8,6 +8,7 @@ import org.dreamabout.sw.frp.be.module.common.model.dto.SchemaCreateRequestDto;
 import org.dreamabout.sw.frp.be.module.common.model.dto.SchemaSetActiveRequestDto;
 import org.dreamabout.sw.frp.be.module.common.service.SchemaService;
 import org.dreamabout.sw.frp.be.module.common.service.UserService;
+import org.dreamabout.sw.frp.be.domain.ApiPath;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/schema")
+@RequestMapping(ApiPath.SCHEMA_FULL)
 @Tag(name = "Schema Management", description = "Create, copy, delete, and switch active schema")
 public class SchemaController {
 
@@ -45,7 +46,7 @@ public class SchemaController {
         return ResponseEntity.ok(Map.of("name", schema.getName()));
     }
 
-    @PostMapping("/copy")
+    @PostMapping(ApiPath.COPY)
     @Operation(summary = "Copy schema")
     public ResponseEntity<Map<String, String>> copySchema(@RequestBody SchemaCopyRequestDto req) {
         var user = userService.getPrincipal();
@@ -53,7 +54,7 @@ public class SchemaController {
         return ResponseEntity.ok(Map.of("name", schema.getName()));
     }
 
-    @DeleteMapping("/{name}")
+    @DeleteMapping(ApiPath.NAME_PARAM)
     @Operation(summary = "Delete schema")
     public ResponseEntity<Void> deleteSchema(@PathVariable("name") String name) {
         var user = userService.getPrincipal();
@@ -61,7 +62,7 @@ public class SchemaController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/active")
+    @PutMapping(ApiPath.ACTIVE)
     @Operation(summary = "Set active schema")
     public ResponseEntity<Void> setActiveSchema(@RequestBody SchemaSetActiveRequestDto req) {
         var user = userService.getPrincipal();

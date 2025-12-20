@@ -164,3 +164,11 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
     -   **Local Development**: Ensure `sonarqube` container is running (`docker compose up -d sonarqube`) before running `mvn verify`.
 
     -   **Action**: Sonar findings must be fixed, not ignored or marked as false positives unless absolutely necessary and justified.
+
+-   **Static Analysis (Checkstyle & SpotBugs)**:
+    -   **Checkstyle**: Enforces coding style and specific best practices (e.g., explicit visibility, no field injection, no magic strings in controllers). Configuration is in `code/backend/checkstyle.xml`.
+    -   **SpotBugs**: Detects potential bugs (null dereferences, resource leaks) in bytecode.
+    -   **Policy**: These tools are configured to **fail the build** on any violation. **Do not fight the tools**; fix the code to comply with the rules.
+    -   **Execution**:
+        -   Checkstyle runs during `mvn validate`.
+        -   SpotBugs runs during `mvn process-classes` (and `verify`).
