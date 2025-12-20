@@ -23,19 +23,35 @@ public class SchemaService {
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
     private final org.dreamabout.sw.frp.be.module.common.repository.UserRepository userRepository;
+    
+    @org.springframework.beans.factory.annotation.Autowired
+    @org.springframework.context.annotation.Lazy
+    private SchemaService self;
 
     private static final Pattern SCHEMA_NAME_PATTERN = Pattern.compile("^[a-z][a-z0-9_]*$");
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public SchemaEntity createSchema(String schemaName) {
+    @Transactional
+    public SchemaEntity createSchema(String schemaName, Long ownerId) {
         validateSchemaName(schemaName);
 
         if (schemaRepository.findByName(schemaName).isPresent()) {
             throw new IllegalArgumentException("Schema with name " + schemaName + " already exists.");
         }
 
-        log.info("Creating new schema and running migrations: {}", schemaName);
+        log.info("Creating new schema: {}", schemaName);
         
+        self.initSchema(schemaName);
+
+        var schema = new SchemaEntity();
+        schema.setName(schemaName);
+        schema.setOwnerId(ownerId);
+        
+        return schemaRepository.save(schema);
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void initSchema(String schemaName) {
+        log.info("Running migrations for schema: {}", schemaName);
         Flyway.configure()
                 .dataSource(dataSource)
                 .schemas(schemaName)
@@ -44,15 +60,10 @@ public class SchemaService {
                 .placeholders(Map.of("schema", schemaName))
                 .load()
                 .migrate();
-
-        var schema = new SchemaEntity();
-        schema.setName(schemaName);
-        
-        return schemaRepository.save(schema);
     }
 
     public java.util.List<SchemaEntity> listMySchemas(Long userId) {
-        return schemaRepository.findAllByCreatedByUserId(userId);
+        return schemaRepository.findAllByOwnerId(userId);
     }
 
     @Transactional

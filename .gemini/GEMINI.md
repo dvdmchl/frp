@@ -134,7 +134,7 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
 -   **Commitment**: Never commit changes using `git`. The user will always commit changes manually.
 -   **Local Server Management**: Never attempt to start the database server or backend application automatically. The user will start these components manually upon request.
 -   **Git Operations**: Never use `git add`, `git stash`, or `git checkout`. The user will handle these operations manually.
-
+-   **Remote Repository**: Do not use tools that modify the remote GitHub repository (like `delete_file`). All changes must be local.
 -   **Backend Testing Policy**: Always write tests for new features. Always check `AbstractDbTest` for integration testing patterns. Use `SharedPostgresContainer`.
 -   **Frontend Testing Policy**: All new frontend code (features, components, bug fixes) must include corresponding unit or integration tests, aiming for a minimum of 70% test coverage. Utilize Vitest and React Testing Library (RTL).
 -   **UI Components**: Reuse existing components in `src/components/UIComponent` (`Text.tsx`, `Input.tsx`, `Form.tsx`, `ErrorDisplay.tsx`).

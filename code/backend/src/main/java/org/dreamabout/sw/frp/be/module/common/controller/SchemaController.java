@@ -37,7 +37,7 @@ public class SchemaController {
     @Operation(summary = "Create new schema")
     public ResponseEntity<Map<String, String>> createSchema(@RequestBody SchemaCreateRequestDto req,
                                                             @RequestParam(name = "setActive", defaultValue = "false") boolean setActive) {
-        var schema = schemaService.createSchema(req.name());
+        var schema = schemaService.createSchema(req.name(), currentUser().getId());
         if (setActive) {
             schemaService.setActiveSchema(schema.getName(), currentUser().getId());
         }

@@ -73,6 +73,8 @@ public abstract class AbstractDbTest {
         registry.add("spring.datasource.username", POSTGRES_CONTAINER::getUsername);
         registry.add("spring.datasource.password", POSTGRES_CONTAINER::getPassword);
         registry.add("frp.flyway.clean", () -> "true");
+        registry.add("spring.flyway.clean-on-validation-error", () -> "true");
+        registry.add("spring.flyway.clean-disabled", () -> "false");
 
         registry.add("security.jwt.secret-key", () -> "test-secret-key-123-test-secret-key-123");
     }

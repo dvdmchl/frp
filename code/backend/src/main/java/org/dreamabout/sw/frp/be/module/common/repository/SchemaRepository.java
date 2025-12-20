@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface SchemaRepository extends JpaRepository<SchemaEntity, Long> {
     Optional<SchemaEntity> findByName(String name);
     List<SchemaEntity> findAllByCreatedByUserId(Long createdByUserId);
+    List<SchemaEntity> findAllByOwnerId(Long ownerId);
 }

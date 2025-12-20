@@ -1,8 +1,8 @@
 package org.dreamabout.sw.frp.be.test;
 
-import org.testcontainers.containers.PostgreSQLContainer;
+import  org.testcontainers.postgresql.PostgreSQLContainer;
 
-public class SharedPostgresContainer extends PostgreSQLContainer<SharedPostgresContainer> {
+public class SharedPostgresContainer extends PostgreSQLContainer {
 
     public static final String POSTGRES_IMAGE_NAME = "postgres:17.1";
     private static final String DB_NAME = "db_frp_test";

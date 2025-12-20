@@ -39,15 +39,18 @@ public class UserService {
             schemaName = sanitizeSchemaName(emailPrefix) + "_schema";
         }
 
-        var schema = schemaService.createSchema(schemaName);
-
         var user = UserEntity.builder()
                 .email(userRegister.email())
                 .password(passwordEncoder.encode(userRegister.password()))
                 .fullName(userRegister.fullName())
-                .schema(schema)
                 .build();
         user = userRepository.save(user);
+
+        var schema = schemaService.createSchema(schemaName, user.getId());
+        
+        user.setSchema(schema);
+        user = userRepository.save(user);
+        
         return userMapper.toDto(user);
     }
 

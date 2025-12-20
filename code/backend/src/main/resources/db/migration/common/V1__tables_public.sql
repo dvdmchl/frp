@@ -25,10 +25,13 @@ create sequence frp_public.frp_schema_id_seq
 create table frp_public.frp_schema (
     id serial primary key,
     name varchar(255) not null,
+    owner_id bigint not null,
 
     created_at timestamp not null default now(),
     created_by_user_id bigint not null,
     updated_at timestamp not null default now(),
     updated_by_user_id bigint not null,
-    version int not null default 0
+    version int not null default 0,
+
+    constraint fk_frp_schema_owner foreign key (owner_id) references frp_public.frp_user(id)
 );

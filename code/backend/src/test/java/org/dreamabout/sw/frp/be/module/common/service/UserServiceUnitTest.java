@@ -50,11 +50,11 @@ class UserServiceUnitTest {
         schema.setName("custom_schema");
         
         when(userRepository.findByEmail(req.email())).thenReturn(Optional.empty());
-        when(schemaService.createSchema("custom_schema")).thenReturn(schema);
+        when(schemaService.createSchema("custom_schema", 1L)).thenReturn(schema);
         when(passwordEncoder.encode(req.password())).thenReturn("encoded_pass");
         when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> {
             UserEntity u = invocation.getArgument(0);
-            u.setId(1L);
+            if (u.getId() == null) u.setId(1L);
             return u;
         });
         when(userMapper.toDto(any(UserEntity.class))).thenAnswer(invocation -> {
@@ -68,8 +68,8 @@ class UserServiceUnitTest {
         // Then
         assertNotNull(result);
         assertEquals("custom_schema", result.activeSchema());
-        verify(schemaService).createSchema("custom_schema");
-        verify(userRepository).save(any(UserEntity.class));
+        verify(schemaService).createSchema("custom_schema", 1L);
+        verify(userRepository, times(2)).save(any(UserEntity.class));
     }
 
     @Test
@@ -80,9 +80,13 @@ class UserServiceUnitTest {
         schema.setName("testuser_schema");
         
         when(userRepository.findByEmail(req.email())).thenReturn(Optional.empty());
-        when(schemaService.createSchema("testuser_schema")).thenReturn(schema);
+        when(schemaService.createSchema("testuser_schema", 1L)).thenReturn(schema);
         when(passwordEncoder.encode(req.password())).thenReturn("encoded_pass");
-        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> {
+            UserEntity u = invocation.getArgument(0);
+            if (u.getId() == null) u.setId(1L);
+            return u;
+        });
         when(userMapper.toDto(any(UserEntity.class))).thenAnswer(invocation -> {
             UserEntity u = invocation.getArgument(0);
             return new UserDto(u.getId(), u.getEmail(), u.getFullName(), u.getSchema().getName());
@@ -93,7 +97,7 @@ class UserServiceUnitTest {
 
         // Then
         assertEquals("testuser_schema", result.activeSchema());
-        verify(schemaService).createSchema("testuser_schema");
+        verify(schemaService).createSchema("testuser_schema", 1L);
     }
 
     @Test
@@ -104,9 +108,13 @@ class UserServiceUnitTest {
         schema.setName("u_123user_schema");
         
         when(userRepository.findByEmail(req.email())).thenReturn(Optional.empty());
-        when(schemaService.createSchema("u_123user_schema")).thenReturn(schema);
+        when(schemaService.createSchema("u_123user_schema", 1L)).thenReturn(schema);
         when(passwordEncoder.encode(req.password())).thenReturn("encoded_pass");
-        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> {
+            UserEntity u = invocation.getArgument(0);
+            if (u.getId() == null) u.setId(1L);
+            return u;
+        });
         when(userMapper.toDto(any(UserEntity.class))).thenAnswer(invocation -> {
             UserEntity u = invocation.getArgument(0);
             return new UserDto(u.getId(), u.getEmail(), u.getFullName(), u.getSchema().getName());
@@ -117,7 +125,7 @@ class UserServiceUnitTest {
 
         // Then
         assertEquals("u_123user_schema", result.activeSchema());
-        verify(schemaService).createSchema("u_123user_schema");
+        verify(schemaService).createSchema("u_123user_schema", 1L);
     }
 }
 

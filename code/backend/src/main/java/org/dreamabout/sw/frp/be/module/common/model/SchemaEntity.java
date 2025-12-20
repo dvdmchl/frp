@@ -1,6 +1,7 @@
 package org.dreamabout.sw.frp.be.module.common.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,4 +25,8 @@ public class SchemaEntity extends AuditableEntity implements Serializable {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "owner_id", nullable = false)
+    @NotNull
+    private Long ownerId;
 }

@@ -32,11 +32,13 @@ class MultitenancyTest extends AbstractDbTest {
 
     @Test
     void correctSchemaUsingTest() {
-        var schema = schemaService.createSchema("frp_test");
-
         var user = new UserEntity();
         user.setEmail("test@test.com");
         user.setPassword("password");
+        user = userRepository.save(user);
+
+        var schema = schemaService.createSchema("frp_test", user.getId());
+        
         user.setSchema(schema);
         user = userRepository.save(user);
 
