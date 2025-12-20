@@ -174,3 +174,20 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
     -   **Execution**:
         -   Checkstyle runs during `mvn validate`.
         -   SpotBugs runs during `mvn process-classes` (and `verify`).
+
+-   **Frontend Static Analysis & Type Checking**:
+    -   **ESLint**: Enforces React best practices and project-specific rules (no magic strings for paths, no inline styles).
+    -   **Prettier**: Enforces consistent code formatting.
+    -   **TypeScript**: Strict type checking via `tsc`.
+    -   **Policy**: These tools are the authority for code quality. The build **will fail** if rules are violated.
+    -   **Execution**:
+        -   Run all checks: `npm run check-all` (in `code/frontend/frp-fe`).
+        -   Fix formatting: `npm run lint:fix`.
+        -   Type check only: `npm run tsc`.
+
+### Testing Best Practices
+- Do not write disabled tests or early returns to bypass unimplemented logic.
+- Every test method must contain meaningful assertions or be removed entirely.
+- If the functionality is not implemented, do not create placeholder test methods.
+- Do not comment out or disable tests with 'if(true) return;' or similar hacks.
+
