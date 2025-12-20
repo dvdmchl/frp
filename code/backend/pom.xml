@@ -32,6 +32,8 @@
         <maven.compiler.proc>full</maven.compiler.proc>
         <spring.boot.maven.plugin.version>3.5.8</spring.boot.maven.plugin.version>
         <archunit.version>1.4.1</archunit.version>
+        <jacoco.version>0.8.12</jacoco.version>
+        <sonar.version>5.0.0.4389</sonar.version>
         <test.docker.host>tcp://172.19.62.177:2375</test.docker.host>
     </properties>
 
@@ -226,6 +228,33 @@
                         <DOCKER_HOST>${test.docker.host}</DOCKER_HOST>
                     </environmentVariables>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar.version}</version>
             </plugin>
 
             <plugin>

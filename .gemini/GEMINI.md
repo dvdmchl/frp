@@ -148,3 +148,8 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
     -   **DTOs**: Must be immutable Java `record`s residing in `..model.dto` packages. Inner classes for DTOs are forbidden.
     -   **Controllers**: Must not be inner classes. Must not access `SecurityContextHolder` or Repositories directly. Must only depend on Services, DTOs, and Constants.
     -   **Layering**: Strict layering is enforced: Controller -> Service -> Repository. No skipping layers or reverse dependencies.
+
+-   **Sonar Analysis**:
+    -   Analysis runs automatically in the CI pipeline (GitHub Actions).
+    -   **Quality Gate**: The project enforces a "zero new issues" policy. Any new bugs, vulnerabilities, or code smells will cause the pipeline to fail.
+    -   **Action**: Sonar findings must be fixed, not ignored or marked as false positives unless absolutely necessary and justified.
