@@ -11,9 +11,11 @@ vi.mock('./components/Footer', () => ({
   default: () => <div data-testid="footer">Footer</div>,
 }))
 vi.mock('./AppRoutes', () => ({
-  AppRoutes: ({ onLoginSuccess }: any) => (
+  AppRoutes: ({ onLoginSuccess, onRegisterSuccess }: any) => (
     <div data-testid="app-routes">
       <button onClick={() => onLoginSuccess({ user: { id: 1, email: 'test' }, token: 'new-token' })}>Mock Login</button>
+      <button onClick={() => onLoginSuccess({ user: null, token: 'token' })}>Mock Login No User</button>
+      <button onClick={() => onRegisterSuccess()}>Mock Register</button>
     </div>
   ),
 }))
@@ -86,6 +88,48 @@ describe('App Component', () => {
     await waitFor(() => {
       expect(localStorage.getItem('jwt')).toBe('new-token')
     })
+  })
+
+  it('handles user load failure', async () => {
+    localStorage.setItem('jwt', 'invalid-token')
+    ;(UserManagementService.authenticatedUser as any).mockRejectedValue(new Error('Auth failed'))
+
+    await act(async () => {
+      render(<App />)
+    })
+
+    await waitFor(() => {
+      expect(localStorage.getItem('jwt')).toBeNull()
+    })
+  })
+
+  it('handles login success without user data (error case)', async () => {
+    await act(async () => {
+      render(<App />)
+    })
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const loginBtn = screen.getByText('Mock Login No User')
+    fireEvent.click(loginBtn)
+
+    expect(consoleSpy).toHaveBeenCalledWith('Login response does not contain user data')
+  })
+
+  it('handles register success', async () => {
+    const originalLocation = window.location
+    delete (window as any).location
+    // @ts-expect-error - mock location
+    window.location = { ...originalLocation, href: '' }
+
+    await act(async () => {
+      render(<App />)
+    })
+
+    fireEvent.click(screen.getByText('Mock Register'))
+    expect(window.location.href).toBe('/login')
+
+    // @ts-expect-error - restore location
+    window.location = originalLocation
   })
 })
 

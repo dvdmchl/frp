@@ -115,4 +115,40 @@ describe('ProfileEditForm Component', () => {
     renderComponent('database-schemas')
     await waitFor(() => expect(screen.getByTestId('schema-manager')).toBeInTheDocument())
   })
+
+  it('handles user load error', async () => {
+    ;(UserManagementService.authenticatedUser as any).mockRejectedValue(new Error('Load failed'))
+    renderComponent('personal-info')
+
+    await waitFor(() => {
+      expect(screen.getByText('profile.error')).toBeInTheDocument()
+    })
+  })
+
+  it('handles personal info update error', async () => {
+    ;(UserManagementService.updateAuthenticatedUserInfo as any).mockRejectedValue(new Error('Update failed'))
+    renderComponent('personal-info')
+
+    await waitFor(() => screen.getByDisplayValue('Test User'))
+    fireEvent.click(screen.getByRole('button', { name: 'profile.button' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('profile.infoError')).toBeInTheDocument()
+    })
+  })
+
+  it('handles password update error', async () => {
+    ;(UserManagementService.changeAuthenticatedUserPassword as any).mockRejectedValue(new Error('Password failed'))
+    renderComponent('security')
+
+    await waitFor(() => screen.getByRole('heading', { name: 'profile.security' }))
+    fireEvent.change(screen.getByLabelText('profile.oldPassword'), { target: { value: 'oldPass' } })
+    fireEvent.change(screen.getByLabelText('profile.password'), { target: { value: 'newPass' } })
+    fireEvent.change(screen.getByLabelText('profile.confirmPassword'), { target: { value: 'newPass' } })
+    fireEvent.click(screen.getByRole('button', { name: 'profile.button' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('profile.passwordError')).toBeInTheDocument()
+    })
+  })
 })

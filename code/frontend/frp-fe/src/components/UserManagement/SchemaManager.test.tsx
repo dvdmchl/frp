@@ -51,6 +51,15 @@ describe('SchemaManager Component', () => {
     })
   })
 
+  it('handles load error', async () => {
+    ;(SchemaManagementService.listMySchemas as any).mockRejectedValue(new Error('Load failed'))
+    render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('schema.error')).toBeInTheDocument()
+    })
+  })
+
   it('creates new schema', async () => {
     render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
 
@@ -65,6 +74,57 @@ describe('SchemaManager Component', () => {
       expect(SchemaManagementService.createSchema).toHaveBeenCalledWith({ name: 'new_schema' }, false)
       expect(screen.getByText('schema.createSuccess')).toBeInTheDocument()
       expect(SchemaManagementService.listMySchemas).toHaveBeenCalledTimes(2) // Initial + after create
+    })
+  })
+
+  it('handles create error', async () => {
+    ;(SchemaManagementService.createSchema as any).mockRejectedValue(new Error('Create failed'))
+    render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
+
+    fireEvent.click(screen.getByText('schema.createTitle'))
+    fireEvent.change(screen.getByLabelText('schema.name'), { target: { value: 'new_schema' } })
+    fireEvent.click(screen.getByRole('button', { name: 'schema.create' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('schema.error')).toBeInTheDocument()
+    })
+  })
+
+  it('copies schema', async () => {
+    render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
+    await waitFor(() => screen.getByText('public'))
+
+    const rows = screen.getAllByRole('row')
+    const publicRow = rows.find((row) => row.textContent?.includes('public'))
+    const copyButton = within(publicRow!).getByText('schema.copy')
+
+    fireEvent.click(copyButton)
+
+    await waitFor(() => expect(screen.getByLabelText('schema.target')).toBeInTheDocument())
+
+    fireEvent.change(screen.getByLabelText('schema.target'), { target: { value: 'target_schema' } })
+    fireEvent.click(screen.getByRole('button', { name: 'schema.copy' }))
+
+    await waitFor(() => {
+      expect(SchemaManagementService.copySchema).toHaveBeenCalledWith({
+        source: 'public',
+        target: 'target_schema',
+      })
+      expect(screen.getByText('schema.copySuccess')).toBeInTheDocument()
+    })
+  })
+
+  it('handles copy error', async () => {
+    ;(SchemaManagementService.copySchema as any).mockRejectedValue(new Error('Copy failed'))
+    render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
+    await waitFor(() => screen.getByText('public'))
+
+    fireEvent.click(screen.getAllByText('schema.copy')[0])
+    fireEvent.change(screen.getByLabelText('schema.target'), { target: { value: 'target' } })
+    fireEvent.click(screen.getByRole('button', { name: 'schema.copy' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('schema.error')).toBeInTheDocument()
     })
   })
 
@@ -87,6 +147,20 @@ describe('SchemaManager Component', () => {
     })
   })
 
+  it('handles switch error', async () => {
+    ;(SchemaManagementService.setActiveSchema as any).mockRejectedValue(new Error('Switch failed'))
+    render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
+    await waitFor(() => screen.getByText('private'))
+
+    const rows = screen.getAllByRole('row')
+    const privateRow = rows.find((row) => row.textContent?.includes('private'))
+    fireEvent.click(within(privateRow!).getByText('schema.switch'))
+
+    await waitFor(() => {
+      expect(screen.getByText('schema.error')).toBeInTheDocument()
+    })
+  })
+
   it('deletes schema', async () => {
     render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
     await waitFor(() => screen.getByText('private'))
@@ -101,6 +175,47 @@ describe('SchemaManager Component', () => {
       expect(SchemaManagementService.deleteSchema).toHaveBeenCalledWith('private')
       expect(SchemaManagementService.listMySchemas).toHaveBeenCalledTimes(2)
     })
+  })
+
+  it('handles delete error', async () => {
+    ;(SchemaManagementService.deleteSchema as any).mockRejectedValue(new Error('Delete failed'))
+    render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
+    await waitFor(() => screen.getByText('private'))
+
+    const rows = screen.getAllByRole('row')
+    const privateRow = rows.find((row) => row.textContent?.includes('private'))
+    fireEvent.click(within(privateRow!).getByText('schema.delete'))
+
+    await waitFor(() => {
+      expect(screen.getByText('schema.error')).toBeInTheDocument()
+    })
+  })
+
+  it('does not delete when confirm is cancelled', async () => {
+    vi.spyOn(window, 'confirm').mockImplementation(() => false)
+    render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
+    await waitFor(() => screen.getByText('private'))
+
+    fireEvent.click(screen.getAllByText('schema.delete')[0])
+
+    expect(SchemaManagementService.deleteSchema).not.toHaveBeenCalled()
+  })
+
+  it('can cancel create modal', async () => {
+    render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
+    fireEvent.click(screen.getByText('schema.createTitle'))
+    await waitFor(() => expect(screen.getByText('Cancel')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('Cancel'))
+    await waitFor(() => expect(screen.queryByText('Cancel')).not.toBeInTheDocument())
+  })
+
+  it('can cancel copy modal', async () => {
+    render(<SchemaManager user={mockUser} onUserUpdate={mockOnUserUpdate} />)
+    await waitFor(() => screen.getByText('public'))
+    fireEvent.click(screen.getAllByText('schema.copy')[0])
+    await waitFor(() => expect(screen.getByText('Cancel')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('Cancel'))
+    await waitFor(() => expect(screen.queryByText('Cancel')).not.toBeInTheDocument())
   })
 
   // Helper to scope queries

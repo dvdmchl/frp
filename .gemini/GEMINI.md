@@ -143,7 +143,16 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
 -   **Git Operations**: Never use `git add`, `git stash`, or `git checkout`. The user will handle these operations manually.
 -   **Remote Repository**: Do not use tools that modify the remote GitHub repository (like `delete_file`). All changes must be local.
 -   **Backend Testing Policy**: Always write tests for new features. Always check `AbstractDbTest` for integration testing patterns. Use `SharedPostgresContainer`.
--   **Frontend Testing Policy**: All new frontend code (features, components, bug fixes) must include corresponding unit or integration tests, aiming for a minimum of 70% test coverage. Utilize Vitest and React Testing Library (RTL).
+-   **Frontend Testing Policy**:
+    -   All new frontend code (features, components, hooks) **MUST** include corresponding unit or integration tests using Vitest and React Testing Library.
+    -   Tests must cover edge cases, error handling (e.g., API errors), and utilize proper mocking of services.
+    -   **Strict Coverage Gate**: The project enforces a minimum of **70% test coverage** (statements, branches, functions, lines) for the frontend.
+    -   **AI Agent Rule**: AI agents must generate tests simultaneously with components/hooks. If a test is missing, the code is considered invalid and incomplete.
+    -   **Execution**:
+        -   Run tests: `npm run test`.
+        -   Run tests with coverage: `npm run test:coverage`.
+        -   Coverage violation will fail the build/CI.
+
 -   **UI Components**: Reuse existing components in `src/components/UIComponent` (`Text.tsx`, `Input.tsx`, `Form.tsx`, `ErrorDisplay.tsx`).
 -   **Translations**: Always add user-facing strings to `src/locales/en/translation.json` and `cs/translation.json`. Use `t('key')`.
 -   **Strict Types**: Use `import type` for interfaces/types in TypeScript to avoid compilation errors with `verbatimModuleSyntax`.

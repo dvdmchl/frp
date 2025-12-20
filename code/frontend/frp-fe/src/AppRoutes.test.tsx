@@ -1,11 +1,15 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { AppRoutes } from './AppRoutes'
 import { MemoryRouter } from 'react-router-dom'
 
 // Mock components
 vi.mock('./components/UserManagement/LoginForm', () => ({
-  LoginForm: () => <div data-testid="login-form">Login Form</div>,
+  LoginForm: ({ onRegisterClick }: { onRegisterClick: () => void }) => (
+    <div data-testid="login-form">
+      <button onClick={onRegisterClick}>Register</button>
+    </div>
+  ),
 }))
 vi.mock('./components/UserManagement/RegisterForm', () => ({
   RegisterForm: () => <div data-testid="register-form">Register Form</div>,
@@ -47,6 +51,21 @@ describe('AppRoutes Component', () => {
         />
       </MemoryRouter>,
     )
+    expect(screen.getByTestId('register-form')).toBeInTheDocument()
+  })
+
+  it('navigates to register from login page', () => {
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <AppRoutes
+          user={null}
+          onLoginSuccess={mockOnLoginSuccess}
+          onRegisterSuccess={mockOnRegisterSuccess}
+          setUser={mockSetUser}
+        />
+      </MemoryRouter>,
+    )
+    fireEvent.click(screen.getByText('Register'))
     expect(screen.getByTestId('register-form')).toBeInTheDocument()
   })
 
