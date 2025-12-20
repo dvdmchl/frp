@@ -7,10 +7,10 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
-export type { CopySchemaRequest } from './models/CopySchemaRequest';
-export type { CreateSchemaRequest } from './models/CreateSchemaRequest';
 export type { ErrorDto } from './models/ErrorDto';
-export type { SetActiveSchemaRequest } from './models/SetActiveSchemaRequest';
+export type { SchemaCopyRequestDto } from './models/SchemaCopyRequestDto';
+export type { SchemaCreateRequestDto } from './models/SchemaCreateRequestDto';
+export type { SchemaSetActiveRequestDto } from './models/SchemaSetActiveRequestDto';
 export type { UserChangePasswordRequestDto } from './models/UserChangePasswordRequestDto';
 export type { UserDto } from './models/UserDto';
 export type { UserLoginRequestDto } from './models/UserLoginRequestDto';

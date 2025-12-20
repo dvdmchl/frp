@@ -26,7 +26,7 @@ class UserControllerTest extends AbstractDbTest {
         var email = "john.doe_new@test.com";
         var fullName = "John Doe";
         var password = "password";
-        var userRegisterDto = new UserRegisterRequestDto(email, password, fullName);
+        var userRegisterDto = new UserRegisterRequestDto(email, password, fullName, null);
 
         var jsonReply = mockMvc.perform(
                         post(ApiPath.USER_REGISTER_FULL)
@@ -44,7 +44,7 @@ class UserControllerTest extends AbstractDbTest {
 
     @Test
     void register_email_already_exists_test() throws Exception {
-        var dto = new UserRegisterRequestDto("existing@test.com", "pwd", "Someone");
+        var dto = new UserRegisterRequestDto("existing@test.com", "pwd", "Someone", null);
 
         mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -60,7 +60,7 @@ class UserControllerTest extends AbstractDbTest {
 
     @Test
     void register_empty_password_test() throws Exception {
-        var dto = new UserRegisterRequestDto("empty@pwd.com", "", "NoPass");
+        var dto = new UserRegisterRequestDto("empty@pwd.com", "", "NoPass", null);
         mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
@@ -73,7 +73,7 @@ class UserControllerTest extends AbstractDbTest {
         var email = "john.doe@test.com";
         var fullName = "John Doe";
         var password = "password";
-        var registerDto = new UserRegisterRequestDto(email, password, fullName);
+        var registerDto = new UserRegisterRequestDto(email, password, fullName, null);
         mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerDto)))
@@ -96,7 +96,7 @@ class UserControllerTest extends AbstractDbTest {
         var password = "correct";
         mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UserRegisterRequestDto(email, password, "Real User"))))
+                        .content(objectMapper.writeValueAsString(new UserRegisterRequestDto(email, password, "Real User", null))))
                 .andExpect(status().isOk());
 
         var loginDto = new UserLoginRequestDto(email, "wrongpass");
@@ -112,7 +112,7 @@ class UserControllerTest extends AbstractDbTest {
         var fullName = "Me Tester";
         var password = "pass";
 
-        var registerDto = new UserRegisterRequestDto(email, password, fullName);
+        var registerDto = new UserRegisterRequestDto(email, password, fullName, null);
         mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerDto)))
@@ -149,7 +149,7 @@ class UserControllerTest extends AbstractDbTest {
         var email = "upd@test.com";
         var fullName = "Update Me";
         var password = "pass";
-        var registerDto = new UserRegisterRequestDto(email, password, fullName);
+        var registerDto = new UserRegisterRequestDto(email, password, fullName, null);
         mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerDto)))
@@ -193,7 +193,7 @@ class UserControllerTest extends AbstractDbTest {
         var password = "pass";
         mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UserRegisterRequestDto(email, password, fullName))))
+                        .content(objectMapper.writeValueAsString(new UserRegisterRequestDto(email, password, fullName, null))))
                 .andExpect(status().isOk());
 
         var loginJson = mockMvc.perform(post(ApiPath.USER_LOGIN_FULL)
@@ -224,7 +224,7 @@ class UserControllerTest extends AbstractDbTest {
         // 1. Register
         mockMvc.perform(post(ApiPath.USER_REGISTER_FULL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UserRegisterRequestDto(email, password, fullName))))
+                        .content(objectMapper.writeValueAsString(new UserRegisterRequestDto(email, password, fullName, null))))
                 .andExpect(status().isOk());
 
         // 2. Login with INVALID token header

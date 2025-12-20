@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CopySchemaRequest } from '../models/CopySchemaRequest';
-import type { CreateSchemaRequest } from '../models/CreateSchemaRequest';
-import type { SetActiveSchemaRequest } from '../models/SetActiveSchemaRequest';
+import type { SchemaCopyRequestDto } from '../models/SchemaCopyRequestDto';
+import type { SchemaCreateRequestDto } from '../models/SchemaCreateRequestDto';
+import type { SchemaSetActiveRequestDto } from '../models/SchemaSetActiveRequestDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -16,7 +16,7 @@ export class SchemaManagementService {
      * @throws ApiError
      */
     public static setActiveSchema(
-        requestBody: SetActiveSchemaRequest,
+        requestBody: SchemaSetActiveRequestDto,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
@@ -56,7 +56,7 @@ export class SchemaManagementService {
      * @throws ApiError
      */
     public static createSchema(
-        requestBody: CreateSchemaRequest,
+        requestBody: SchemaCreateRequestDto,
         setActive: boolean = false,
     ): CancelablePromise<Record<string, string>> {
         return __request(OpenAPI, {
@@ -82,7 +82,7 @@ export class SchemaManagementService {
      * @throws ApiError
      */
     public static copySchema(
-        requestBody: CopySchemaRequest,
+        requestBody: SchemaCopyRequestDto,
     ): CancelablePromise<Record<string, string>> {
         return __request(OpenAPI, {
             method: 'POST',

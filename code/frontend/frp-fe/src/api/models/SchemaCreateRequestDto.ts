@@ -2,8 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type CopySchemaRequest = {
-    source: string;
-    target: string;
+export type SchemaCreateRequestDto = {
+    name: string;
 };
 

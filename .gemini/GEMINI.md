@@ -140,3 +140,4 @@ When the Backend API changes (Controllers, DTOs), update the Frontend client:
 -   **UI Components**: Reuse existing components in `src/components/UIComponent` (`Text.tsx`, `Input.tsx`, `Form.tsx`, `ErrorDisplay.tsx`).
 -   **Translations**: Always add user-facing strings to `src/locales/en/translation.json` and `cs/translation.json`. Use `t('key')`.
 -   **Strict Types**: Use `import type` for interfaces/types in TypeScript to avoid compilation errors with `verbatimModuleSyntax`.
+-   **DTOs**: Always implement Data Transfer Objects as Java `record`s. Place them in a `model.dto` package within the relevant module. Append `Dto` to the class name (e.g., `SchemaCreateRequestDto`). Avoid inner static classes for DTOs.

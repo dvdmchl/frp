@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type CreateSchemaRequest = {
+export type SchemaSetActiveRequestDto = {
     name: string;
 };
 

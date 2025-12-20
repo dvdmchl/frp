@@ -2,7 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type SetActiveSchemaRequest = {
-    name: string;
+export type SchemaCopyRequestDto = {
+    source: string;
+    target: string;
 };
 

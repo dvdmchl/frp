@@ -14,9 +14,7 @@ export type UserRegisterRequestDto = {
      * Password
      */
     password: string;
-    /**
-     * Full name of the user
-     */
     fullName: string;
+    schemaName?: string;
 };
 

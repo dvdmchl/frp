@@ -16,8 +16,9 @@ public record UserRegisterRequestDto(
         @Schema(description = "Password", example = "securePass123")
         String password,
 
-        @NotBlank
-        @Schema(description = "Full name of the user", example = "John Doe")
-        String fullName
+    @NotBlank
+    String fullName,
+    
+    String schemaName
 ) {
 }

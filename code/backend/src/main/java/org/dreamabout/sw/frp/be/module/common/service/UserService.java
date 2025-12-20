@@ -26,18 +26,37 @@ public class UserService {
     private final JwtService jwtService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final SchemaService schemaService;
 
     public UserDto signup(UserRegisterRequestDto userRegister) {
         if (userRepository.findByEmail(userRegister.email()).isPresent()) {
             throw new UserAlreadyExistsException(userRegister.email());
         }
+
+        String schemaName = userRegister.schemaName();
+        if (schemaName == null || schemaName.isBlank()) {
+            String emailPrefix = userRegister.email().split("@")[0];
+            schemaName = sanitizeSchemaName(emailPrefix) + "_schema";
+        }
+
+        var schema = schemaService.createSchema(schemaName);
+
         var user = UserEntity.builder()
                 .email(userRegister.email())
                 .password(passwordEncoder.encode(userRegister.password()))
                 .fullName(userRegister.fullName())
+                .schema(schema)
                 .build();
         user = userRepository.save(user);
         return userMapper.toDto(user);
+    }
+
+    private String sanitizeSchemaName(String name) {
+        String sanitized = name.replaceAll("[^a-zA-Z0-9_]", "").toLowerCase();
+        if (sanitized.isEmpty() || !Character.isLetter(sanitized.charAt(0))) {
+            return "u_" + sanitized;
+        }
+        return sanitized;
     }
 
     public UserLoginResponseDto authenticate(UserLoginRequestDto userLogin) {
