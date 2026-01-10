@@ -42,7 +42,8 @@ URL: https://github.com/dvdmchl/frp
     -   `src/api`: Generated API client (do not edit manually unless necessary, generated via `npm run generate-api`).
     -   `src/components`: React components (`UIComponent`, `UserManagement`, etc.).
     -   `src/locales`: Translation files (`en`, `cs`).
--   `docker-compose.yml`: Setup for running the full stack (DB, Backend, Frontend) or just DB.
+-   `docker-compose.yml`: Base Docker Compose configuration containing core services (DB, Backend, Frontend).
+-   `docker-compose.override.yml`: Development extensions, including SonarQube. Automatically loaded by Docker in development.
 
 ## Development Instructions
 
@@ -52,6 +53,25 @@ URL: https://github.com/dvdmchl/frp
 -   Node.js 20+
 -   Docker & Docker Compose
 -   Maven
+
+### Docker Environment Management
+
+-   **Development Mode** (Core + SonarQube):
+    ```bash
+    wsl docker compose up -d
+    ```
+    (Loads `docker-compose.yml` and `docker-compose.override.yml`)
+
+-   **Production Mode** (Core only):
+    ```bash
+    wsl docker compose -f docker-compose.yml up -d
+    ```
+
+-   **Isolated Environments**:
+    Use `-p` flag to avoid conflicts:
+    ```bash
+    wsl docker compose -p frp-dev up -d
+    ```
 
 ### Running the Database
 

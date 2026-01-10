@@ -1,6 +1,5 @@
 services:
   db:
-    container_name: frp-db-1
     image: postgres
     restart: no
     shm_size: 128mb
@@ -12,7 +11,7 @@ services:
 
     volumes:
       - db_data:/var/lib/postgresql
-      - ./code/db-init:/docker-entrypoint-initdb.d/
+      - ./code/db-init:/docker-entrypoint-initdb.d
     ports:
         - "5432:5432"
 
@@ -39,23 +38,6 @@ services:
     ports:
       - "3000:80"
 
-  sonarqube:
-    image: sonarqube:community
-    ports:
-      - "9000:9000"
-    environment:
-      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
-    volumes:
-      - sonar_data:/opt/sonarqube/data
-      - sonar_logs:/opt/sonarqube/logs
-      - sonar_extensions:/opt/sonarqube/extensions
-
 volumes:
   db_data:
-    driver: local
-  sonar_data:
-    driver: local
-  sonar_logs:
-    driver: local
-  sonar_extensions:
     driver: local

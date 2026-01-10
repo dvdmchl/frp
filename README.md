@@ -2,22 +2,43 @@
 
 FRP is a comprehensive application designed to help families efficiently manage their day-to-day tasks and resources. It aims to simplify and streamline family life, offering all the necessary tools for a well-organized household.
 
-## Running the Application with Docker Compose
+## Deployment and Environments
 
-1. Ensure [Docker Compose](https://docs.docker.com/compose/) is installed.
-2. Build the images:
+This project uses a modular Docker Compose setup to support both development and production environments.
 
-   ```bash
-   docker compose build
-   ```
+### Development Mode (with SonarQube)
 
-3. Start the containers:
+To start the full stack including SonarQube (development tools), run:
 
-   ```bash
-   docker compose up
-   ```
+```bash
+docker compose up -d
+```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+Docker automatically loads `docker-compose.yml` (Core) and `docker-compose.override.yml` (Dev Tools).
+
+### Production Mode (Core Services Only)
+
+To run only the core application services (DB, Backend, Frontend) without development tools:
+
+```bash
+docker compose -f docker-compose.yml up -d
+```
+
+### Environment Isolation
+
+To run multiple environments on the same host (e.g., `frp-dev` and `frp-prod`), use the `-p` (project name) flag to isolate containers and volumes:
+
+**Dev Environment:**
+
+```bash
+docker compose -p frp-dev up -d
+```
+
+**Prod Environment:**
+
+```bash
+docker compose -p frp-prod -f docker-compose.yml up -d
+```
 
 
 ## Features
