@@ -1,8 +1,14 @@
 package org.dreamabout.sw.frp.be;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.dreamabout.sw.frp.be.config.db.TenantUtil;
 import org.dreamabout.sw.frp.be.config.security.SecurityContextService;
+import org.dreamabout.sw.frp.be.module.accounting.domain.AccAcountType;
+import org.dreamabout.sw.frp.be.module.accounting.model.AccAccountEntity;
+import org.dreamabout.sw.frp.be.module.accounting.model.AccCurrencyEntity;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccJournalEntity;
+import org.dreamabout.sw.frp.be.module.accounting.model.AccTransactionEntity;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccJournalRepository;
 import org.dreamabout.sw.frp.be.module.common.model.SchemaEntity;
 import org.dreamabout.sw.frp.be.module.common.model.UserEntity;
@@ -13,7 +19,11 @@ import org.dreamabout.sw.multitenancy.core.TenantContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,9 +45,14 @@ class MultitenancyTest extends AbstractDbTest {
     @Autowired
     private SecurityContextService securityContextService;
 
-
     @Autowired
     private org.dreamabout.sw.frp.be.module.common.service.GroupService groupService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @Test
     void correctSchemaUsingTest() {
@@ -55,8 +70,42 @@ class MultitenancyTest extends AbstractDbTest {
         var auth = new TestingAuthenticationToken(user, null, List.of());
         securityContextService.setAuthentication(auth);
         TenantContext.setCurrentTenant(tenantUtil.getCurrentTenantIdentifier());
-        var accJournal = new AccJournalEntity();
-        accJournal = accJournalRepository.save(accJournal);
+
+        var accJournalId = new TransactionTemplate(transactionManager).execute(status -> {
+            var currency = new AccCurrencyEntity();
+            currency.setCode("USD");
+            currency.setName("US Dollar");
+            currency.setScale(2);
+            entityManager.persist(currency);
+
+            var account = new AccAccountEntity();
+            account.setName("Cash");
+            account.setCurrency(currency);
+            account.setIsLiquid(true);
+            account.setAccountType(AccAcountType.ASSET);
+            entityManager.persist(account);
+
+            var transaction = new AccTransactionEntity();
+            
+            var accJournal1 = new AccJournalEntity();
+            accJournal1.setAccount(account);
+            accJournal1.setTransaction(transaction);
+            accJournal1.setDate(LocalDate.now());
+            accJournal1.setCredit(BigDecimal.TEN);
+            accJournal1.setDebit(BigDecimal.ZERO);
+
+            var accJournal2 = new AccJournalEntity();
+            accJournal2.setAccount(account);
+            accJournal2.setTransaction(transaction);
+            accJournal2.setDate(LocalDate.now());
+            accJournal2.setCredit(BigDecimal.ZERO);
+            accJournal2.setDebit(BigDecimal.TEN);
+
+            transaction.setJournals(List.of(accJournal1, accJournal2));
+            entityManager.persist(transaction);
+            
+            return accJournal1.getId();
+        });
 
         // user and schema tables must be stored in frp_db/frp_public schema
         var users = selectAllFromPublicSchema(UserEntity.class);
@@ -71,9 +120,8 @@ class MultitenancyTest extends AbstractDbTest {
 
         // an accounting journal must be stored in frp_test schema
         var accJournals = selectAll(AccJournalEntity.class, schema.getName());
-        assertThat(accJournals).hasSize(1);
-        var accJournalRes = accJournals.get(0);
-        assertThat(accJournalRes.getId()).isEqualTo(accJournal.getId());
+        assertThat(accJournals).hasSize(2);
+        assertThat(accJournals).extracting(AccJournalEntity::getId).contains(accJournalId);
     }
 
     @Test

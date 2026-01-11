@@ -26,6 +26,7 @@ public class SchemaService {
     private final JdbcTemplate jdbcTemplate;
     private final UserRepository userRepository;
     private final SchemaInitializationService schemaInitializationService;
+    private final List<TablePriorityProvider> priorityProviders;
 
     private static final Pattern SCHEMA_NAME_PATTERN = Pattern.compile("^[a-z][a-z0-9_]*$");
 
@@ -157,6 +158,13 @@ public class SchemaService {
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = ? AND table_type = 'BASE TABLE' AND table_name != 'flyway_schema_history'",
                 String.class, source);
 
+        tables.sort((t1, t2) -> {
+            int s1 = getTableScore(t1);
+            int s2 = getTableScore(t2);
+            if (s1 != s2) return Integer.compare(s1, s2);
+            return t1.compareTo(t2);
+        });
+
         for (String table : tables) {
             String sourceTable = "\"" + source + "\".\"" + table + "\"";
             String targetTable = "\"" + target + "\".\"" + table + "\"";
@@ -167,6 +175,14 @@ public class SchemaService {
         }
 
         updateSequences(target);
+    }
+
+    private int getTableScore(String tableName) {
+        return priorityProviders.stream()
+                .map(provider -> provider.getTablePriority(tableName))
+                .filter(java.util.Objects::nonNull)
+                .findFirst()
+                .orElse(10);
     }
 
     private void updateSequences(String schemaName) {
