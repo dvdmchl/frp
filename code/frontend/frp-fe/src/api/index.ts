@@ -8,6 +8,7 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { ErrorDto } from './models/ErrorDto';
+export type { ModuleDefinitionDto } from './models/ModuleDefinitionDto';
 export type { SchemaCopyRequestDto } from './models/SchemaCopyRequestDto';
 export type { SchemaCreateRequestDto } from './models/SchemaCreateRequestDto';
 export type { SchemaSetActiveRequestDto } from './models/SchemaSetActiveRequestDto';
@@ -21,6 +22,7 @@ export type { UserUpdateInfoRequestDto } from './models/UserUpdateInfoRequestDto
 
 export { ContextControllerService } from './services/ContextControllerService';
 export { MaintenanceAdminService } from './services/MaintenanceAdminService';
+export { ModuleManagementService } from './services/ModuleManagementService';
 export { SchemaManagementService } from './services/SchemaManagementService';
 export { UserManagementService } from './services/UserManagementService';
 export { UserManagementAdminService } from './services/UserManagementAdminService';
