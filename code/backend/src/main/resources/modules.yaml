@@ -1,0 +1,9 @@
+modules:
+  - code: ACC
+    title: Accounting
+    description: Manage finances, accounts, and transactions.
+    state: ENABLED
+  - code: TSK
+    title: Tasks
+    description: Manage family tasks and chores.
+    state: DISABLED
