@@ -57,4 +57,9 @@ public class ApiPath {
     public static final String ACTIVE = "/active";
     public static final String NAME_PARAM = "/{name}";
     public static final String CODE_PARAM = "/{code}";
+
+    public static final String ACCOUNTING = "/accounting";
+    public static final String ACCOUNTS = "/accounts";
+    public static final String ACCOUNTS_TREE = "/tree";
+    public static final String MOVE = "/move";
 }
