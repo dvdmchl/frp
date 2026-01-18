@@ -62,6 +62,7 @@ public class ApiPath {
     public static final String ACCOUNTS = "/accounts";
     public static final String CURRENCIES = "/currencies";
     public static final String TRANSACTIONS = "/transactions";
+    public static final String JOURNALS = "/journals";
     public static final String ACCOUNTS_TREE = "/tree";
     public static final String MOVE = "/move";
 }
