@@ -4,3 +4,6 @@
 # env files
 .env*
 
+# Maven flattened POMs
+.flattened-pom.xml
+
