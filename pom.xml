@@ -12,10 +12,16 @@
 
     <properties>
         <revision>0.0.1-SNAPSHOT</revision>
+        <sonar.version>5.5.0.6356</sonar.version>
     </properties>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar.version}</version>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
@@ -47,4 +53,15 @@
     <modules>
         <module>code</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>sonar</id>
+            <properties>
+                <sonar.host.url>http://localhost:9000</sonar.host.url>
+                <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+                <sonar.skip>false</sonar.skip>
+            </properties>
+        </profile>
+    </profiles>
 </project>

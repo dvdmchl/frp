@@ -44,8 +44,8 @@ class AccountingSchemaCreationTest extends AbstractDbTest {
 
         assertThat(result).hasSize(1);
         Map<String, Object> currency = result.get(0);
-        assertThat(currency.get("code")).isEqualTo("EUR");
-        assertThat(currency.get("is_base")).isEqualTo(true);
-        assertThat(currency.get("created_by_user_id")).isEqualTo(user.getId());
+        assertThat(currency).containsEntry("code", "EUR")
+                .containsEntry("is_base", true)
+                .containsEntry("created_by_user_id", user.getId());
     }
 }

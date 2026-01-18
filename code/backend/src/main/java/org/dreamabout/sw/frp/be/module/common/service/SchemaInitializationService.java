@@ -31,7 +31,7 @@ public class SchemaInitializationService {
 
         try {
             flyway.migrate();
-        } catch (FlywayValidateException e) {
+        } catch (FlywayValidateException _) {
             log.warn("Schema {} validation failed, attempting repair", schemaName);
             flyway.repair();
             flyway.migrate();

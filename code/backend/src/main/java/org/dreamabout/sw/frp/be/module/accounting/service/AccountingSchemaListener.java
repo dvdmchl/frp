@@ -2,6 +2,7 @@ package org.dreamabout.sw.frp.be.module.accounting.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamabout.sw.frp.be.domain.exception.FrpDbException;
 import org.dreamabout.sw.frp.be.module.accounting.config.AccountingProperties;
 import org.dreamabout.sw.frp.be.module.common.service.SchemaCreationListener;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -53,10 +54,10 @@ public class AccountingSchemaListener implements SchemaCreationListener {
 
         } catch (IllegalArgumentException e) {
             log.error("Invalid currency code configured: {}", baseCurrencyCode, e);
-            throw new RuntimeException("Invalid base currency code: " + baseCurrencyCode, e);
+            throw new FrpDbException("Invalid base currency code: " + baseCurrencyCode, e);
         } catch (Exception e) {
             log.error("Failed to create base currency for schema {}", schemaName, e);
-            throw new RuntimeException("Failed to create base currency", e);
+            throw new FrpDbException("Failed to create base currency", e);
         }
     }
 }

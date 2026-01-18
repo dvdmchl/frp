@@ -15,6 +15,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JournalService {
 
+    private static final String JOURNAL_ENTRY_NOT_FOUND = "Journal entry not found";
+
     private final AccJournalRepository accJournalRepository;
     private final TransactionMapper transactionMapper;
 
@@ -29,13 +31,13 @@ public class JournalService {
     public AccJournalDto getJournal(Long id) {
         return accJournalRepository.findById(id)
                 .map(transactionMapper::toDto)
-                .orElseThrow(() -> new IllegalArgumentException("Journal entry not found"));
+                .orElseThrow(() -> new IllegalArgumentException(JOURNAL_ENTRY_NOT_FOUND));
     }
 
     @Transactional
     public AccJournalDto updateJournal(Long id, AccJournalUpdateRequestDto request) {
         AccJournalEntity journal = accJournalRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Journal entry not found"));
+                .orElseThrow(() -> new IllegalArgumentException(JOURNAL_ENTRY_NOT_FOUND));
 
         journal.setDate(request.date());
         journal.setDescription(request.description());
@@ -46,7 +48,7 @@ public class JournalService {
     @Transactional
     public void deleteJournal(Long id) {
         AccJournalEntity journal = accJournalRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Journal entry not found"));
+                .orElseThrow(() -> new IllegalArgumentException(JOURNAL_ENTRY_NOT_FOUND));
         
         // Deleting a journal entry usually requires checking if the transaction remains balanced.
         // For simplicity in this iteration, we might assume the user knows what they are doing 

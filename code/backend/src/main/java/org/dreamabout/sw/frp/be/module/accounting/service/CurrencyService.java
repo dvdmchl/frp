@@ -17,6 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CurrencyService {
 
+    private static final String CURRENCY_NOT_FOUND = "Currency not found";
+
     private final AccCurrencyRepository accCurrencyRepository;
     private final AccAccountRepository accAccountRepository;
     private final CurrencyMapper currencyMapper;
@@ -50,7 +52,7 @@ public class CurrencyService {
     @Transactional
     public AccCurrencyDto updateCurrency(Long id, AccCurrencyUpdateRequestDto request) {
         AccCurrencyEntity currency = accCurrencyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Currency not found"));
+                .orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_FOUND));
 
         currency.setName(request.name());
         currency.setScale(request.scale());
@@ -61,7 +63,7 @@ public class CurrencyService {
     @Transactional
     public void deleteCurrency(Long id) {
         AccCurrencyEntity currency = accCurrencyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Currency not found"));
+                .orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_FOUND));
 
         if (accAccountRepository.existsByCurrency(currency)) {
             throw new IllegalStateException("Cannot delete currency as it is used by one or more accounts");
@@ -77,7 +79,7 @@ public class CurrencyService {
     @Transactional
     public void setBaseCurrency(Long id) {
         AccCurrencyEntity newBase = accCurrencyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Currency not found"));
+                .orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_FOUND));
         
         if (Boolean.TRUE.equals(newBase.getIsBase())) {
             return;

@@ -3,6 +3,7 @@ package org.dreamabout.sw.frp.be.module.common.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamabout.sw.frp.be.domain.Constant;
+import org.dreamabout.sw.frp.be.domain.exception.FrpDbException;
 import org.dreamabout.sw.frp.be.module.common.model.*;
 import org.dreamabout.sw.frp.be.module.common.repository.SchemaAccessRepository;
 import org.dreamabout.sw.frp.be.module.common.repository.SchemaRepository;
@@ -237,6 +238,10 @@ public class SchemaService {
 
     @Transactional(readOnly = true)
     public List<String> getOrphanSchemas() {
+        return internalGetOrphanSchemas();
+    }
+
+    private List<String> internalGetOrphanSchemas() {
         String sql = """
                 SELECT schema_name
                 FROM information_schema.schemata
@@ -250,7 +255,7 @@ public class SchemaService {
 
     @Transactional
     public void dropOrphanSchemas(List<String> schemaNames) {
-        List<String> orphanSchemas = getOrphanSchemas();
+        List<String> orphanSchemas = internalGetOrphanSchemas();
         for (String name : schemaNames) {
             if (!orphanSchemas.contains(name)) {
                 throw new IllegalArgumentException("Schema " + name + " is not an orphan schema or doesn't exist.");
@@ -269,7 +274,7 @@ public class SchemaService {
                 // We might want to rethrow or just log.
                 // If a listener fails (e.g. creating base currency), should schema creation fail?
                 // Probably yes, to ensure consistency.
-                throw new RuntimeException("Failed to execute schema creation listener", e);
+                throw new FrpDbException("Failed to execute schema creation listener", e);
             }
         }
     }

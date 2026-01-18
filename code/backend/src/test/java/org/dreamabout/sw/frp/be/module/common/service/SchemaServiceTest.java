@@ -1,6 +1,7 @@
 package org.dreamabout.sw.frp.be.module.common.service;
 
 import org.dreamabout.sw.frp.be.domain.Constant;
+import org.dreamabout.sw.frp.be.module.common.model.SchemaEntity;
 import org.dreamabout.sw.frp.be.module.common.model.UserEntity;
 import org.dreamabout.sw.frp.be.module.common.repository.UserRepository;
 import org.dreamabout.sw.frp.be.test.AbstractDbTest;
@@ -31,9 +32,10 @@ class SchemaServiceTest extends AbstractDbTest {
 
         var schema = schemaService.createSchema("test_schema", user.getId());
 
-        assertThat(schema).isNotNull();
-        assertThat(schema.getName()).isEqualTo("test_schema");
-        assertThat(schema.getOwnerId()).isEqualTo(user.getId());
+        assertThat(schema)
+                .isNotNull()
+                .returns("test_schema", SchemaEntity::getName)
+                .returns(user.getId(), SchemaEntity::getOwnerId);
     }
 
     @Test

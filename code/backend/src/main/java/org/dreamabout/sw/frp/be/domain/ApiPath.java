@@ -32,6 +32,8 @@ public class ApiPath {
     public static final String USER_LOGOUT = "/logout";
 
     public static final String ADMIN = "/admin";
+    public static final String ACTIVE = "/active";
+    
     public static final String ADMIN_USERS = ADMIN + "/users";
     public static final String ADMIN_USERS_FULL = API_ROOT + ADMIN_USERS;
 
@@ -40,8 +42,8 @@ public class ApiPath {
     public static final String ORPHAN_SCHEMAS = "/orphan-schemas";
 
     public static final String ID_PARAM = "/{id}";
-    public static final String ID_ACTIVE = ID_PARAM + "/active";
-    public static final String ID_ADMIN = ID_PARAM + "/admin";
+    public static final String ID_ACTIVE = ID_PARAM + ACTIVE;
+    public static final String ID_ADMIN = ID_PARAM + ADMIN;
     public static final String ID_GROUPS = ID_PARAM + "/groups";
 
     public static final String CONTEXT = "/context";
@@ -54,7 +56,6 @@ public class ApiPath {
     public static final String MODULES_FULL = API_ROOT + MODULES;
 
     public static final String COPY = "/copy";
-    public static final String ACTIVE = "/active";
     public static final String NAME_PARAM = "/{name}";
     public static final String CODE_PARAM = "/{code}";
 
