@@ -27,7 +27,7 @@ describe('AdminPage', () => {
           <Route path={Paths.ADMIN} element={<AdminPage />} />
           <Route path={Paths.ADMIN_SECTION} element={<AdminPage />} />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     )
 
     expect(screen.getByTestId('user-management-admin')).toBeInTheDocument()
@@ -40,7 +40,7 @@ describe('AdminPage', () => {
           <Route path={Paths.ADMIN} element={<AdminPage />} />
           <Route path={Paths.ADMIN_SECTION} element={<AdminPage />} />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     )
 
     expect(screen.getByTestId('maintenance-admin')).toBeInTheDocument()

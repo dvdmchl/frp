@@ -5,6 +5,7 @@ import { Button } from 'flowbite-react'
 import { useState } from 'react'
 import { UserManagementService } from '../api/services/UserManagementService'
 import { Paths } from '../constants/Paths'
+import { ModulesMenu } from './Modules/ModulesMenu'
 
 type HeaderProps = {
   user?: UserDto | null
@@ -56,6 +57,11 @@ export default function Header({ user, onLogout }: Readonly<HeaderProps>) {
               <option value="en">English</option>
             </select>
           </div>
+          {user && (
+            <div>
+              <ModulesMenu />
+            </div>
+          )}
           <div>{user && <LinkText to={Paths.PROFILE}>{user.fullName}</LinkText>}</div>
           {user?.admin && (
             <div>

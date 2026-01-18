@@ -80,6 +80,17 @@
     "email": "E-mail",
     "activeSchema": "Active Schema"
   },
+  "modules": {
+    "menuTitle": "Modules"
+  },
+  "module": {
+    "disabled": {
+      "title": "Module Disabled",
+      "message": "The module {{module}} is currently disabled."
+    },
+    "notFound": "Module not found",
+    "placeholderContent": "Welcome to the module page. Content coming soon."
+  },
   "admin": {
     "title": "Admin",
     "userManagement": {

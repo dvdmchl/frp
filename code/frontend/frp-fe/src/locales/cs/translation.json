@@ -80,6 +80,17 @@
     "email": "E-mail",
     "activeSchema": "Aktivní schéma"
   },
+  "modules": {
+    "menuTitle": "Moduly"
+  },
+  "module": {
+    "disabled": {
+      "title": "Modul zakázán",
+      "message": "Modul {{module}} je momentálně zakázán."
+    },
+    "notFound": "Modul nenalezen",
+    "placeholderContent": "Vítejte na stránce modulu. Obsah bude brzy k dispozici."
+  },
   "admin": {
     "title": "Administrace",
     "userManagement": {

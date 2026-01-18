@@ -4,6 +4,7 @@ import { RegisterForm } from './components/UserManagement/RegisterForm'
 import { ProfileEditForm } from './components/UserManagement/ProfileEditForm'
 import { AdminPage } from './components/UserManagement/AdminPage'
 import { HomePage } from './components/HomePage'
+import { ModuleWrapper } from './components/Modules/ModuleWrapper'
 import type { UserLoginResponseDto } from './api/models/UserLoginResponseDto'
 import type { UserDto } from './api/models/UserDto'
 import type { JSX } from 'react'
@@ -48,6 +49,7 @@ export function AppRoutes({ user, onLoginSuccess, onRegisterSuccess, setUser }: 
           <Route path={Paths.ADMIN_SECTION} element={<AdminPage />} />
           <Route path={Paths.PROFILE} element={<Navigate to={Paths.PROFILE_PERSONAL_INFO} replace />} />
           <Route path={Paths.PROFILE_SECTION} element={<ProfileEditForm onProfileUpdate={setUser} />} />
+          <Route path={Paths.MODULES} element={<ModuleWrapper />} />
           <Route path={Paths.WILDCARD} element={<Navigate to={Paths.HOME} />} />
         </>
       )}

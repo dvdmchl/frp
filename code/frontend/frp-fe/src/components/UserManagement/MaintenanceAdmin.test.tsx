@@ -35,11 +35,11 @@ describe('MaintenanceAdmin', () => {
     render(
       <MemoryRouter>
         <MaintenanceAdmin />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
 
     expect(screen.getByText('admin.maintenance.title')).toBeInTheDocument()
-    
+
     await waitFor(() => {
       expect(screen.getByText('orphan_1')).toBeInTheDocument()
       expect(screen.getByText('orphan_2')).toBeInTheDocument()
@@ -53,14 +53,14 @@ describe('MaintenanceAdmin', () => {
     render(
       <MemoryRouter>
         <MaintenanceAdmin />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
 
     await waitFor(() => expect(screen.getByText('orphan_1')).toBeInTheDocument())
 
     const checkboxes = screen.getAllByRole('checkbox')
     fireEvent.click(checkboxes[1]) // First orphan schema (index 0 is header checkbox)
-    
+
     const dropButton = screen.getByText('admin.maintenance.dropSelected')
     fireEvent.click(dropButton)
 

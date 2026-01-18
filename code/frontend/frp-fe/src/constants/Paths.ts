@@ -11,5 +11,6 @@ export const Paths = {
   ADMIN_SECTION: '/admin/:section',
   ADMIN_USERS: '/admin/users',
   ADMIN_MAINTENANCE: '/admin/maintenance',
+  MODULES: '/modules/:moduleCode',
   WILDCARD: '*',
 } as const

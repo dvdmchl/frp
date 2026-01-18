@@ -44,7 +44,7 @@ export function MaintenanceAdmin() {
 
   const handleCheckboxChange = (schemaName: string) => {
     setSelectedUserSchemas((prev) =>
-      prev.includes(schemaName) ? prev.filter((s) => s !== schemaName) : [...prev, schemaName]
+      prev.includes(schemaName) ? prev.filter((s) => s !== schemaName) : [...prev, schemaName],
     )
   }
 
@@ -76,11 +76,7 @@ export function MaintenanceAdmin() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">{t('admin.maintenance.orphanSchemas')}</h2>
-          <Button
-            color="failure"
-            onClick={handleDropSelected}
-            disabled={selectedSchemas.length === 0 || actionLoading}
-          >
+          <Button color="failure" onClick={handleDropSelected} disabled={selectedSchemas.length === 0 || actionLoading}>
             {actionLoading ? <Spinner size="sm" className="mr-2" /> : null}
             {t('admin.maintenance.dropSelected')}
           </Button>

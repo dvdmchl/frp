@@ -39,11 +39,11 @@ describe('UserManagementAdmin', () => {
     render(
       <MemoryRouter>
         <UserManagementAdmin />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
 
     expect(screen.getByText('admin.userManagement.title')).toBeInTheDocument()
-    
+
     await waitFor(() => {
       expect(screen.getByText('Admin User')).toBeInTheDocument()
       expect(screen.getByText('Regular User')).toBeInTheDocument()
@@ -54,14 +54,14 @@ describe('UserManagementAdmin', () => {
     render(
       <MemoryRouter>
         <UserManagementAdmin />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
 
     await waitFor(() => expect(screen.getByText('Admin User')).toBeInTheDocument())
 
     const searchInput = screen.getByPlaceholderText('admin.userManagement.searchPlaceholder')
     fireEvent.change(searchInput, { target: { value: 'Admin' } })
-    
+
     const searchButton = screen.getByText('common.search')
     fireEvent.click(searchButton)
 
@@ -75,17 +75,17 @@ describe('UserManagementAdmin', () => {
     render(
       <MemoryRouter>
         <UserManagementAdmin />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
 
     await waitFor(() => expect(screen.getByText('Regular User')).toBeInTheDocument())
 
     const regularUserRow = screen.getByText('Regular User').closest('tr')
     if (!regularUserRow) throw new Error('Regular user row not found')
-    
+
     const deactivateButton = within(regularUserRow).getByText('admin.userManagement.deactivate')
     fireEvent.click(deactivateButton)
-    
+
     await waitFor(() => {
       expect(UserManagementAdminService.updateActiveStatus).toHaveBeenCalledWith(2, false)
     })
