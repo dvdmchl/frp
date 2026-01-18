@@ -27,6 +27,7 @@ public class SchemaService {
     private final UserRepository userRepository;
     private final SchemaInitializationService schemaInitializationService;
     private final List<TablePriorityProvider> priorityProviders;
+    private final List<SchemaCreationListener> schemaCreationListeners;
 
     private static final Pattern SCHEMA_NAME_PATTERN = Pattern.compile("^[a-z][a-z0-9_]*$");
 
@@ -44,6 +45,8 @@ public class SchemaService {
 
         var schema = saveSchemaEntity(schemaName, ownerId);
         grantOwnerAccess(schema, ownerId);
+
+        notifyListeners(schemaName, ownerId);
 
         return schema;
     }
@@ -254,6 +257,20 @@ public class SchemaService {
             }
             log.info("Dropping orphan schema: {}", name);
             jdbcTemplate.execute("DROP SCHEMA \"" + name + "\" CASCADE");
+        }
+    }
+
+    private void notifyListeners(String schemaName, Long ownerId) {
+        for (SchemaCreationListener listener : schemaCreationListeners) {
+            try {
+                listener.onSchemaCreated(schemaName, ownerId);
+            } catch (Exception e) {
+                log.error("Error in schema creation listener: {}", e.getMessage(), e);
+                // We might want to rethrow or just log.
+                // If a listener fails (e.g. creating base currency), should schema creation fail?
+                // Probably yes, to ensure consistency.
+                throw new RuntimeException("Failed to execute schema creation listener", e);
+            }
         }
     }
 

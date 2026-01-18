@@ -100,10 +100,10 @@ class SchemaControllerTest extends AbstractDbTest {
         // Insert some data into source
         jdbcTemplate.execute("""
             INSERT INTO source_schema.acc_currency (id, code, name, scale, created_by_user_id, created_at, updated_by_user_id, updated_at, version, is_base) 
-            VALUES (1, 'USD', 'US Dollar', 2, 1, NOW(), 1, NOW(), 0, false);
+            VALUES (100, 'USD', 'US Dollar', 2, 1, NOW(), 1, NOW(), 0, false);
             
             INSERT INTO source_schema.acc_account (id, name, currency_id, is_liquid, account_type, created_by_user_id, created_at, updated_by_user_id, updated_at, version)
-            VALUES (1, 'Cash', 1, true, 'ASSET', 1, NOW(), 1, NOW(), 0);
+            VALUES (1, 'Cash', 100, true, 'ASSET', 1, NOW(), 1, NOW(), 0);
             
             INSERT INTO source_schema.acc_transaction (id, created_by_user_id, created_at, updated_by_user_id, updated_at, version)
             VALUES (1, 1, NOW(), 1, NOW(), 0);
