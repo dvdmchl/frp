@@ -7,6 +7,18 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { AccAccountCreateRequestDto } from './models/AccAccountCreateRequestDto';
+export type { AccAccountDto } from './models/AccAccountDto';
+export type { AccCurrencyCreateRequestDto } from './models/AccCurrencyCreateRequestDto';
+export type { AccCurrencyDto } from './models/AccCurrencyDto';
+export type { AccCurrencyUpdateRequestDto } from './models/AccCurrencyUpdateRequestDto';
+export type { AccJournalCreateRequestDto } from './models/AccJournalCreateRequestDto';
+export type { AccJournalDto } from './models/AccJournalDto';
+export type { AccJournalUpdateRequestDto } from './models/AccJournalUpdateRequestDto';
+export type { AccNodeDto } from './models/AccNodeDto';
+export type { AccNodeMoveRequestDto } from './models/AccNodeMoveRequestDto';
+export type { AccTransactionCreateRequestDto } from './models/AccTransactionCreateRequestDto';
+export type { AccTransactionDto } from './models/AccTransactionDto';
 export type { ErrorDto } from './models/ErrorDto';
 export type { ModuleDefinitionDto } from './models/ModuleDefinitionDto';
 export type { SchemaCopyRequestDto } from './models/SchemaCopyRequestDto';
@@ -20,6 +32,7 @@ export type { UserRegisterRequestDto } from './models/UserRegisterRequestDto';
 export type { UserUpdateGroupsRequestDto } from './models/UserUpdateGroupsRequestDto';
 export type { UserUpdateInfoRequestDto } from './models/UserUpdateInfoRequestDto';
 
+export { AccountingService } from './services/AccountingService';
 export { ContextControllerService } from './services/ContextControllerService';
 export { MaintenanceAdminService } from './services/MaintenanceAdminService';
 export { ModuleManagementService } from './services/ModuleManagementService';

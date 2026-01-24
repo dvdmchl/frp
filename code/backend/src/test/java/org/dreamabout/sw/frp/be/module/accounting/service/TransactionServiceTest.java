@@ -53,7 +53,7 @@ class TransactionServiceTest {
         var savedTxn = new AccTransactionEntity();
         savedTxn.setId(1L);
 
-        var expectedDto = new AccTransactionDto(1L, "REF123", "Txn Desc", BigDecimal.ONE, List.of());
+        var expectedDto = new AccTransactionDto(1L, "REF123", "Txn Desc", BigDecimal.ONE, BigDecimal.TEN, List.of());
 
         when(accAccountRepository.findById(100L)).thenReturn(Optional.of(account));
         when(accTransactionRepository.save(any(AccTransactionEntity.class))).thenReturn(savedTxn);

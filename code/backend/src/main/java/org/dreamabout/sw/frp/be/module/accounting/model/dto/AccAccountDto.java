@@ -8,5 +8,6 @@ public record AccAccountDto(
     String description,
     String currencyCode,
     Boolean isLiquid,
-    AccAcountType accountType
+    AccAcountType accountType,
+    java.math.BigDecimal balance
 ) {}

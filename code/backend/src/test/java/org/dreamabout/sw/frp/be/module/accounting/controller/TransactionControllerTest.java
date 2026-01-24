@@ -44,7 +44,7 @@ class TransactionControllerTest extends AbstractDbTest {
         var request = new AccTransactionCreateRequestDto(
                 "REF123", "Txn Desc", BigDecimal.ONE, List.of(journalDto)
         );
-        var response = new AccTransactionDto(1L, "REF123", "Txn Desc", BigDecimal.ONE, List.of());
+        var response = new AccTransactionDto(1L, "REF123", "Txn Desc", BigDecimal.ONE, BigDecimal.TEN, List.of());
 
         when(transactionService.createTransaction(any())).thenReturn(response);
 

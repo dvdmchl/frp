@@ -8,5 +8,6 @@ public record AccTransactionDto(
     String reference,
     String description,
     BigDecimal fxRate,
+    BigDecimal totalAmount,
     List<AccJournalDto> journals
 ) {}

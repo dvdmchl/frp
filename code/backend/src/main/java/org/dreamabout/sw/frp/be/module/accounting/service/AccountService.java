@@ -1,6 +1,7 @@
 package org.dreamabout.sw.frp.be.module.accounting.service;
 
 import lombok.RequiredArgsConstructor;
+import org.dreamabout.sw.frp.be.module.accounting.domain.AccAcountType;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccAccountEntity;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccCurrencyEntity;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccNodeEntity;
@@ -10,10 +11,12 @@ import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccNodeMoveRequestDt
 import org.dreamabout.sw.frp.be.module.accounting.model.mapper.AccountMapper;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccAccountRepository;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccCurrencyRepository;
+import org.dreamabout.sw.frp.be.module.accounting.repository.AccJournalRepository;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccNodeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +32,7 @@ public class AccountService {
     private final AccAccountRepository accAccountRepository;
     private final AccNodeRepository accNodeRepository;
     private final AccCurrencyRepository accCurrencyRepository;
+    private final AccJournalRepository accJournalRepository;
     private final AccountMapper accountMapper;
 
     @Transactional
@@ -67,16 +71,37 @@ public class AccountService {
         }
 
         node = accNodeRepository.save(node);
-        return accountMapper.toDto(node);
+        return accountMapper.toDto(node, Map.of());
     }
 
     @Transactional(readOnly = true)
     public List<AccNodeDto> getTree() {
         List<AccNodeEntity> allNodes = accNodeRepository.findAll();
-        return buildTree(allNodes);
+
+        List<Object[]> rawBalances = accJournalRepository.findBalances();
+        Map<Long, BigDecimal[]> rawMap = rawBalances.stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> new BigDecimal[]{(BigDecimal) row[1], (BigDecimal) row[2]}
+                ));
+
+        Map<Long, BigDecimal> balances = new java.util.HashMap<>();
+        for (AccNodeEntity node : allNodes) {
+            if (node.getAccount() != null) {
+                Long id = node.getAccount().getId();
+                BigDecimal[] sums = rawMap.get(id);
+                BigDecimal balance = BigDecimal.ZERO;
+                if (sums != null) {
+                    balance = calculateBalance(node.getAccount().getAccountType(), sums[0], sums[1]);
+                }
+                balances.put(id, balance);
+            }
+        }
+
+        return buildTree(allNodes, balances);
     }
 
-    private List<AccNodeDto> buildTree(List<AccNodeEntity> allNodes) {
+    private List<AccNodeDto> buildTree(List<AccNodeEntity> allNodes, Map<Long, BigDecimal> balances) {
         Map<Long, List<AccNodeEntity>> nodesByParentId = allNodes.stream()
                 .filter(n -> n.getParent() != null)
                 .collect(Collectors.groupingBy(n -> n.getParent().getId()));
@@ -87,17 +112,17 @@ public class AccountService {
                 .toList();
 
         return roots.stream()
-                .map(root -> mapRecursive(root, nodesByParentId))
+                .map(root -> mapRecursive(root, nodesByParentId, balances))
                 .toList();
     }
 
-    private AccNodeDto mapRecursive(AccNodeEntity node, Map<Long, List<AccNodeEntity>> nodesByParentId) {
-        AccNodeDto dto = accountMapper.toDto(node);
+    private AccNodeDto mapRecursive(AccNodeEntity node, Map<Long, List<AccNodeEntity>> nodesByParentId, Map<Long, BigDecimal> balances) {
+        AccNodeDto dto = accountMapper.toDto(node, balances);
         List<AccNodeEntity> childrenEntities = nodesByParentId.getOrDefault(node.getId(), List.of());
 
         List<AccNodeDto> childrenDtos = childrenEntities.stream()
                 .sorted((n1, n2) -> Integer.compare(n1.getOrderIndex(), n2.getOrderIndex()))
-                .map(child -> mapRecursive(child, nodesByParentId))
+                .map(child -> mapRecursive(child, nodesByParentId, balances))
                 .toList();
 
         return new AccNodeDto(
@@ -108,6 +133,15 @@ public class AccountService {
                 dto.orderIndex(),
                 childrenDtos
         );
+    }
+
+    private BigDecimal calculateBalance(AccAcountType type, BigDecimal credit, BigDecimal debit) {
+        if (credit == null) credit = BigDecimal.ZERO;
+        if (debit == null) debit = BigDecimal.ZERO;
+        return switch (type) {
+            case ASSET, EXPENSE -> debit.subtract(credit);
+            default -> credit.subtract(debit);
+        };
     }
 
     @Transactional
@@ -243,6 +277,19 @@ public class AccountService {
             }
             accAccountRepository.save(account);
         }
-        return accountMapper.toDto(node);
+
+        BigDecimal balance = BigDecimal.ZERO;
+        Map<Long, BigDecimal> balances = Map.of();
+
+        if (Boolean.FALSE.equals(node.getIsPlaceholder()) && node.getAccount() != null) {
+            Object[] sums = accJournalRepository.findBalanceByAccountId(node.getAccount().getId());
+            if (sums != null && sums.length >= 2) {
+                BigDecimal credit = (BigDecimal) sums[0];
+                BigDecimal debit = (BigDecimal) sums[1];
+                balance = calculateBalance(node.getAccount().getAccountType(), credit, debit);
+            }
+            balances = Map.of(node.getAccount().getId(), balance);
+        }
+        return accountMapper.toDto(node, balances);
     }
 }

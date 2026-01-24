@@ -10,6 +10,7 @@ import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccNodeMoveRequestDt
 import org.dreamabout.sw.frp.be.module.accounting.model.mapper.AccountMapper;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccAccountRepository;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccCurrencyRepository;
+import org.dreamabout.sw.frp.be.module.accounting.repository.AccJournalRepository;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccNodeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +39,8 @@ class AccountServiceTest {
     @Mock
     private AccCurrencyRepository accCurrencyRepository;
     @Mock
+    private AccJournalRepository accJournalRepository;
+    @Mock
     private AccountMapper accountMapper;
 
     @InjectMocks
@@ -63,7 +66,7 @@ class AccountServiceTest {
         when(accNodeRepository.save(any(AccNodeEntity.class))).thenReturn(savedNode);
 
         var expectedDto = new AccNodeDto(10L, null, false, null, 0, null);
-        when(accountMapper.toDto(savedNode)).thenReturn(expectedDto);
+        when(accountMapper.toDto(any(AccNodeEntity.class), any())).thenReturn(expectedDto);
 
         // Act
         var result = accountService.createAccount(request);
@@ -88,8 +91,11 @@ class AccountServiceTest {
         childNode.setOrderIndex(0);
 
         when(accNodeRepository.findAll()).thenReturn(List.of(rootNode, childNode));
-        when(accountMapper.toDto(rootNode)).thenReturn(new AccNodeDto(1L, null, true, null, 0, null));
-        when(accountMapper.toDto(childNode)).thenReturn(new AccNodeDto(2L, 1L, true, null, 0, null));
+        when(accJournalRepository.findBalances()).thenReturn(List.of());
+        when(accountMapper.toDto(any(AccNodeEntity.class), any())).thenAnswer(inv -> {
+             AccNodeEntity n = inv.getArgument(0);
+             return new AccNodeDto(n.getId(), n.getParent() != null ? n.getParent().getId() : null, true, null, 0, null);
+        });
 
         var tree = accountService.getTree();
 
@@ -163,8 +169,13 @@ class AccountServiceTest {
 
         when(accNodeRepository.findById(1L)).thenReturn(Optional.of(node));
         when(accCurrencyRepository.findByCode("EUR")).thenReturn(Optional.of(currency));
-        when(accAccountRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(accountMapper.toDto(node)).thenReturn(new AccNodeDto(1L, null, false, null, 0, null));
+        when(accAccountRepository.save(any())).thenAnswer(i -> {
+            AccAccountEntity a = i.getArgument(0);
+            a.setId(100L);
+            return a;
+        });
+        when(accJournalRepository.findBalanceByAccountId(any())).thenReturn(new Object[]{null, null});
+        when(accountMapper.toDto(any(AccNodeEntity.class), any())).thenReturn(new AccNodeDto(1L, null, false, null, 0, null));
 
         var result = accountService.updateAccount(1L, request);
 
