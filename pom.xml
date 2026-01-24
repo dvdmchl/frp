@@ -61,6 +61,13 @@
                 <sonar.host.url>http://localhost:9000</sonar.host.url>
                 <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
                 <sonar.skip>false</sonar.skip>
+                <sonar.coverage.exclusions>
+                    **/model/dto/**,
+                    **/model/entity/**,
+                    **/*MapperImpl.java,
+                    **/config/**,
+                    **/FrpApplication.java
+                </sonar.coverage.exclusions>
             </properties>
         </profile>
     </profiles>
