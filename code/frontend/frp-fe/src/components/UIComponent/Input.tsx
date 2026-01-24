@@ -36,6 +36,13 @@ export const InputText = React.forwardRef<HTMLInputElement, Omit<BaseInputProps,
 )
 InputText.displayName = 'InputText'
 
+export const InputNumber = React.forwardRef<HTMLInputElement, Omit<BaseInputProps, 'type' | 'autoComplete'>>(
+  ({ ...props }, ref) => {
+    return <BaseInput ref={ref} type="number" autoComplete="off" {...props} />
+  },
+)
+InputNumber.displayName = 'InputNumber'
+
 export function InputEmail(
   props: Readonly<
     Omit<BaseInputProps, 'type' | 'labelTranslationKey' | 'placeholderTranslationKey' | 'name' | 'id' | 'autoComplete'>

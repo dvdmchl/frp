@@ -7,6 +7,7 @@ import { ErrorDisplay } from '../UIComponent/ErrorDisplay'
 import { H2Title, Paragraph } from '../UIComponent/Text'
 import { Spinner } from 'flowbite-react'
 import type { ErrorDto } from '../../api/models/ErrorDto'
+import { AccountingModule } from './Accounting/AccountingModule'
 
 export const ModuleWrapper: React.FC = () => {
   const { moduleCode } = useParams<{ moduleCode: string }>()
@@ -62,6 +63,10 @@ export const ModuleWrapper: React.FC = () => {
         <Paragraph>{t('module.disabled.message', { module: module.title })}</Paragraph>
       </div>
     )
+  }
+
+  if (module.code === 'ACC') {
+    return <AccountingModule />
   }
 
   return (

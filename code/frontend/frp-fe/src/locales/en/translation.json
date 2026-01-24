@@ -91,6 +91,25 @@
     "notFound": "Module not found",
     "placeholderContent": "Welcome to the module page. Content coming soon."
   },
+  "currency": {
+    "title": "Currency Management",
+    "createTitle": "Add Currency",
+    "editTitle": "Edit Currency",
+    "code": "Code",
+    "name": "Name",
+    "scale": "Scale",
+    "isBase": "Base",
+    "create": "Add",
+    "update": "Update",
+    "delete": "Delete",
+    "setBase": "Set as Base",
+    "createSuccess": "Currency added successfully",
+    "updateSuccess": "Currency updated successfully",
+    "deleteSuccess": "Currency deleted successfully",
+    "setBaseSuccess": "Base currency set successfully",
+    "deleteConfirm": "Are you sure you want to delete this currency?",
+    "error": "Operation failed"
+  },
   "admin": {
     "title": "Admin",
     "userManagement": {

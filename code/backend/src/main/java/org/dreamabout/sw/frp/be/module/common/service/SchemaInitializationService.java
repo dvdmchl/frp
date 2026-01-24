@@ -18,6 +18,9 @@ public class SchemaInitializationService {
 
     private final DataSource dataSource;
 
+    @org.springframework.beans.factory.annotation.Value("${frp.flyway.clean:false}")
+    private boolean clean;
+
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void initSchema(String schemaName) {
         log.info("Running migrations for schema: {}", schemaName);
@@ -25,11 +28,16 @@ public class SchemaInitializationService {
                 .dataSource(dataSource)
                 .schemas(schemaName)
                 .createSchemas(true)
-                .locations("classpath:db/migration/modules")
+                .cleanDisabled(!clean) // Allow clean if property is true
+                .locations("classpath:db/migration/modules/accounting")
                 .placeholders(Map.of("schema", schemaName))
                 .load();
 
         try {
+            if (clean) {
+                log.warn("Cleaning schema {} before migration (frp.flyway.clean=true)", schemaName);
+                flyway.clean();
+            }
             flyway.migrate();
         } catch (FlywayValidateException _) {
             log.warn("Schema {} validation failed, attempting repair", schemaName);

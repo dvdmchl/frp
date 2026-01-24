@@ -8,6 +8,7 @@ import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccCurrencyUpdateReq
 import org.dreamabout.sw.frp.be.module.accounting.model.mapper.CurrencyMapper;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccAccountRepository;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccCurrencyRepository;
+import org.dreamabout.sw.frp.be.module.accounting.repository.AccJournalRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class CurrencyService {
 
     private final AccCurrencyRepository accCurrencyRepository;
     private final AccAccountRepository accAccountRepository;
+    private final AccJournalRepository accJournalRepository;
     private final CurrencyMapper currencyMapper;
 
     @Transactional(readOnly = true)
@@ -37,6 +39,7 @@ public class CurrencyService {
         }
 
         if (Boolean.TRUE.equals(request.isBase())) {
+            validateNoJournalEntries();
             unsetExistingBaseCurrency();
         }
 
@@ -84,10 +87,18 @@ public class CurrencyService {
         if (Boolean.TRUE.equals(newBase.getIsBase())) {
             return;
         }
+
+        validateNoJournalEntries();
         
         unsetExistingBaseCurrency();
         newBase.setIsBase(true);
         accCurrencyRepository.save(newBase);
+    }
+
+    private void validateNoJournalEntries() {
+        if (accJournalRepository.count() > 0) {
+            throw new IllegalStateException("Cannot change base currency when journal entries exist.");
+        }
     }
 
     private void unsetExistingBaseCurrency() {
