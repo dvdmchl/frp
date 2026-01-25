@@ -22,7 +22,7 @@ CREATE TABLE ${schema}.acc_account (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255),
-    currency_id BIGINT NOT NULL,
+    currency_id BIGINT,
     is_liquid BOOLEAN NOT NULL DEFAULT FALSE,
     account_type VARCHAR(255) NOT NULL,
     

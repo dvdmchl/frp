@@ -9,7 +9,11 @@ vi.mock('react-i18next', () => ({
 
 // Mock CurrencyManager to avoid full render
 vi.mock('./CurrencyManager', () => ({
-  CurrencyManager: () => <div>MockCurrencyManager</div>
+  CurrencyManager: () => <div>MockCurrencyManager</div>,
+}))
+
+vi.mock('./AccountTree', () => ({
+  AccountTree: () => <div>MockAccountTree</div>,
 }))
 
 describe('AccountingModule', () => {
@@ -17,16 +21,17 @@ describe('AccountingModule', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <AccountingModule />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
-    expect(screen.getByText('Accounting Module')).toBeDefined()
+    expect(screen.getByText('currency.title')).toBeDefined()
+    expect(screen.getByText('MockAccountTree')).toBeDefined()
   })
 
   it('renders currency manager at /currencies', () => {
     render(
       <MemoryRouter initialEntries={['/currencies']}>
         <AccountingModule />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
     expect(screen.getByText('MockCurrencyManager')).toBeDefined()
   })

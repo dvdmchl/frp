@@ -55,20 +55,22 @@ public class AccountService {
         int orderIndex = siblings.isEmpty() ? 0 : siblings.getLast().getOrderIndex() + 1;
         node.setOrderIndex(orderIndex);
 
-        if (Boolean.FALSE.equals(request.isPlaceholder())) {
+        AccAccountEntity account = new AccAccountEntity();
+        account.setName(request.name());
+        account.setDescription(request.description());
+        account.setIsLiquid(request.isLiquid());
+        account.setAccountType(request.accountType());
+
+        if (request.currencyCode() != null && !request.currencyCode().isEmpty()) {
             AccCurrencyEntity currency = accCurrencyRepository.findByCode(request.currencyCode())
                     .orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_FOUND + request.currencyCode()));
-
-            AccAccountEntity account = new AccAccountEntity();
-            account.setName(request.name());
-            account.setDescription(request.description());
             account.setCurrency(currency);
-            account.setIsLiquid(request.isLiquid());
-            account.setAccountType(request.accountType());
-
-            account = accAccountRepository.save(account);
-            node.setAccount(account);
+        } else if (Boolean.FALSE.equals(request.isPlaceholder())) {
+            throw new IllegalArgumentException("Currency is required for non-placeholder accounts");
         }
+
+        account = accAccountRepository.save(account);
+        node.setAccount(account);
 
         node = accNodeRepository.save(node);
         return accountMapper.toDto(node, Map.of());
@@ -241,42 +243,55 @@ public class AccountService {
         AccNodeEntity node = accNodeRepository.findById(nodeId)
                 .orElseThrow(() -> new IllegalArgumentException(NODE_NOT_FOUND));
 
-        // Update basic node props (isPlaceholder) - maybe?
-        // Usually we don't change from placeholder to account easily if type strict.
-        // Let's assume we can update name/description etc.
-
-        if (Boolean.TRUE.equals(node.getIsPlaceholder())) {
-            // It's a placeholder.
-            if (Boolean.FALSE.equals(request.isPlaceholder())) {
-                // Converting to account
-                AccCurrencyEntity currency = accCurrencyRepository.findByCode(request.currencyCode())
-                        .orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_FOUND + request.currencyCode()));
-
-                AccAccountEntity account = new AccAccountEntity();
-                account.setName(request.name());
-                account.setDescription(request.description());
-                account.setCurrency(currency);
-                account.setIsLiquid(request.isLiquid());
-                account.setAccountType(request.accountType());
-                account = accAccountRepository.save(account);
-                node.setAccount(account);
-                node.setIsPlaceholder(false);
-            }
-        } else {
-            // It's an account.
-            AccAccountEntity account = node.getAccount();
-            account.setName(request.name());
-            account.setDescription(request.description());
-            account.setIsLiquid(request.isLiquid());
-            account.setAccountType(request.accountType());
-            // Currency update? usually restricted if tx exist.
-            if (!account.getCurrency().getCode().equals(request.currencyCode())) {
-                AccCurrencyEntity currency = accCurrencyRepository.findByCode(request.currencyCode())
-                        .orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_FOUND + request.currencyCode()));
-                account.setCurrency(currency);
-            }
-            accAccountRepository.save(account);
+        AccAccountEntity account = node.getAccount();
+        if (account == null) {
+            // Should not happen for new accounts, but for old placeholders it might.
+            account = new AccAccountEntity();
+            node.setAccount(account);
         }
+
+        account.setName(request.name());
+        account.setDescription(request.description());
+        account.setIsLiquid(request.isLiquid());
+        account.setAccountType(request.accountType());
+
+        node.setIsPlaceholder(request.isPlaceholder());
+
+        // Handle parent change
+        Long currentParentId = node.getParent() == null ? null : node.getParent().getId();
+        Long newParentId = request.parentId();
+
+        if (!Objects.equals(currentParentId, newParentId)) {
+            AccNodeEntity oldParent = node.getParent();
+            AccNodeEntity newParent = resolveNewParent(newParentId, nodeId);
+
+            shiftOldSiblings(node, oldParent);
+
+            // Calculate new order index (append to end)
+            List<AccNodeEntity> newSiblings = getSiblings(newParent);
+            // If we are moving within same parent (should not happen due to equals check above),
+            // we would need to filter out 'node'. But since parent changed, newSiblings doesn't contain 'node'.
+            
+            int newOrderIndex = newSiblings.isEmpty() ? 0 : newSiblings.getLast().getOrderIndex() + 1;
+            
+            node.setParent(newParent);
+            node.setOrderIndex(newOrderIndex);
+        }
+
+        if (request.currencyCode() != null && !request.currencyCode().isEmpty()) {
+            if (account.getCurrency() == null || !account.getCurrency().getCode().equals(request.currencyCode())) {
+                AccCurrencyEntity currency = accCurrencyRepository.findByCode(request.currencyCode())
+                        .orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_FOUND + request.currencyCode()));
+                account.setCurrency(currency);
+            }
+        } else if (Boolean.FALSE.equals(request.isPlaceholder())) {
+            if (account.getCurrency() == null) {
+                throw new IllegalArgumentException("Currency is required for non-placeholder accounts");
+            }
+        }
+
+        account = accAccountRepository.save(account);
+        node = accNodeRepository.save(node);
 
         BigDecimal balance = BigDecimal.ZERO;
         Map<Long, BigDecimal> balances = Map.of();

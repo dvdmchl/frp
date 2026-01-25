@@ -30,7 +30,7 @@ public class AccAccountEntity extends AuditableEntity {
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "currency_id", nullable = false,
+    @JoinColumn(name = "currency_id",
             comment = "Reference to the currency used for this account")
     private AccCurrencyEntity currency;
 

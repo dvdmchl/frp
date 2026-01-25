@@ -12,5 +12,7 @@ export const Paths = {
   ADMIN_USERS: '/admin/users',
   ADMIN_MAINTENANCE: '/admin/maintenance',
   MODULES: '/modules/:moduleCode',
+  ACCOUNTING_CURRENCIES: 'currencies',
+  CURRENT: '.',
   WILDCARD: '*',
 } as const

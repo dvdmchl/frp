@@ -28,14 +28,20 @@ describe('CurrencyManager', () => {
     render(<CurrencyManager />)
 
     await waitFor(() => {
-        expect(screen.getByText('USD')).toBeDefined()
-        expect(screen.getByText('Euro')).toBeDefined()
+      expect(screen.getByText('USD')).toBeDefined()
+      expect(screen.getByText('Euro')).toBeDefined()
     })
   })
 
   it('opens create modal and creates currency', async () => {
     const user = userEvent.setup()
-    vi.mocked(AccountingService.createCurrency).mockResolvedValue({ id: 3, code: 'GBP', name: 'Pound', scale: 2, isBase: false })
+    vi.mocked(AccountingService.createCurrency).mockResolvedValue({
+      id: 3,
+      code: 'GBP',
+      name: 'Pound',
+      scale: 2,
+      isBase: false,
+    })
 
     render(<CurrencyManager />)
 
@@ -50,20 +56,20 @@ describe('CurrencyManager', () => {
 
     await user.type(codeInput, 'GBP')
     await user.type(nameInput, 'Pound')
-    
+
     // Scale might be pre-filled with 2. clear it first?
     await user.clear(scaleInput)
     await user.type(scaleInput, '2')
-    
+
     await user.click(screen.getByText('currency.create'))
 
     await waitFor(() => {
-        expect(AccountingService.createCurrency).toHaveBeenCalledWith({
-            code: 'GBP',
-            name: 'Pound',
-            scale: 2,
-            isBase: false
-        })
+      expect(AccountingService.createCurrency).toHaveBeenCalledWith({
+        code: 'GBP',
+        name: 'Pound',
+        scale: 2,
+        isBase: false,
+      })
     })
   })
 
@@ -81,7 +87,7 @@ describe('CurrencyManager', () => {
     await user.click(deleteButtons[1]) // Index 1 should be EUR
 
     await waitFor(() => {
-        expect(AccountingService.deleteCurrency).toHaveBeenCalledWith(2)
+      expect(AccountingService.deleteCurrency).toHaveBeenCalledWith(2)
     })
   })
 
@@ -97,7 +103,7 @@ describe('CurrencyManager', () => {
     await user.click(setBaseButtons[0]) // Only one button (EUR), USD is base so no button
 
     await waitFor(() => {
-        expect(AccountingService.setBaseCurrency).toHaveBeenCalledWith(2)
+      expect(AccountingService.setBaseCurrency).toHaveBeenCalledWith(2)
     })
   })
 
@@ -107,7 +113,7 @@ describe('CurrencyManager', () => {
     render(<CurrencyManager />)
 
     await waitFor(() => {
-        expect(screen.getByText('currency.error')).toBeDefined()
+      expect(screen.getByText('currency.error')).toBeDefined()
     })
   })
 })

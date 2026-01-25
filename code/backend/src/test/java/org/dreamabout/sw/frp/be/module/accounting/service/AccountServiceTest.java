@@ -14,6 +14,7 @@ import org.dreamabout.sw.frp.be.module.accounting.repository.AccJournalRepositor
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccNodeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -77,6 +78,37 @@ class AccountServiceTest {
         verify(accCurrencyRepository).findByCode("CZK");
         verify(accAccountRepository).save(any(AccAccountEntity.class));
         verify(accNodeRepository).save(any(AccNodeEntity.class));
+    }
+
+    @Test
+    void createAccount_placeholder_shouldCreateAccountWithoutCurrency() {
+        // Arrange
+        var request = new AccAccountCreateRequestDto(
+                null, "Placeholder", "Desc", null, false, AccAcountType.ASSET, true
+        );
+
+        var savedAccount = new AccAccountEntity();
+        savedAccount.setId(1L);
+        var savedNode = new AccNodeEntity();
+        savedNode.setId(10L);
+        savedNode.setAccount(savedAccount);
+
+        when(accAccountRepository.save(any(AccAccountEntity.class))).thenReturn(savedAccount);
+        when(accNodeRepository.save(any(AccNodeEntity.class))).thenReturn(savedNode);
+        
+        var expectedDto = new AccNodeDto(10L, null, true, null, 0, null);
+        when(accountMapper.toDto(any(AccNodeEntity.class), any())).thenReturn(expectedDto);
+
+        // Act
+        accountService.createAccount(request);
+
+        // Assert
+        ArgumentCaptor<AccAccountEntity> accountCaptor = ArgumentCaptor.forClass(AccAccountEntity.class);
+        verify(accAccountRepository).save(accountCaptor.capture());
+        
+        AccAccountEntity capturedAccount = accountCaptor.getValue();
+        assertThat(capturedAccount.getName()).isEqualTo("Placeholder");
+        assertThat(capturedAccount.getCurrency()).isNull();
     }
 
     @Test
@@ -158,10 +190,11 @@ class AccountServiceTest {
     }
 
     @Test
-    void updateAccount_placeholderToAccount_test() {
+    void updateAccount_legacyPlaceholderToAccount_test() {
         var node = new AccNodeEntity();
         node.setId(1L);
         node.setIsPlaceholder(true);
+        // NO ACCOUNT SET (simulate legacy)
 
         var request = new AccAccountCreateRequestDto(null, "Name", "Desc", "EUR", true, AccAcountType.EXPENSE, false);
         var currency = new AccCurrencyEntity();
@@ -174,6 +207,7 @@ class AccountServiceTest {
             a.setId(100L);
             return a;
         });
+        when(accNodeRepository.save(any())).thenAnswer(i -> i.getArgument(0)); // Return the node
         when(accJournalRepository.findBalanceByAccountId(any())).thenReturn(new Object[]{null, null});
         when(accountMapper.toDto(any(AccNodeEntity.class), any())).thenReturn(new AccNodeDto(1L, null, false, null, 0, null));
 
@@ -182,5 +216,83 @@ class AccountServiceTest {
         assertThat(node.getIsPlaceholder()).isFalse();
         assertThat(node.getAccount()).isNotNull();
         assertThat(node.getAccount().getName()).isEqualTo("Name");
+        verify(accAccountRepository).save(any());
+    }
+
+    @Test
+    void updateAccount_updatePlaceholderName_test() {
+        var node = new AccNodeEntity();
+        node.setId(1L);
+        node.setIsPlaceholder(true);
+        var account = new AccAccountEntity();
+        account.setName("Old Name");
+        account.setAccountType(AccAcountType.ASSET);
+        node.setAccount(account);
+
+        var request = new AccAccountCreateRequestDto(null, "New Name", "Desc", null, false, AccAcountType.ASSET, true);
+
+        when(accNodeRepository.findById(1L)).thenReturn(Optional.of(node));
+        when(accAccountRepository.save(any())).thenReturn(account);
+        when(accNodeRepository.save(any())).thenAnswer(i -> i.getArgument(0)); // Return the node
+        when(accountMapper.toDto(any(AccNodeEntity.class), any())).thenReturn(new AccNodeDto(1L, null, true, null, 0, null));
+
+        accountService.updateAccount(1L, request);
+
+        assertThat(account.getName()).isEqualTo("New Name");
+        assertThat(account.getCurrency()).isNull(); // Should remain null
+    }
+
+    @Test
+    void updateAccount_changeParent_test() {
+        var node = new AccNodeEntity();
+        node.setId(1L);
+        node.setOrderIndex(0);
+        
+        var oldParent = new AccNodeEntity();
+        oldParent.setId(10L);
+        node.setParent(oldParent);
+        
+        var newParent = new AccNodeEntity();
+        newParent.setId(20L);
+        newParent.setOrderIndex(0);
+
+        var account = new AccAccountEntity();
+        account.setId(100L);
+        account.setName("Name");
+        account.setAccountType(AccAcountType.ASSET);
+        node.setAccount(account);
+        
+        // Sibling in new parent
+        var newSibling = new AccNodeEntity();
+        newSibling.setId(21L);
+        newSibling.setOrderIndex(0);
+        newSibling.setParent(newParent);
+
+        var request = new AccAccountCreateRequestDto(20L, "Name", "Desc", "USD", false, AccAcountType.ASSET, false);
+
+        var currency = new AccCurrencyEntity();
+        currency.setCode("USD");
+        when(accCurrencyRepository.findByCode("USD")).thenReturn(Optional.of(currency));
+
+        when(accNodeRepository.findById(1L)).thenReturn(Optional.of(node));
+        when(accAccountRepository.save(any())).thenReturn(account);
+        when(accNodeRepository.save(any())).thenAnswer(i -> i.getArgument(0)); 
+        when(accountMapper.toDto(any(AccNodeEntity.class), any())).thenReturn(new AccNodeDto(1L, 20L, false, null, 1, null));
+        
+        // Mock finding new parent
+        when(accNodeRepository.findById(20L)).thenReturn(Optional.of(newParent));
+        
+        // Mock siblings for old parent (shiftOldSiblings)
+        when(accNodeRepository.findAllByParentIdOrderByOrderIndexAsc(10L)).thenReturn(List.of(node)); // Only node itself
+        
+        // Mock siblings for new parent (getSiblings) to calculate new index
+        when(accNodeRepository.findAllByParentIdOrderByOrderIndexAsc(20L)).thenReturn(List.of(newSibling));
+
+        when(accJournalRepository.findBalanceByAccountId(any())).thenReturn(new Object[]{null, null});
+
+        accountService.updateAccount(1L, request);
+
+        assertThat(node.getParent().getId()).isEqualTo(20L);
+        assertThat(node.getOrderIndex()).isEqualTo(1); // Should be after newSibling (0) -> 1
     }
 }

@@ -70,6 +70,7 @@
     "search": "Hledat",
     "reset": "Reset",
     "actions": "Akce",
+    "edit": "Upravit",
     "details": "Detaily",
     "close": "Zavřít",
     "none": "Žádné",
@@ -90,6 +91,34 @@
     },
     "notFound": "Modul nenalezen",
     "placeholderContent": "Vítejte na stránce modulu. Obsah bude brzy k dispozici."
+  },
+  "account": {
+    "title": "Strom účtů",
+    "createTitle": "Vytvořit účet",
+    "editTitle": "Upravit účet",
+    "name": "Název účtu",
+    "description": "Popis",
+    "currency": "Měna",
+    "type": "Typ účtu",
+    "isLiquid": "Likvidní",
+    "parent": "Nadřazený účet",
+    "isPlaceholder": "Zástupný symbol",
+    "create": "Vytvořit",
+    "update": "Upravit",
+    "delete": "Smazat",
+    "createSuccess": "Účet úspěšně vytvořen",
+    "updateSuccess": "Účet úspěšně upraven",
+    "deleteSuccess": "Účet úspěšně smazán",
+    "moveSuccess": "Účet úspěšně přesunut",
+    "deleteConfirm": "Opravdu chcete smazat tento účet?",
+    "error": "Operace selhala",
+    "types": {
+        "ASSET": "Aktivum",
+        "LIABILITY": "Pasivum",
+        "EQUITY": "Vlastní kapitál",
+        "REVENUE": "Výnos",
+        "EXPENSE": "Náklad"
+    }
   },
   "admin": {
     "title": "Administrace",

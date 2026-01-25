@@ -13,6 +13,10 @@ export function H2Title({ children }: Readonly<{ children: React.ReactNode }>) {
   return <h2 className="text-3xl font-extrabold text-center text-textPrimary mb-4">{children}</h2>
 }
 
+export function H3Title({ children }: Readonly<{ children: React.ReactNode }>) {
+  return <h3 className="text-2xl font-bold text-center text-textPrimary mb-3">{children}</h3>
+}
+
 export function TextError({ message }: Readonly<{ message: string }>) {
   return <div className="text-textError text-sm text-center my-2">{message}</div>
 }

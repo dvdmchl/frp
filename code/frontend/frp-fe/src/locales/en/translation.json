@@ -70,6 +70,7 @@
     "search": "Search",
     "reset": "Reset",
     "actions": "Actions",
+    "edit": "Edit",
     "details": "Details",
     "close": "Close",
     "none": "None",
@@ -109,6 +110,34 @@
     "setBaseSuccess": "Base currency set successfully",
     "deleteConfirm": "Are you sure you want to delete this currency?",
     "error": "Operation failed"
+  },
+  "account": {
+    "title": "Account Tree",
+    "createTitle": "Create Account",
+    "editTitle": "Edit Account",
+    "name": "Account Name",
+    "description": "Description",
+    "currency": "Currency",
+    "type": "Account Type",
+    "isLiquid": "Liquid",
+    "parent": "Parent Account",
+    "isPlaceholder": "Placeholder",
+    "create": "Create",
+    "update": "Update",
+    "delete": "Delete",
+    "createSuccess": "Account created successfully",
+    "updateSuccess": "Account updated successfully",
+    "deleteSuccess": "Account deleted successfully",
+    "moveSuccess": "Account moved successfully",
+    "deleteConfirm": "Are you sure you want to delete this account?",
+    "error": "Operation failed",
+    "types": {
+        "ASSET": "Asset",
+        "LIABILITY": "Liability",
+        "EQUITY": "Equity",
+        "REVENUE": "Revenue",
+        "EXPENSE": "Expense"
+    }
   },
   "admin": {
     "title": "Admin",

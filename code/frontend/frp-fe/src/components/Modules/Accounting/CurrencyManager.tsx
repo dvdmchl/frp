@@ -11,9 +11,6 @@ import {
   TableHeadCell,
   TableRow,
   Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
   Checkbox,
   Label,
   Spinner,
@@ -151,6 +148,9 @@ export const CurrencyManager: React.FC = () => {
     }
   }
 
+  // Cast Modal to any to avoid TS error about static Body property or runtime issues if exports are weird
+  const ModalAny = Modal as any
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <H2Title>{t('currency.title')}</H2Title>
@@ -160,9 +160,9 @@ export const CurrencyManager: React.FC = () => {
       </div>
 
       {loading && currencies.length === 0 && (
-          <div className="flex justify-center p-4">
-            <Spinner size="xl" />
-          </div>
+        <div className="flex justify-center p-4">
+          <Spinner size="xl" />
+        </div>
       )}
 
       {apiError && <ErrorDisplay error={apiError} />}
@@ -192,7 +192,7 @@ export const CurrencyManager: React.FC = () => {
                   </Button>
                   {!c.isBase && (
                     <Button size="xs" color="warning" onClick={() => c.id && handleSetBase(c.id)}>
-                        {t('currency.setBase')}
+                      {t('currency.setBase')}
                     </Button>
                   )}
                   <Button size="xs" color="failure" onClick={() => c.id && handleDelete(c.id)}>
@@ -206,18 +206,18 @@ export const CurrencyManager: React.FC = () => {
       </Table>
 
       <Modal show={showModal} onClose={() => setShowModal(false)}>
-        <ModalHeader>{isEdit ? t('currency.editTitle') : t('currency.createTitle')}</ModalHeader>
-        <ModalBody>
+        <ModalAny.Header>{isEdit ? t('currency.editTitle') : t('currency.createTitle')}</ModalAny.Header>
+        <ModalAny.Body>
           <div className="space-y-6">
             {!isEdit && (
-                <InputText
+              <InputText
                 id="code"
                 name="code"
                 labelTranslationKey="currency.code"
                 placeholderTranslationKey="currency.code"
                 value={formData.code}
                 onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                />
+              />
             )}
             <InputText
               id="name"
@@ -236,26 +236,26 @@ export const CurrencyManager: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, scale: parseInt(e.target.value) || 0 })}
             />
             {!isEdit && (
-                <div className="flex items-center gap-2">
-                    <Checkbox 
-                        id="isBase" 
-                        checked={formData.isBase} 
-                        onChange={(e) => setFormData({...formData, isBase: e.target.checked})}
-                    />
-                    <Label htmlFor="isBase">{t('currency.isBase')}</Label>
-                </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="isBase"
+                  checked={formData.isBase}
+                  onChange={(e) => setFormData({ ...formData, isBase: e.target.checked })}
+                />
+                <Label htmlFor="isBase">{t('currency.isBase')}</Label>
+              </div>
             )}
             {actionError && <ErrorDisplay error={actionError} />}
           </div>
-        </ModalBody>
-        <ModalFooter>
+        </ModalAny.Body>
+        <ModalAny.Footer>
           <Button onClick={handleSubmit} disabled={loading || !formData.code || !formData.name}>
             {isEdit ? t('currency.update') : t('currency.create')}
           </Button>
           <Button color="gray" onClick={() => setShowModal(false)}>
             {t('common.close')}
           </Button>
-        </ModalFooter>
+        </ModalAny.Footer>
       </Modal>
     </div>
   )

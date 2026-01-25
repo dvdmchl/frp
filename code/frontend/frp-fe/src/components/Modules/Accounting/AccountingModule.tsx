@@ -1,28 +1,31 @@
 import React from 'react'
 import { Routes, Route, Navigate, Link } from 'react-router-dom'
 import { CurrencyManager } from './CurrencyManager'
-import { H2Title } from '../../UIComponent/Text'
+import { AccountTree } from './AccountTree'
 import { Button } from 'flowbite-react'
+import { useTranslation } from 'react-i18next'
+import { Paths } from '../../../constants/Paths'
 
 const AccountingDashboard: React.FC = () => {
-    return (
-        <div className="p-4">
-             <H2Title>Accounting Module</H2Title>
-             <div className="flex gap-4 mt-4">
-                <Link to="currencies">
-                    <Button>Manage Currencies</Button>
-                </Link>
-             </div>
-        </div>
-    )
+  const { t } = useTranslation()
+  return (
+    <div className="p-4">
+      <div className="flex justify-end mb-4">
+        <Link to={Paths.ACCOUNTING_CURRENCIES}>
+          <Button color="light">{t('currency.title')}</Button>
+        </Link>
+      </div>
+      <AccountTree />
+    </div>
+  )
 }
 
 export const AccountingModule: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<AccountingDashboard />} />
-      <Route path="currencies" element={<CurrencyManager />} />
-      <Route path="*" element={<Navigate to="" replace />} />
+      <Route index element={<AccountingDashboard />} />
+      <Route path={Paths.ACCOUNTING_CURRENCIES} element={<CurrencyManager />} />
+      <Route path={Paths.WILDCARD} element={<Navigate to={Paths.CURRENT} replace />} />
     </Routes>
   )
 }
