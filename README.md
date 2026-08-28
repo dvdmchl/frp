@@ -61,6 +61,12 @@ docker compose -p frp-prod -f docker-compose.yml up -d
 - **Back-end**: Spring Boot, Hibernate
 - **Database**: PostgreSQL
 
+## Working with Codex
+
+This repository is configured for [Codex](https://developers.openai.com/codex/). Project conventions, safe development practices, and verification commands are in [AGENTS.md](AGENTS.md). Codex project defaults are stored in [.codex/config.toml](.codex/config.toml) and take effect after the repository is trusted.
+
+The project configuration uses workspace-only writes, on-request approvals, cached web search, and the native elevated Windows sandbox. It contains no credentials or provider-specific MCP token configuration.
+
 ## License
 
 This project is licensed under the GNU AGPLv3.
