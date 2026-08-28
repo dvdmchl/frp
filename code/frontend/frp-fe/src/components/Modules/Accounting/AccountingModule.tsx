@@ -2,6 +2,7 @@ import React from 'react'
 import { Routes, Route, Navigate, Link } from 'react-router-dom'
 import { CurrencyManager } from './CurrencyManager'
 import { AccountTree } from './AccountTree'
+import { AccountDetailPage } from './AccountDetailPage'
 import { Button } from 'flowbite-react'
 import { useTranslation } from 'react-i18next'
 import { Paths } from '../../../constants/Paths'
@@ -25,6 +26,7 @@ export const AccountingModule: React.FC = () => {
     <Routes>
       <Route index element={<AccountingDashboard />} />
       <Route path={Paths.ACCOUNTING_CURRENCIES} element={<CurrencyManager />} />
+      <Route path={Paths.ACCOUNTING_ACCOUNT} element={<AccountDetailPage />} />
       <Route path={Paths.WILDCARD} element={<Navigate to={Paths.CURRENT} replace />} />
     </Routes>
   )

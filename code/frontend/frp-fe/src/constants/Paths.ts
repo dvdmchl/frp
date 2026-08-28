@@ -13,6 +13,8 @@ export const Paths = {
   ADMIN_MAINTENANCE: '/admin/maintenance',
   MODULES: '/modules/:moduleCode',
   ACCOUNTING_CURRENCIES: 'currencies',
+  ACCOUNTING_ACCOUNT: 'accounts/:accountId',
   CURRENT: '.',
+  PARENT: '..',
   WILDCARD: '*',
 } as const

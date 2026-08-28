@@ -10,6 +10,7 @@ import { ErrorDisplay } from '../../UIComponent/ErrorDisplay'
 import { ErrorBoundary } from '../../UIComponent/ErrorBoundary'
 import { ApiError } from '../../../api/core/ApiError'
 import { H2Title } from '../../UIComponent/Text'
+import { Link } from 'react-router-dom'
 
 interface TreeNodeProps {
   node: AccNodeDto
@@ -38,9 +39,16 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, onEdit, onDelete, onAddChild,
         </div>
 
         <div className="flex-grow flex items-center gap-2">
-          <span className={`font-medium ${node.isPlaceholder ? 'text-gray-500 italic' : 'text-gray-900'}`}>
-            {node.account?.name || 'Unnamed'}
-          </span>
+          {node.isPlaceholder || !node.account?.id ? (
+            <span className="font-medium italic text-gray-500">{node.account?.name || 'Unnamed'}</span>
+          ) : (
+            <Link
+              to={`accounts/${node.account.id}`}
+              className="font-medium text-gray-900 hover:text-blue-700 hover:underline"
+            >
+              {node.account.name || 'Unnamed'}
+            </Link>
+          )}
           {!node.isPlaceholder && (
             <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{node.account?.currencyCode}</span>
           )}

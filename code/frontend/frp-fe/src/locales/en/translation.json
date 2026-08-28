@@ -72,6 +72,7 @@
     "actions": "Actions",
     "edit": "Edit",
     "details": "Details",
+    "delete": "Delete",
     "close": "Close",
     "none": "None",
     "id": "ID"
@@ -131,13 +132,50 @@
     "moveSuccess": "Account moved successfully",
     "deleteConfirm": "Are you sure you want to delete this account?",
     "error": "Operation failed",
+    "notFound": "Account not found.",
+    "backToTree": "Back to account tree",
+    "balance": "Current balance",
     "types": {
-        "ASSET": "Asset",
-        "LIABILITY": "Liability",
-        "EQUITY": "Equity",
-        "REVENUE": "Revenue",
-        "EXPENSE": "Expense"
+      "ASSET": "Asset",
+      "LIABILITY": "Liability",
+      "EQUITY": "Equity",
+      "REVENUE": "Revenue",
+      "EXPENSE": "Expense"
     }
+  },
+  "transaction": {
+    "createTitle": "Add transaction",
+    "editTitle": "Edit transaction",
+    "create": "Create transaction",
+    "update": "Update transaction",
+    "date": "Date",
+    "reference": "Reference",
+    "description": "Description",
+    "fxRate": "Exchange rate",
+    "amount": "Amount",
+    "count": "Transactions",
+    "totalDebit": "Total debit",
+    "totalCredit": "Total credit",
+    "search": "Filter transactions",
+    "searchPlaceholder": "Reference or description",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "empty": "No transactions match the selected account and filters.",
+    "balanceSummary": "Credits: {{credit}} · Debits: {{debit}}",
+    "deleteConfirm": "Are you sure you want to delete this transaction?",
+    "error": "Transaction operation failed"
+  },
+  "journal": {
+    "title": "Journal entries",
+    "editTitle": "Edit journal entry",
+    "add": "Add journal entry",
+    "update": "Update entry",
+    "date": "Date",
+    "description": "Description",
+    "account": "Account",
+    "credit": "Credit",
+    "debit": "Debit",
+    "deleteConfirm": "Are you sure you want to delete this journal entry?"
   },
   "admin": {
     "title": "Admin",

@@ -2,6 +2,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { AccountTree } from './AccountTree'
 import { AccountingService } from '../../../api/services/AccountingService'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
 
 // Mock services
 vi.mock('../../../api/services/AccountingService')
@@ -61,17 +62,25 @@ describe('AccountTree', () => {
     vi.mocked(AccountingService.getAllCurrencies).mockResolvedValue([])
   })
 
+  const renderTree = () =>
+    render(
+      <MemoryRouter>
+        <AccountTree />
+      </MemoryRouter>,
+    )
+
   it('renders tree correctly', async () => {
-    render(<AccountTree />)
+    renderTree()
 
     await waitFor(() => {
       expect(screen.getByText('Assets')).toBeInTheDocument()
       expect(screen.getByText('Cash')).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Cash' })).toHaveAttribute('href', '/accounts/2')
     })
   })
 
   it('opens create modal on add button click', async () => {
-    render(<AccountTree />)
+    renderTree()
     await waitFor(() => expect(screen.getByText('Assets')).toBeInTheDocument())
 
     // Find the main "Create" button. It text is 'account.create'.
@@ -89,7 +98,7 @@ describe('AccountTree', () => {
 
   it('calls delete API on delete click', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
-    render(<AccountTree />)
+    renderTree()
     await waitFor(() => expect(screen.getByText('Assets')).toBeInTheDocument())
 
     const deleteButtons = screen.getAllByText('X')

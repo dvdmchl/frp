@@ -16,6 +16,10 @@ vi.mock('./AccountTree', () => ({
   AccountTree: () => <div>MockAccountTree</div>,
 }))
 
+vi.mock('./AccountDetailPage', () => ({
+  AccountDetailPage: () => <div>MockAccountDetailPage</div>,
+}))
+
 describe('AccountingModule', () => {
   it('renders dashboard at root', () => {
     render(
@@ -34,5 +38,14 @@ describe('AccountingModule', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText('MockCurrencyManager')).toBeDefined()
+  })
+
+  it('renders account detail at /accounts/:accountId', () => {
+    render(
+      <MemoryRouter initialEntries={['/accounts/42']}>
+        <AccountingModule />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('MockAccountDetailPage')).toBeDefined()
   })
 })

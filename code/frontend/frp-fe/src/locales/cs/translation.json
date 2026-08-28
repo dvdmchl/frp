@@ -72,6 +72,7 @@
     "actions": "Akce",
     "edit": "Upravit",
     "details": "Detaily",
+    "delete": "Smazat",
     "close": "Zavřít",
     "none": "Žádné",
     "id": "ID"
@@ -112,13 +113,50 @@
     "moveSuccess": "Účet úspěšně přesunut",
     "deleteConfirm": "Opravdu chcete smazat tento účet?",
     "error": "Operace selhala",
+    "notFound": "Účet nebyl nalezen.",
+    "backToTree": "Zpět na strom účtů",
+    "balance": "Aktuální zůstatek",
     "types": {
-        "ASSET": "Aktivum",
-        "LIABILITY": "Pasivum",
-        "EQUITY": "Vlastní kapitál",
-        "REVENUE": "Výnos",
-        "EXPENSE": "Náklad"
+      "ASSET": "Aktivum",
+      "LIABILITY": "Pasivum",
+      "EQUITY": "Vlastní kapitál",
+      "REVENUE": "Výnos",
+      "EXPENSE": "Náklad"
     }
+  },
+  "transaction": {
+    "createTitle": "Přidat transakci",
+    "editTitle": "Upravit transakci",
+    "create": "Vytvořit transakci",
+    "update": "Uložit transakci",
+    "date": "Datum",
+    "reference": "Reference",
+    "description": "Popis",
+    "fxRate": "Směnný kurz",
+    "amount": "Částka",
+    "count": "Transakce",
+    "totalDebit": "Celkem Má dáti",
+    "totalCredit": "Celkem Dal",
+    "search": "Filtrovat transakce",
+    "searchPlaceholder": "Reference nebo popis",
+    "dateFrom": "Od",
+    "dateTo": "Do",
+    "empty": "Vybranému účtu a filtrům neodpovídají žádné transakce.",
+    "balanceSummary": "Dal: {{credit}} · Má dáti: {{debit}}",
+    "deleteConfirm": "Opravdu chcete tuto transakci smazat?",
+    "error": "Operace s transakcí selhala"
+  },
+  "journal": {
+    "title": "Položky deníku",
+    "editTitle": "Upravit položku deníku",
+    "add": "Přidat položku deníku",
+    "update": "Uložit položku",
+    "date": "Datum",
+    "description": "Popis",
+    "account": "Účet",
+    "credit": "Dal",
+    "debit": "Má dáti",
+    "deleteConfirm": "Opravdu chcete tuto položku deníku smazat?"
   },
   "admin": {
     "title": "Administrace",
