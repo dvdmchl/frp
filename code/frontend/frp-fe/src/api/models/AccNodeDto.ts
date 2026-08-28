@@ -9,6 +9,6 @@ export type AccNodeDto = {
     isPlaceholder?: boolean;
     account?: AccAccountDto;
     orderIndex?: number;
-    children?: Array<any>;
+    children?: Array<AccNodeDto>;
 };
 

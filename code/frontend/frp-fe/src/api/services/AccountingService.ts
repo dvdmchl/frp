@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AccAccountCreateRequestDto } from '../models/AccAccountCreateRequestDto';
-import type { AccAccountDto } from '../models/AccAccountDto';
 import type { AccCurrencyCreateRequestDto } from '../models/AccCurrencyCreateRequestDto';
 import type { AccCurrencyDto } from '../models/AccCurrencyDto';
 import type { AccCurrencyUpdateRequestDto } from '../models/AccCurrencyUpdateRequestDto';
@@ -451,17 +450,10 @@ export class AccountingService {
     /**
      * Get account tree
      * Returns the entire account tree.
-     * @returns any OK
+     * @returns AccNodeDto OK
      * @throws ApiError
      */
-    public static getTree(): CancelablePromise<Array<{
-        id?: number;
-        parentId?: number;
-        isPlaceholder?: boolean;
-        account?: AccAccountDto;
-        orderIndex?: number;
-        children?: Array<any>;
-    }>> {
+    public static getTree(): CancelablePromise<Array<AccNodeDto>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/accounting/accounts/tree',
