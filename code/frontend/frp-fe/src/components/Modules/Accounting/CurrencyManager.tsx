@@ -11,6 +11,9 @@ import {
   TableHeadCell,
   TableRow,
   Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Checkbox,
   Label,
   Spinner,
@@ -148,9 +151,6 @@ export const CurrencyManager: React.FC = () => {
     }
   }
 
-  // Cast Modal to any to avoid TS error about static Body property or runtime issues if exports are weird
-  const ModalAny = Modal as any
-
   return (
     <div className="flex flex-col gap-4 p-4">
       <H2Title>{t('currency.title')}</H2Title>
@@ -206,8 +206,8 @@ export const CurrencyManager: React.FC = () => {
       </Table>
 
       <Modal show={showModal} onClose={() => setShowModal(false)}>
-        <ModalAny.Header>{isEdit ? t('currency.editTitle') : t('currency.createTitle')}</ModalAny.Header>
-        <ModalAny.Body>
+        <ModalHeader>{isEdit ? t('currency.editTitle') : t('currency.createTitle')}</ModalHeader>
+        <ModalBody>
           <div className="space-y-6">
             {!isEdit && (
               <InputText
@@ -247,15 +247,15 @@ export const CurrencyManager: React.FC = () => {
             )}
             {actionError && <ErrorDisplay error={actionError} />}
           </div>
-        </ModalAny.Body>
-        <ModalAny.Footer>
+        </ModalBody>
+        <ModalFooter>
           <Button onClick={handleSubmit} disabled={loading || !formData.code || !formData.name}>
             {isEdit ? t('currency.update') : t('currency.create')}
           </Button>
           <Button color="gray" onClick={() => setShowModal(false)}>
             {t('common.close')}
           </Button>
-        </ModalAny.Footer>
+        </ModalFooter>
       </Modal>
     </div>
   )

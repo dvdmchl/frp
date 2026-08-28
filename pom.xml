@@ -12,7 +12,7 @@
 
     <properties>
         <revision>0.0.1-SNAPSHOT</revision>
-        <sonar.version>5.5.0.6356</sonar.version>
+        <sonar.version>5.7.0.6970</sonar.version>
     </properties>
 
     <build>
