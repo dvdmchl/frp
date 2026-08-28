@@ -13,11 +13,10 @@ import {
   InputOldPassword,
   InputConfirmPassword,
 } from '../UIComponent/Input.tsx'
-import { Button, SidebarItemGroup, Sidebar, SidebarItem, SidebarItems } from 'flowbite-react'
+import { Button } from 'flowbite-react'
 import { useTranslation } from 'react-i18next'
 import { SchemaManager } from './SchemaManager'
-import { Link, useParams } from 'react-router-dom'
-import { Paths } from '../../constants/Paths'
+import { useParams } from 'react-router-dom'
 
 export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => void }> = ({ onProfileUpdate }) => {
   const { t } = useTranslation()
@@ -112,91 +111,56 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
   }
 
   return (
-    <div className="flex gap-6">
-      <Sidebar aria-label="User Profile Sidebar">
-        <SidebarItems>
-          <SidebarItemGroup>
-            <SidebarItem
-              active={section === 'info'}
-              as={Link}
-              // @ts-expect-error: flowbite-react polymorphic type issue
-              to={Paths.PROFILE_PERSONAL_INFO}
-              className="cursor-pointer"
-            >
-              {t('profile.personalInfo')}
-            </SidebarItem>
-            <SidebarItem
-              active={section === 'security'}
-              as={Link}
-              // @ts-expect-error: flowbite-react polymorphic type issue
-              to={Paths.SECURITY}
-              className="cursor-pointer"
-            >
-              {t('profile.security')}
-            </SidebarItem>
-            <SidebarItem
-              active={section === 'schemas'}
-              as={Link}
-              // @ts-expect-error: flowbite-react polymorphic type issue
-              to={Paths.DATABASE_SCHEMAS}
-              className="cursor-pointer"
-            >
-              {t('profile.databaseSchemas')}
-            </SidebarItem>
-          </SidebarItemGroup>
-        </SidebarItems>
-      </Sidebar>
-      <div className="flex-1">
-        {section === 'info' && (
-          <Form onSubmit={handleInfoSubmit}>
-            <H2Title>{t('profile.title')}</H2Title>
+    <div className="min-w-0">
+      {section === 'info' && (
+        <Form onSubmit={handleInfoSubmit}>
+          <H2Title>{t('profile.title')}</H2Title>
 
-            <InputText
-              id="fullName"
-              name="fullName"
-              placeholderTranslationKey="profile.fullName"
-              labelTranslationKey="profile.fullName"
-              value={fullName}
-              required
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)}
-            />
+          <InputText
+            id="fullName"
+            name="fullName"
+            placeholderTranslationKey="profile.fullName"
+            labelTranslationKey="profile.fullName"
+            value={fullName}
+            required
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)}
+          />
 
-            <InputEmail value={email} required onChange={(e) => setEmail(e.target.value)} />
+          <InputEmail value={email} required onChange={(e) => setEmail(e.target.value)} />
 
-            {apiError && <ErrorDisplay error={apiError} />}
-            {success && <TextSuccess message={success} />}
+          {apiError && <ErrorDisplay error={apiError} />}
+          {success && <TextSuccess message={success} />}
 
-            <Button disabled={loading} type="submit">
-              {loading ? t('profile.button-progress') : t('profile.button')}
-            </Button>
-          </Form>
-        )}
+          <Button disabled={loading} type="submit">
+            {loading ? t('profile.button-progress') : t('profile.button')}
+          </Button>
+        </Form>
+      )}
 
-        {section === 'security' && (
-          <Form onSubmit={handlePasswordSubmit}>
-            <H2Title>{t('profile.security')}</H2Title>
+      {section === 'security' && (
+        <Form onSubmit={handlePasswordSubmit}>
+          <H2Title>{t('profile.security')}</H2Title>
 
-            <InputOldPassword value={oldPassword} required onChange={(e) => setOldPassword(e.target.value)} />
+          <InputOldPassword value={oldPassword} required onChange={(e) => setOldPassword(e.target.value)} />
 
-            <InputNewPassword value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+          <InputNewPassword value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
 
-            <InputConfirmPassword value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+          <InputConfirmPassword value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
 
-            {apiError && <ErrorDisplay error={apiError} />}
-            {success && <TextSuccess message={success} />}
+          {apiError && <ErrorDisplay error={apiError} />}
+          {success && <TextSuccess message={success} />}
 
-            <Button disabled={loading} type="submit">
-              {loading ? t('profile.button-progress') : t('profile.button')}
-            </Button>
-          </Form>
-        )}
+          <Button disabled={loading} type="submit">
+            {loading ? t('profile.button-progress') : t('profile.button')}
+          </Button>
+        </Form>
+      )}
 
-        {section === 'schemas' && (
-          <div className="max-w-4xl mx-auto mt-12 p-8 bg-bgForm rounded-2xl shadow-2xl">
-            <SchemaManager user={userDto} onUserUpdate={handleUserUpdate} />
-          </div>
-        )}
-      </div>
+      {section === 'schemas' && (
+        <div className="max-w-4xl mx-auto mt-12 p-8 bg-bgForm rounded-2xl shadow-2xl">
+          <SchemaManager user={userDto} onUserUpdate={handleUserUpdate} />
+        </div>
+      )}
     </div>
   )
 }

@@ -1,17 +1,17 @@
-@import "tailwindcss";
-@import "flowbite-react/plugin/tailwindcss";
+@import 'tailwindcss';
+@import 'flowbite-react/plugin/tailwindcss';
 @source "../.flowbite-react/class-list.json";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --color-bgForm: #f9fafb;
-    --color-bgMenu: #f3f4f6;
+  --color-bgForm: #f9fafb;
+  --color-bgMenu: #f3f4f6;
 }
 
 #root {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem;
-    text-align: center;
+  min-height: 100vh;
+  max-width: 1536px;
+  margin: 0 auto;
+  background: #fff;
 }

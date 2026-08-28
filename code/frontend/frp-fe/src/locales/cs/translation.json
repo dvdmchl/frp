@@ -85,6 +85,14 @@
   "modules": {
     "menuTitle": "Moduly"
   },
+  "navigation": {
+    "main": "Hlavní navigace",
+    "menu": "Menu",
+    "home": "Domů",
+    "profile": "Profil a nastavení",
+    "openMenu": "Otevřít navigační menu",
+    "closeMenu": "Zavřít navigační menu"
+  },
   "module": {
     "disabled": {
       "title": "Modul zakázán",

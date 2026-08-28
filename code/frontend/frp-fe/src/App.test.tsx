@@ -10,6 +10,9 @@ vi.mock('./components/Header', () => ({
 vi.mock('./components/Footer', () => ({
   default: () => <div data-testid="footer">Footer</div>,
 }))
+vi.mock('./components/AppNavigation', () => ({
+  AppNavigation: () => <nav data-testid="app-navigation">Navigation</nav>,
+}))
 vi.mock('./AppRoutes', () => ({
   AppRoutes: ({ onLoginSuccess, onRegisterSuccess }: any) => (
     <div data-testid="app-routes">

@@ -34,6 +34,7 @@ describe('Header Component', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText('Family Resource Planner')).toBeInTheDocument()
+    expect(screen.getByText('FRP')).toBeInTheDocument()
   })
 
   it('renders user info when user is provided', () => {
@@ -47,6 +48,19 @@ describe('Header Component', () => {
     expect(screen.getByText('schema1')).toBeInTheDocument()
   })
 
+  it('opens navigation from the mobile menu button', () => {
+    const onMenuToggle = vi.fn()
+    const user: UserDto = { id: 1, email: 'test@example.com' }
+    render(
+      <MemoryRouter>
+        <Header user={user} onMenuToggle={onMenuToggle} />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'navigation.openMenu' }))
+    expect(onMenuToggle).toHaveBeenCalledOnce()
+  })
+
   it('calls logout and redirects on logout button click', async () => {
     const onLogout = vi.fn()
     // Mock window.location.href
@@ -56,7 +70,7 @@ describe('Header Component', () => {
 
     render(
       <MemoryRouter>
-        <Header onLogout={onLogout} />
+        <Header user={{ id: 1, email: 'test@example.com' }} onLogout={onLogout} />
       </MemoryRouter>,
     )
 

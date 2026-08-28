@@ -85,6 +85,14 @@
   "modules": {
     "menuTitle": "Modules"
   },
+  "navigation": {
+    "main": "Main navigation",
+    "menu": "Menu",
+    "home": "Home",
+    "profile": "Profile and settings",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu"
+  },
   "module": {
     "disabled": {
       "title": "Module Disabled",
