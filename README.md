@@ -74,9 +74,9 @@ mvn -f spring-pg-multitenancy/pom.xml install
 
 The backend Docker image installs the library from GitHub on its own.
 
-## Working with Codex
+## Working with AI agents
 
-This repository is configured for [Codex](https://developers.openai.com/codex/). Project conventions, safe development practices, and verification commands are in [AGENTS.md](AGENTS.md). Codex project defaults are stored in [.codex/config.toml](.codex/config.toml) and take effect after the repository is trusted.
+Project conventions, workflow rules, and verification commands for AI agents are in [AGENTS.md](AGENTS.md). [Codex](https://developers.openai.com/codex/) reads it directly; Claude Code imports it through [CLAUDE.md](CLAUDE.md). Codex project defaults are stored in [.codex/config.toml](.codex/config.toml) and take effect after the repository is trusted.
 
 The project configuration uses workspace-only writes, on-request approvals, cached web search, and the native elevated Windows sandbox. It contains no credentials or provider-specific MCP token configuration.
 
