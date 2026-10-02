@@ -44,7 +44,18 @@ relying on this file.
 - **Commits.** Message format `#<issue> - <description>` (e.g. `#72 - Add transaction and journal account page`).
   Agents may commit and push to `main` themselves once the relevant tests and checks pass.
   Commit only your own changes; never revert, stash or discard work you did not make.
-- **Issues.** Work is tracked in GitHub issues in dvdmchl/frp. Close the issue when the work is done and pushed.
+- **Issues.** Work is tracked in GitHub issues in dvdmchl/frp. Every new issue must also be added to the linked
+  GitHub Project **FRP** (https://github.com/users/dvdmchl/projects/10) with a Status; an issue only in the repo
+  is not tracked. The gh token needs the `project` scope (`gh auth refresh -s project`, ask the user to run it).
+  ```bash
+  gh issue create -R dvdmchl/frp --title "[BE] ..." --body "..." --project "FRP"   # lands without Status
+  ITEM=$(gh project item-add 10 --owner dvdmchl --url <issue-url> --format json -q .id)   # idempotent, returns item id
+  gh project item-edit --project-id PVT_kwHOATHpmc4AqTXv --id $ITEM \
+    --field-id PVTSSF_lAHOATHpmc4AqTXvzghkl2o --single-select-option-id <status>
+  ```
+  Status option ids: Backlog `f75ad846`, In progress `47fc9ee4`, Done `98236657`. Set In progress when you
+  start the work and Done when you close the issue (`gh project field-list 10 --owner dvdmchl` lists all fields).
+  Close the issue when the work is done and pushed.
 - **No remote file tools.** Make all changes locally and push with git; do not edit or delete files through
   the GitHub API.
 
