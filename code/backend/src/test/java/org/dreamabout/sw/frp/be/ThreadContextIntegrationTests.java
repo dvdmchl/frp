@@ -1,8 +1,8 @@
 package org.dreamabout.sw.frp.be;
 
-import org.dreamabout.sw.frp.be.config.context.FrpThreadContext;
 import org.dreamabout.sw.frp.be.module.common.service.ExampleService;
 import org.dreamabout.sw.frp.be.test.AbstractDbTest;
+import org.dreamabout.sw.multitenancy.core.MultitenancyThreadContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,14 +42,14 @@ class ThreadContextIntegrationTests extends AbstractDbTest {
     @Test
     void executorDecorator_clearsAfterRun() {
         Runnable decorated = decorator.decorate(() -> {
-            FrpThreadContext.set("key", "value");
-            var storedValue = FrpThreadContext.get("key");
+            MultitenancyThreadContext.set("key", "value");
+            var storedValue = MultitenancyThreadContext.get("key");
             assertThat(storedValue).isEqualTo("value");
         });
 
         decorated.run();
 
-        var storedValue = FrpThreadContext.get("key");
+        var storedValue = MultitenancyThreadContext.get("key");
         assertThat(storedValue).isNull();
     }
 
@@ -57,19 +57,19 @@ class ThreadContextIntegrationTests extends AbstractDbTest {
     void scheduledTask_clearedAfterRun() throws Exception {
         CompletableFuture<Void> cf = new CompletableFuture<>();
         scheduler.schedule(() -> {
-            FrpThreadContext.set("sched", "ok");
+            MultitenancyThreadContext.set("sched", "ok");
             cf.complete(null);
         }, Instant.now());
         cf.get(1, TimeUnit.SECONDS);
-        var storedValue = FrpThreadContext.get("sched");
+        var storedValue = MultitenancyThreadContext.get("sched");
         assertThat(storedValue).isNull();
     }
 
     @Test
     void asyncService_contextIsolatedAndCleared() {
         exampleService.asyncProcess("abc");
-        await().atMost(500, TimeUnit.MILLISECONDS).until(() -> FrpThreadContext.get("asyncValue") == null);
-        var storedValue = FrpThreadContext.get("asyncValue");
+        await().atMost(500, TimeUnit.MILLISECONDS).until(() -> MultitenancyThreadContext.get("asyncValue") == null);
+        var storedValue = MultitenancyThreadContext.get("asyncValue");
         assertThat(storedValue).isNull();
     }
 
@@ -80,7 +80,7 @@ class ThreadContextIntegrationTests extends AbstractDbTest {
                         .with(user("testuser")))
                 .andExpect(status().isOk())
                 .andExpect(content().string("test123"));
-        var storedValue = FrpThreadContext.get("frpHeader");
+        var storedValue = MultitenancyThreadContext.get("frpHeader");
         assertThat(storedValue).isNull();
     }
 }

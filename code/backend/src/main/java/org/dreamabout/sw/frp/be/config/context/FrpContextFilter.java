@@ -2,6 +2,7 @@ package org.dreamabout.sw.frp.be.config.context;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import org.dreamabout.sw.multitenancy.core.MultitenancyThreadContext;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -15,11 +16,11 @@ public class FrpContextFilter implements Filter {
         try {
             String ctxHeader = ((HttpServletRequest) req).getHeader("X-Frp-Context");
             if (ctxHeader != null) {
-                FrpThreadContext.set("frpHeader", ctxHeader);
+                MultitenancyThreadContext.set("frpHeader", ctxHeader);
             }
             chain.doFilter(req, res);
         } finally {
-            FrpThreadContext.clear();
+            MultitenancyThreadContext.clear();
         }
     }
 }

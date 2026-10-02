@@ -1,10 +1,10 @@
 package org.dreamabout.sw.frp.be.module.accounting.service;
 
-import org.dreamabout.sw.frp.be.module.common.service.TablePriorityProvider;
+import org.dreamabout.sw.multitenancy.schema.TableCopyPriorityProvider;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AccountingTablePriorityProvider implements TablePriorityProvider {
+public class AccountingTablePriorityProvider implements TableCopyPriorityProvider {
 
     @Override
     public Integer getTablePriority(String tableName) {

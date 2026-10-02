@@ -120,10 +120,11 @@ npm run generate-api     # regenerate src/api from the running backend (port 808
   (`multitenancy.default-schema`). The library switches Hibernate's tenant and `search_path`; mark tenant-scoped
   repositories (or services/methods) with `@Multitenant`, provide the tenant via `TenantResolver`, and propagate the context to
   async work with `MultitenancyTaskDecorator`.
-- **Schemas.** Create, copy and list tenant schemas through `SchemaService` (`module/common/service`). It validates
-  names (`^[a-z][a-z0-9_]*$`), runs schema initialization and module migrations, and records ownership and access
-  (`SchemaEntity`, `SchemaAccessEntity`). The library's `TenantSchemaManager` offers the generic schema lifecycle;
-  FRP-specific ownership and access stay in FRP.
+- **Schemas.** Create, copy, delete and list tenant schemas through `SchemaService` (`module/common/service`). It checks
+  ownership and access (`SchemaEntity`, `SchemaAccessEntity`) and delegates the schema itself to the library's
+  `TenantSchemaManager` (name validation, tenant migrations, data copy, drop, orphans). `FrpTenantRegistry` lists the
+  tenant schemas from `frp_schema`; the library migrates all of them on startup. Copy order of tables comes from
+  `TableCopyPriorityProvider` beans; `SchemaCreationListener` beans seed new schemas (they get the owner id).
 - **Migrations.** Flyway; shared schema in `db/migration/common`, per-tenant module migrations in
   `db/migration/modules/<module>`. Never edit an applied migration, add a new version instead.
 - **Static analysis.** Checkstyle (`code/backend/checkstyle.xml`, runs in `validate`) and SpotBugs
