@@ -41,6 +41,9 @@ public class ApiPath {
     public static final String MAINTENANCE_FULL = API_ROOT + MAINTENANCE;
     public static final String ORPHAN_SCHEMAS = "/orphan-schemas";
 
+    public static final String AUDIT_LOG = ADMIN + "/audit-log";
+    public static final String AUDIT_LOG_FULL = API_ROOT + AUDIT_LOG;
+
     public static final String ID_PARAM = "/{id}";
     public static final String ID_ACTIVE = ID_PARAM + ACTIVE;
     public static final String ID_ADMIN = ID_PARAM + ADMIN;

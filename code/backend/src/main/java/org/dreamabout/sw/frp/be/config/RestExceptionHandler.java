@@ -9,6 +9,7 @@ import org.dreamabout.sw.frp.be.domain.exception.UserAlreadyExistsException;
 import org.dreamabout.sw.frp.be.module.common.model.dto.ErrorDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @ApiResponses(value = {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ErrorDto.class))),
         @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorDto.class))),
+        @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = ErrorDto.class))),
         @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = ErrorDto.class))),
         @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorDto.class)))
 })
@@ -55,6 +57,12 @@ public class RestExceptionHandler {
     public ResponseEntity<ErrorDto> handleBadCredentials(BadCredentialsException ex) {
         ErrorDto errorDto = new ErrorDto("AuthenticationError", "Invalid email or password", null);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorDto> handleAccessDenied(AccessDeniedException ex) {
+        ErrorDto errorDto = new ErrorDto("AccessDenied", ex.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorDto);
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)

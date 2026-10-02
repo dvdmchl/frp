@@ -1,0 +1,18 @@
+package org.dreamabout.sw.frp.be.module.common.domain;
+
+public enum AuditAction {
+    LOGIN,
+    LOGIN_FAILED,
+    LOGOUT,
+    USER_REGISTERED,
+    USER_INFO_CHANGED,
+    PASSWORD_CHANGED,
+    USER_ACTIVATED,
+    USER_DEACTIVATED,
+    ADMIN_GRANTED,
+    ADMIN_REVOKED,
+    USER_GROUPS_CHANGED,
+    SCHEMA_CREATED,
+    SCHEMA_COPIED,
+    SCHEMA_DROPPED
+}

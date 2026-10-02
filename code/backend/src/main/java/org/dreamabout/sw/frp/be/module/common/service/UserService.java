@@ -3,13 +3,17 @@ package org.dreamabout.sw.frp.be.module.common.service;
 import lombok.RequiredArgsConstructor;
 import org.dreamabout.sw.frp.be.config.security.SecurityContextService;
 import org.dreamabout.sw.frp.be.domain.exception.UserAlreadyExistsException;
+import org.dreamabout.sw.frp.be.module.common.domain.AuditAction;
+import org.dreamabout.sw.frp.be.module.common.model.GroupEntity;
 import org.dreamabout.sw.frp.be.module.common.model.UserEntity;
 import org.dreamabout.sw.frp.be.module.common.model.dto.*;
 import org.dreamabout.sw.frp.be.module.common.model.mapper.UserMapper;
 import org.dreamabout.sw.frp.be.module.common.repository.GroupRepository;
 import org.dreamabout.sw.frp.be.module.common.repository.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +22,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -32,6 +37,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final SchemaService schemaService;
     private final SecurityContextService securityContextService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
@@ -55,12 +61,14 @@ public class UserService {
     public UserDto updateUserActiveStatus(Long id, boolean active) {
         var user = userRepository.findById(id).orElseThrow();
         user.setActive(active);
+        audit(active ? AuditAction.USER_ACTIVATED : AuditAction.USER_DEACTIVATED, id, null);
         return userMapper.toDto(userRepository.save(user));
     }
 
     public UserDto updateUserAdminStatus(Long id, boolean admin) {
         var user = userRepository.findById(id).orElseThrow();
         user.setAdmin(admin);
+        audit(admin ? AuditAction.ADMIN_GRANTED : AuditAction.ADMIN_REVOKED, id, null);
         return userMapper.toDto(userRepository.save(user));
     }
 
@@ -69,6 +77,8 @@ public class UserService {
         var groups = groupRepository.findAllById(groupIds);
         user.getGroups().clear();
         user.getGroups().addAll(groups);
+        var groupNames = groups.stream().map(GroupEntity::getName).sorted().collect(Collectors.joining(","));
+        audit(AuditAction.USER_GROUPS_CHANGED, id, "groups=" + groupNames);
         return userMapper.toDto(userRepository.save(user));
     }
 
@@ -94,7 +104,9 @@ public class UserService {
         
         user.setSchema(schema);
         user = userRepository.save(user);
-        
+
+        eventPublisher.publishEvent(AuditEvent.ofUser(AuditAction.USER_REGISTERED, user.getId(), user.getEmail(),
+                "schema=" + schemaName));
         return userMapper.toDto(user);
     }
 
@@ -106,17 +118,26 @@ public class UserService {
         return sanitized;
     }
 
+    @Transactional(noRollbackFor = AuthenticationException.class)
     public UserLoginResponseDto authenticate(UserLoginRequestDto userLogin) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        userLogin.email(),
-                        userLogin.password()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            userLogin.email(),
+                            userLogin.password()
+                    )
+            );
+        } catch (AuthenticationException e) {
+            var userId = userRepository.findByEmail(userLogin.email()).map(UserEntity::getId).orElse(null);
+            eventPublisher.publishEvent(AuditEvent.ofUser(AuditAction.LOGIN_FAILED, userId, userLogin.email(),
+                    e.getClass().getSimpleName()));
+            throw e;
+        }
         var user = userRepository.findByEmail(userLogin.email())
                 .orElseThrow();
         user.setLastLogin(Instant.now());
         user.setTokenValid(true);
+        eventPublisher.publishEvent(AuditEvent.ofUser(AuditAction.LOGIN, user.getId(), user.getEmail(), null));
         var token = jwtService.generateToken(user);
         return new UserLoginResponseDto(token, userMapper.toDto(user));
     }
@@ -134,6 +155,7 @@ public class UserService {
             user.setFullName(update.fullName());
             user.setEmail(update.email());
             user = userRepository.save(user);
+            eventPublisher.publishEvent(AuditEvent.ofUser(AuditAction.USER_INFO_CHANGED, user.getId(), user.getEmail(), null));
             return Optional.of(userMapper.toDto(user));
         }
         return Optional.empty();
@@ -148,6 +170,7 @@ public class UserService {
             }
             user.setPassword(passwordEncoder.encode(update.newPassword()));
             userRepository.save(user);
+            eventPublisher.publishEvent(AuditEvent.ofUser(AuditAction.PASSWORD_CHANGED, user.getId(), user.getEmail(), null));
             return Optional.of(true);
         }
         return Optional.empty();
@@ -158,6 +181,7 @@ public class UserService {
         user.ifPresent(u -> {
             u.setTokenValid(false);
             userRepository.save(u);
+            eventPublisher.publishEvent(AuditEvent.ofUser(AuditAction.LOGOUT, u.getId(), u.getEmail(), null));
         });
         securityContextService.clearContext();
     }
@@ -165,6 +189,13 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserEntity getPrincipal() {
         return securityContextService.getPrincipal();
+    }
+
+    /**
+     * Audits an administrative change of the target user; the acting admin is taken from the security context.
+     */
+    private void audit(AuditAction action, Long targetUserId, String details) {
+        eventPublisher.publishEvent(AuditEvent.ofCurrentUser(action, AuditEvent.userResource(targetUserId), details));
     }
 
     private Optional<UserEntity> getCurrentUser() {
