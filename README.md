@@ -60,6 +60,19 @@ docker compose -p frp-prod -f docker-compose.yml up -d
 - **Front-end**: React, Vite, TypeScript, Tailwind CSS, Flowbite-React
 - **Back-end**: Spring Boot, Hibernate
 - **Database**: PostgreSQL
+- **Multitenancy**: [spring-pg-multitenancy](https://github.com/dvdmchl/spring-pg-multitenancy)
+
+### Local build
+
+The backend depends on [spring-pg-multitenancy](https://github.com/dvdmchl/spring-pg-multitenancy), which is not on Maven Central yet.
+Install it into the local Maven repository once (and again after changing it) before building FRP:
+
+```bash
+git clone https://github.com/dvdmchl/spring-pg-multitenancy.git
+mvn -f spring-pg-multitenancy/pom.xml install
+```
+
+The backend Docker image installs the library from GitHub on its own.
 
 ## Working with Codex
 

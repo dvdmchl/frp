@@ -33,6 +33,8 @@
         <spring.boot.maven.plugin.version>4.0.8</spring.boot.maven.plugin.version>
         <archunit.version>1.5.0</archunit.version>
         <jacoco.version>0.8.15</jacoco.version>
+        <!-- https://github.com/dvdmchl/spring-pg-multitenancy - run "mvn install" there until it is on Maven Central -->
+        <spring-pg-multitenancy.version>0.1.0-SNAPSHOT</spring-pg-multitenancy.version>
         <sonar.projectKey>frp-backend</sonar.projectKey>
         <sonar.projectName>FRP Backend</sonar.projectName>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -73,9 +75,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.dreamabout.sw.frp</groupId>
-            <artifactId>multitenancy-lib</artifactId>
-            <version>${revision}</version>
+            <groupId>org.dreamabout.sw</groupId>
+            <artifactId>spring-pg-multitenancy</artifactId>
+            <version>${spring-pg-multitenancy.version}</version>
         </dependency>
 
         <dependency>
