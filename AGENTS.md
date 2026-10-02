@@ -95,7 +95,7 @@ wsl docker compose -p frp-dev up -d               # isolated environment
 ```bash
 mvn clean compile -pl code/backend        # compile (Checkstyle runs in validate)
 mvn test -pl code/backend                 # unit + integration tests (Testcontainers)
-mvn verify -pl code/backend               # incl. SpotBugs and coverage
+mvn verify -pl code/backend               # incl. SpotBugs and coverage report
 mvn spring-boot:run -pl code/backend      # run (needs the db service)
 mvn verify -Psonar sonar:sonar -pl code/backend   # Sonar analysis (needs the sonarqube container)
 ```
@@ -112,6 +112,30 @@ npm run check-all        # ESLint + tsc + tests with coverage
 npm run lint:fix         # fix lint/formatting
 npm run generate-api     # regenerate src/api from the running backend (port 8080)
 ```
+
+## Engineering practices
+
+These apply to all code (backend, frontend, tests) and complement the conventions below.
+
+- **Test-first (TDD).** For new behaviour write a failing test first, then the minimal code that makes it pass, then
+  refactor with the tests green. A bug fix starts with a test that reproduces the bug; keep it as a regression test.
+- **Test quality.** One behaviour per test, descriptive names (`shouldXWhenY`), Arrange-Act-Assert structure.
+  Tests are deterministic: no `Thread.sleep` or fixed timeouts, no dependence on test order, current time or locale
+  (inject a `Clock`). Mock only boundaries you do not own; prefer real collaborators and the real database for
+  persistence logic.
+- **DRY, but not prematurely.** Do not copy logic, constants, SQL, validation or test setup; extract a shared method,
+  helper, component or fixture instead. Introduce an abstraction when a third copy would appear, not speculatively.
+- **KISS / YAGNI.** Implement only what the issue needs: no speculative options, extension points, unused parameters
+  or "just in case" code. Prefer the simplest solution that keeps the code readable.
+- **Clean code.** Intention-revealing names; small, focused methods, classes and components; early returns instead
+  of deep nesting. No dead or commented-out code, no `System.out`/`printStackTrace`/`console.log` (log through
+  SLF4J), no `TODO` without an issue number. Never return `null` for collections or `Optional`. Prefer immutability
+  (`final`, records, unmodifiable collections).
+- **Scope.** Keep changes focused on the issue. Unrelated refactoring or cleanup goes into its own issue and commit.
+- **Dependencies.** Do not add a new library, Maven plugin or npm package without the user's approval; prefer what
+  the project already uses.
+- **Security.** No secrets in the repository, tests or logs. Validate input at the boundary (Bean Validation on
+  request DTOs). SQL only with bind parameters; never concatenate user input into SQL or identifiers.
 
 ## Backend conventions
 
@@ -156,10 +180,18 @@ npm run generate-api     # regenerate src/api from the running backend (port 808
 
 ## Testing policy
 
-- Every new feature comes with tests, written together with the code; code without tests is incomplete.
+- Every new feature comes with tests, written first (TDD, see Engineering practices); code without tests is incomplete.
 - Backend integration tests extend `AbstractDbTest` and use `SharedPostgresContainer`.
 - Frontend: Vitest + React Testing Library for all new components, hooks and features, including edge cases and
   API error handling with proper mocks. Coverage gate: at least 70 % statements, branches, functions and lines.
 - No disabled tests, placeholder tests, early returns or `if (true) return;` hacks. Every test has meaningful
   assertions or is removed.
 - Run the relevant tests (and `npm run check-all` for frontend changes) before committing.
+
+## Definition of done
+
+- Tests written first cover the new behaviour; coverage does not drop.
+- `mvn verify -pl code/backend` passes for backend changes (not just `mvn test`), `npm run check-all` for frontend
+  changes.
+- README or wiki (`docs/wiki`) updated when behaviour, configuration or the API changed.
+- Committed as `#<issue> - <description>`, pushed to `main`, the issue closed and its project Status set to Done.
