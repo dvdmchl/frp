@@ -8,15 +8,15 @@ import java.util.List;
 /**
  * In-memory connector used to exercise the SPI in tests. Serves one record per page.
  */
-class FakeAccountingConnector implements AccountingConnector {
+public class FakeAccountingConnector implements AccountingConnector {
 
-    static final String TOKEN = "token";
-    static final String VALID_TOKEN = "valid-token";
+    public static final String TOKEN = "token";
+    public static final String VALID_TOKEN = "valid-token";
 
     private final String type;
     private final List<ExternalRecord> records;
 
-    FakeAccountingConnector(String type, List<ExternalRecord> records) {
+    public FakeAccountingConnector(String type, List<ExternalRecord> records) {
         this.type = type;
         this.records = List.copyOf(records);
     }

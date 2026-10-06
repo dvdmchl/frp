@@ -17,6 +17,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 @SpringBootTest
@@ -77,6 +79,8 @@ public abstract class AbstractDbTest {
         registry.add("spring.flyway.clean-disabled", () -> "false");
 
         registry.add("security.jwt.secret-key", () -> "test-secret-key-123-test-secret-key-123");
+        registry.add("frp.connector.encryption-key",
+                () -> Base64.getEncoder().encodeToString("test-connector-key-test-connecto".getBytes(StandardCharsets.US_ASCII)));
     }
 
     @BeforeEach

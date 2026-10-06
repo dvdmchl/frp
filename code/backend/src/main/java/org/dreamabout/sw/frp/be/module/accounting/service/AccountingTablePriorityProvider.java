@@ -14,6 +14,7 @@ public class AccountingTablePriorityProvider implements TableCopyPriorityProvide
             case "acc_transaction" -> 3;
             case "acc_journal" -> 4;
             case "acc_node" -> 5;
+            case "acc_connection" -> 6;
             default -> null;
         };
     }
