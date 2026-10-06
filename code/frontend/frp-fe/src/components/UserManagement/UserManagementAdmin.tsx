@@ -48,7 +48,7 @@ export function UserManagementAdmin() {
     fetchUsers()
   }, [fetchUsers])
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     fetchUsers(searchQuery)
   }

@@ -18,11 +18,16 @@ import { useTranslation } from 'react-i18next'
 import { SchemaManager } from './SchemaManager'
 import { useParams } from 'react-router-dom'
 
+const SECTION_BY_URL: Partial<Record<string, 'info' | 'security' | 'schemas'>> = {
+  security: 'security',
+  'database-schemas': 'schemas',
+}
+
 export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => void }> = ({ onProfileUpdate }) => {
   const { t } = useTranslation()
   const { section: urlSection } = useParams<{ section: string }>()
 
-  const section = urlSection === 'security' ? 'security' : urlSection === 'database-schemas' ? 'schemas' : 'info'
+  const section = SECTION_BY_URL[urlSection ?? ''] ?? 'info'
 
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -51,7 +56,7 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
       })
   }, [t])
 
-  const handleInfoSubmit = async (e: React.FormEvent) => {
+  const handleInfoSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setApiError(null)
@@ -82,7 +87,7 @@ export const ProfileEditForm: React.FC<{ onProfileUpdate?: (user: UserDto) => vo
     }
   }
 
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setApiError(null)

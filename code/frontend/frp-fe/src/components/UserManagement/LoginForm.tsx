@@ -22,7 +22,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onRegister
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState<ErrorDto | null>(null) // Use ErrorDto
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setApiError(null)

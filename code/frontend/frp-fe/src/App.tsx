@@ -58,7 +58,7 @@ function App() {
     // Po registraci můžeš:
     // - přesměrovat na login
     // - nebo rovnou přihlásit (pokud ti /register vrací uživatele+token)
-    window.location.href = Paths.LOGIN // nebo useNavigate("/login")
+    globalThis.location.href = Paths.LOGIN // nebo useNavigate("/login")
   }
 
   return (

@@ -15,6 +15,7 @@ interface TransactionFormProps {
 }
 
 interface JournalDraft {
+  draftKey: string
   date: string
   description: string
   accountId: string
@@ -23,6 +24,7 @@ interface JournalDraft {
 }
 
 const emptyJournal = (accountId?: number): JournalDraft => ({
+  draftKey: crypto.randomUUID(),
   date: new Date().toISOString().slice(0, 10),
   description: '',
   accountId: accountId?.toString() ?? '',
@@ -45,6 +47,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   const [journals, setJournals] = useState<JournalDraft[]>(
     initialData?.journals?.length
       ? initialData.journals.map((journal) => ({
+          draftKey: crypto.randomUUID(),
           date: journal.date ?? new Date().toISOString().slice(0, 10),
           description: journal.description ?? '',
           accountId: journal.accountId?.toString() ?? '',
@@ -80,7 +83,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     )
   }
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!canSubmit) return
 
@@ -102,6 +105,8 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
       setSubmitting(false)
     }
   }
+
+  const submitLabelKey = initialData ? 'transaction.update' : 'transaction.create'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -147,7 +152,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
         </div>
 
         {journals.map((journal, index) => (
-          <div key={index} className="grid gap-3 rounded-lg border border-gray-200 p-3 md:grid-cols-12">
+          <div key={journal.draftKey} className="grid gap-3 rounded-lg border border-gray-200 p-3 md:grid-cols-12">
             <div className="md:col-span-2">
               <Label htmlFor={`journal-date-${index}`}>{t('journal.date')}</Label>
               <TextInput
@@ -228,7 +233,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           {t('common.close')}
         </Button>
         <Button type="submit" disabled={!canSubmit || submitting}>
-          {submitting ? '...' : t(initialData ? 'transaction.update' : 'transaction.create')}
+          {submitting ? '...' : t(submitLabelKey)}
         </Button>
       </div>
     </form>

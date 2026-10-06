@@ -30,7 +30,7 @@ export default function Header({ user, onLogout, onMenuToggle }: Readonly<Header
       if (onLogout) {
         onLogout()
       }
-      window.location.href = Paths.HOME
+      globalThis.location.href = Paths.HOME
     } catch (err) {
       console.error('Logout failed', err)
     } finally {

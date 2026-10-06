@@ -40,7 +40,7 @@ const transactionDate = (transaction: AccTransactionDto) =>
     .sort()[0] ?? ''
 
 const formatAmount = (amount: number | undefined, currencyCode: string | undefined) =>
-  `${(amount ?? 0).toFixed(2)}${currencyCode ? ` ${currencyCode}` : ''}`
+  [(amount ?? 0).toFixed(2), currencyCode].filter(Boolean).join(' ')
 
 export const AccountDetailPage: React.FC = () => {
   const { t } = useTranslation()
@@ -155,7 +155,7 @@ export const AccountDetailPage: React.FC = () => {
   }
 
   const deleteTransaction = async (transaction: AccTransactionDto) => {
-    if (!transaction.id || !window.confirm(t('transaction.deleteConfirm'))) return
+    if (!transaction.id || !globalThis.confirm(t('transaction.deleteConfirm'))) return
     try {
       await AccountingService.deleteTransaction(transaction.id)
       await loadData()
@@ -185,7 +185,7 @@ export const AccountDetailPage: React.FC = () => {
   }
 
   const deleteJournal = async (journal: AccJournalDto) => {
-    if (!journal.id || !window.confirm(t('journal.deleteConfirm'))) return
+    if (!journal.id || !globalThis.confirm(t('journal.deleteConfirm'))) return
     try {
       await AccountingService.deleteJournal(journal.id)
       await loadData()

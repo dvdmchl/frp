@@ -19,7 +19,7 @@ export const RegisterForm: React.FC<{ onRegisterSuccess: (user: UserDto) => void
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState<ErrorDto | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setApiError(null)

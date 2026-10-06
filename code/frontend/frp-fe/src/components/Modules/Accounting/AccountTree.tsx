@@ -159,7 +159,7 @@ export const AccountTree: React.FC = () => {
 
   const handleDelete = async (node: AccNodeDto) => {
     if (!node.id) return
-    if (!window.confirm(t('account.deleteConfirm'))) return
+    if (!globalThis.confirm(t('account.deleteConfirm'))) return
 
     try {
       await AccountingService.deleteAccount(node.id)
@@ -247,7 +247,7 @@ export const AccountTree: React.FC = () => {
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <H2Title>{t('account.title')}</H2Title>
-        <Button onClick={() => handleCreate(undefined)}>{t('account.create')}</Button>
+        <Button onClick={() => handleCreate()}>{t('account.create')}</Button>
       </div>
 
       <div className="bg-white rounded shadow overflow-hidden group">

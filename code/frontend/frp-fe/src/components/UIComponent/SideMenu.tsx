@@ -9,7 +9,7 @@ type SideMenuProps<T extends string> = {
   onSelect: (key: T) => void
 }
 
-export function SideMenu<T extends string>({ items, selected, onSelect }: SideMenuProps<T>) {
+export function SideMenu<T extends string>({ items, selected, onSelect }: Readonly<SideMenuProps<T>>) {
   return (
     <div className="w-48 flex flex-col bg-bgForm rounded-lg shadow-md">
       {items.map((item) => (

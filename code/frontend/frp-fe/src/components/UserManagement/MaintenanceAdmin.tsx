@@ -18,7 +18,7 @@ import { H1Title, Paragraph, TextSuccess } from '../UIComponent/Text'
 export function MaintenanceAdmin() {
   const { t } = useTranslation()
   const [orphanSchemas, setOrphanSchemas] = useState<string[]>([])
-  const [selectedSchemas, setSelectedUserSchemas] = useState<string[]>([])
+  const [selectedSchemas, setSelectedSchemas] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
@@ -30,7 +30,7 @@ export function MaintenanceAdmin() {
     try {
       const data = await MaintenanceAdminService.listOrphanSchemas()
       setOrphanSchemas(data)
-      setSelectedUserSchemas([])
+      setSelectedSchemas([])
     } catch (err) {
       setError(err as ApiError)
     } finally {
@@ -43,7 +43,7 @@ export function MaintenanceAdmin() {
   }, [fetchOrphanSchemas])
 
   const handleCheckboxChange = (schemaName: string) => {
-    setSelectedUserSchemas((prev) =>
+    setSelectedSchemas((prev) =>
       prev.includes(schemaName) ? prev.filter((s) => s !== schemaName) : [...prev, schemaName],
     )
   }
@@ -84,13 +84,15 @@ export function MaintenanceAdmin() {
 
         <Paragraph>{t('admin.maintenance.orphanSchemasDescription')}</Paragraph>
 
-        {loading ? (
+        {loading && (
           <div className="flex justify-center p-10">
             <Spinner size="xl" />
           </div>
-        ) : orphanSchemas.length === 0 ? (
+        )}
+        {!loading && orphanSchemas.length === 0 && (
           <div className="text-center p-10 text-gray-500">{t('admin.maintenance.noOrphanSchemas')}</div>
-        ) : (
+        )}
+        {!loading && orphanSchemas.length > 0 && (
           <div className="overflow-x-auto">
             <Table hoverable>
               <TableHead>
@@ -99,9 +101,9 @@ export function MaintenanceAdmin() {
                     <Checkbox
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedUserSchemas([...orphanSchemas])
+                          setSelectedSchemas([...orphanSchemas])
                         } else {
-                          setSelectedUserSchemas([])
+                          setSelectedSchemas([])
                         }
                       }}
                       checked={selectedSchemas.length === orphanSchemas.length && orphanSchemas.length > 0}

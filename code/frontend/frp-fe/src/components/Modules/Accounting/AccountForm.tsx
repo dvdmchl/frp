@@ -57,6 +57,8 @@ export const AccountForm: React.FC<AccountFormProps> = ({
     await onSubmit(data)
   }
 
+  const submitLabel = initialData?.id ? t('account.update') : t('account.create')
+
   return (
     <form onSubmit={handleSubmit(submitHandler)} className="flex flex-col gap-4 p-4 bg-white rounded-lg shadow">
       <H3Title>{initialData?.id ? t('account.editTitle') : t('account.createTitle')}</H3Title>
@@ -134,7 +136,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({
           {t('common.close')}
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? '...' : initialData?.id ? t('account.update') : t('account.create')}
+          {isSubmitting ? '...' : submitLabel}
         </Button>
       </div>
     </form>

@@ -29,6 +29,11 @@ const BaseInput = React.forwardRef<HTMLInputElement, BaseInputProps>(
 )
 BaseInput.displayName = 'BaseInput'
 
+type PresetInputProps = Omit<
+  BaseInputProps,
+  'type' | 'labelTranslationKey' | 'placeholderTranslationKey' | 'name' | 'id' | 'autoComplete'
+>
+
 export const InputText = React.forwardRef<HTMLInputElement, Omit<BaseInputProps, 'type' | 'autoComplete'>>(
   ({ ...props }, ref) => {
     return <BaseInput ref={ref} type="text" autoComplete="off" {...props} />
@@ -43,11 +48,7 @@ export const InputNumber = React.forwardRef<HTMLInputElement, Omit<BaseInputProp
 )
 InputNumber.displayName = 'InputNumber'
 
-export function InputEmail(
-  props: Readonly<
-    Omit<BaseInputProps, 'type' | 'labelTranslationKey' | 'placeholderTranslationKey' | 'name' | 'id' | 'autoComplete'>
-  >,
-) {
+export function InputEmail(props: Readonly<PresetInputProps>) {
   return (
     <BaseInput
       type="email"
@@ -62,11 +63,7 @@ export function InputEmail(
 }
 InputEmail.displayName = 'InputEmail'
 
-export function InputPassword(
-  props: Readonly<
-    Omit<BaseInputProps, 'type' | 'labelTranslationKey' | 'placeholderTranslationKey' | 'name' | 'id' | 'autoComplete'>
-  >,
-) {
+export function InputPassword(props: Readonly<PresetInputProps>) {
   return (
     <BaseInput
       type="password"
@@ -80,11 +77,7 @@ export function InputPassword(
   )
 }
 
-export function InputNewPassword(
-  props: Readonly<
-    Omit<BaseInputProps, 'type' | 'labelTranslationKey' | 'placeholderTranslationKey' | 'name' | 'id' | 'autoComplete'>
-  >,
-) {
+export function InputNewPassword(props: Readonly<PresetInputProps>) {
   return (
     <BaseInput
       type="password"
@@ -98,11 +91,7 @@ export function InputNewPassword(
   )
 }
 
-export function InputOldPassword(
-  props: Readonly<
-    Omit<BaseInputProps, 'type' | 'labelTranslationKey' | 'placeholderTranslationKey' | 'name' | 'id' | 'autoComplete'>
-  >,
-) {
+export function InputOldPassword(props: Readonly<PresetInputProps>) {
   return (
     <BaseInput
       type="password"
@@ -116,11 +105,7 @@ export function InputOldPassword(
   )
 }
 
-export function InputConfirmPassword(
-  props: Readonly<
-    Omit<BaseInputProps, 'type' | 'labelTranslationKey' | 'placeholderTranslationKey' | 'name' | 'id' | 'autoComplete'>
-  >,
-) {
+export function InputConfirmPassword(props: Readonly<PresetInputProps>) {
   return (
     <BaseInput
       type="password"

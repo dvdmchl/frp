@@ -233,7 +233,7 @@ export const CurrencyManager: React.FC = () => {
               labelTranslationKey="currency.scale"
               placeholderTranslationKey="currency.scale"
               value={formData.scale}
-              onChange={(e) => setFormData({ ...formData, scale: parseInt(e.target.value) || 0 })}
+              onChange={(e) => setFormData({ ...formData, scale: Number.parseInt(e.target.value) || 0 })}
             />
             {!isEdit && (
               <div className="flex items-center gap-2">

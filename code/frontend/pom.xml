@@ -11,12 +11,37 @@
 
     <artifactId>frontend</artifactId>
     <name>frp-frontend</name>
-    <description>FRP - backend</description>
+    <description>FRP - frontend</description>
     <packaging>pom</packaging>
 
     <properties>
         <frontend.maven.plugin.version>1.15.4</frontend.maven.plugin.version>
         <node.version>v24.12.0</node.version>
+        <sonar.projectKey>frp-frontend</sonar.projectKey>
+        <sonar.projectName>FRP Frontend</sonar.projectName>
+        <sonar.sources>frp-fe/src</sonar.sources>
+        <sonar.tests>frp-fe/src</sonar.tests>
+        <sonar.exclusions>
+            frp-fe/src/api/**,
+            **/*.test.ts,
+            **/*.test.tsx,
+            **/*.stories.tsx
+        </sonar.exclusions>
+        <sonar.test.inclusions>
+            **/*.test.ts,
+            **/*.test.tsx
+        </sonar.test.inclusions>
+        <sonar.coverage.exclusions>
+            frp-fe/src/test/**,
+            frp-fe/src/main.tsx,
+            **/*.d.ts
+        </sonar.coverage.exclusions>
+        <sonar.javascript.lcov.reportPaths>frp-fe/coverage/lcov.info</sonar.javascript.lcov.reportPaths>
+        <!-- Tailwind CSS 4 directives (@source, @custom-variant, @theme) are not standard CSS at-rules -->
+        <sonar.issue.ignore.multicriteria>tailwind</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.tailwind.ruleKey>css:S4662</sonar.issue.ignore.multicriteria.tailwind.ruleKey>
+        <sonar.issue.ignore.multicriteria.tailwind.resourceKey>**/*.css</sonar.issue.ignore.multicriteria.tailwind.resourceKey>
+        <sonar.typescript.tsconfigPaths>frp-fe/tsconfig.app.json,frp-fe/tsconfig.node.json</sonar.typescript.tsconfigPaths>
     </properties>
 
     <build>

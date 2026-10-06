@@ -113,6 +113,7 @@ npm run test:coverage    # Vitest with coverage gate
 npm run check-all        # ESLint + tsc + tests with coverage
 npm run lint:fix         # fix lint/formatting
 npm run generate-api     # regenerate src/api from the running backend (port 8080)
+npm run test:coverage && mvn -Psonar sonar:sonar -f ../pom.xml   # Sonar analysis (needs the sonarqube container and SONAR_TOKEN)
 ```
 
 ## Engineering practices
@@ -167,8 +168,8 @@ These apply to all code (backend, frontend, tests) and complement the convention
 - **Static analysis.** Checkstyle (`code/backend/checkstyle.xml`, runs in `validate`; method length, complexity,
   parameter count, imports, empty catch, switch default), SpotBugs (threshold Medium, `process-classes`) and the JaCoCo
   line coverage gate (80 %, `verify`) fail the build on any violation. Fix the code, do not fight or suppress the tools.
-- **Sonar.** Runs only explicitly (command above) with a strict quality gate; any bug, smell, duplication or gate
-  failure must be fixed.
+- **Sonar.** Runs only explicitly (command above, project `frp-backend`) with a strict quality gate; any bug, smell,
+  duplication or gate failure must be fixed.
 
 ## Frontend conventions
 
@@ -180,6 +181,8 @@ These apply to all code (backend, frontend, tests) and complement the convention
 - All user-facing strings go to `src/locales/en/translation.json` and `src/locales/cs/translation.json`; use `t('key')`.
 - Use `import type` for types (`verbatimModuleSyntax`).
 - ESLint, Prettier and `tsc` are the authority; the build fails on violations.
+- Sonar (project `frp-frontend`, configured in `code/frontend/pom.xml`, coverage from Vitest `lcov`) runs explicitly
+  with the same quality gate as the backend; fix every finding.
 
 ## Testing policy
 

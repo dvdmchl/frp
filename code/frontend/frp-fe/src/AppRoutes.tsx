@@ -36,13 +36,7 @@ function LoginPage({ onLoginSuccess }: Readonly<LoginPageProps>): JSX.Element {
 export function AppRoutes({ user, onLoginSuccess, onRegisterSuccess, setUser }: Readonly<AppRoutesProps>) {
   return (
     <Routes>
-      {!user ? (
-        <>
-          <Route path={Paths.LOGIN} element={<LoginPage onLoginSuccess={onLoginSuccess} />} />
-          <Route path={Paths.REGISTER} element={<RegisterForm onRegisterSuccess={onRegisterSuccess} />} />
-          <Route path={Paths.WILDCARD} element={<Navigate to={Paths.LOGIN} />} />
-        </>
-      ) : (
+      {user ? (
         <>
           <Route path={Paths.HOME} element={<HomePage user={user} />} />
           <Route path={Paths.ADMIN} element={<AdminPage />} />
@@ -51,6 +45,12 @@ export function AppRoutes({ user, onLoginSuccess, onRegisterSuccess, setUser }: 
           <Route path={Paths.PROFILE_SECTION} element={<ProfileEditForm onProfileUpdate={setUser} />} />
           <Route path={Paths.MODULES + '/*'} element={<ModuleWrapper />} />
           <Route path={Paths.WILDCARD} element={<Navigate to={Paths.HOME} />} />
+        </>
+      ) : (
+        <>
+          <Route path={Paths.LOGIN} element={<LoginPage onLoginSuccess={onLoginSuccess} />} />
+          <Route path={Paths.REGISTER} element={<RegisterForm onRegisterSuccess={onRegisterSuccess} />} />
+          <Route path={Paths.WILDCARD} element={<Navigate to={Paths.LOGIN} />} />
         </>
       )}
     </Routes>

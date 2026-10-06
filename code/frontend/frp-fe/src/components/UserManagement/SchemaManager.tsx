@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import type { MutableRefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SchemaManagementService } from '../../api/services/SchemaManagementService'
 import { UserManagementService } from '../../api/services/UserManagementService'
@@ -43,7 +42,7 @@ export const SchemaManager: React.FC<SchemaManagerProps> = ({ user, onUserUpdate
   const [copyTarget, setCopyTarget] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showCopyModal, setShowCopyModal] = useState(false)
-  const copyTargetInputRef: MutableRefObject<HTMLInputElement | null> = useRef(null)
+  const copyTargetInputRef = useRef<HTMLInputElement>(null)
 
   const loadSchemas = useCallback(async () => {
     try {
