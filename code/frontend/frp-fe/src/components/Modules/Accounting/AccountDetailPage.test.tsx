@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ApiError } from '../../../api/core/ApiError'
 import { AccountingService } from '../../../api/services/AccountingService'
 import { AccountDetailPage } from './AccountDetailPage'
 
@@ -44,9 +45,16 @@ const transactions = [
   },
 ]
 
-const renderPage = () =>
+const apiError = (message: string) =>
+  new ApiError(
+    { method: 'GET', url: '/api' } as never,
+    { url: '/api', ok: false, status: 400, statusText: 'Bad Request', body: { message } },
+    message,
+  )
+
+const renderPage = (accountId = '10') =>
   render(
-    <MemoryRouter initialEntries={['/accounts/10']}>
+    <MemoryRouter initialEntries={[`/accounts/${accountId}`]}>
       <Routes>
         <Route path="accounts/:accountId" element={<AccountDetailPage />} />
       </Routes>
@@ -94,5 +102,96 @@ describe('AccountDetailPage', () => {
     await user.click(screen.getByRole('button', { name: 'common.delete' }))
 
     await waitFor(() => expect(AccountingService.deleteTransaction).toHaveBeenCalledWith(100))
+  })
+
+  it('shows not found message when the account does not exist', async () => {
+    renderPage('999')
+
+    expect(await screen.findByText('account.notFound')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'account.backToTree' })).toBeInTheDocument()
+  })
+
+  it('shows the API error message when loading fails', async () => {
+    vi.mocked(AccountingService.getTree).mockRejectedValue(apiError('Tree unavailable'))
+    renderPage()
+
+    expect(await screen.findByText('Tree unavailable')).toBeInTheDocument()
+  })
+
+  it('shows a generic error when loading fails without an API error', async () => {
+    vi.mocked(AccountingService.getAllTransactions).mockRejectedValue(new Error('network'))
+    renderPage()
+
+    expect(await screen.findByText('transaction.error')).toBeInTheDocument()
+  })
+
+  it('filters transactions by date range', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByText('PAY-001')
+
+    await user.type(screen.getByLabelText('transaction.dateFrom'), '2026-08-02')
+
+    expect(screen.getByText('transaction.empty')).toBeInTheDocument()
+
+    await user.clear(screen.getByLabelText('transaction.dateFrom'))
+    await user.type(screen.getByLabelText('transaction.dateTo'), '2026-08-01')
+
+    expect(screen.getByText('PAY-001')).toBeInTheDocument()
+  })
+
+  it('does not delete a transaction when confirmation is cancelled', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    renderPage()
+    await screen.findByText('PAY-001')
+
+    await user.click(screen.getByRole('button', { name: 'common.delete' }))
+
+    expect(AccountingService.deleteTransaction).not.toHaveBeenCalled()
+  })
+
+  it('shows the API error when deleting a transaction fails', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    vi.mocked(AccountingService.deleteTransaction).mockRejectedValue(apiError('Delete refused'))
+    renderPage()
+    await screen.findByText('PAY-001')
+
+    await user.click(screen.getByRole('button', { name: 'common.delete' }))
+
+    expect(await screen.findByText('Delete refused')).toBeInTheDocument()
+  })
+
+  it('updates a journal entry from the edit dialog', async () => {
+    const user = userEvent.setup()
+    vi.mocked(AccountingService.updateJournal).mockResolvedValue({} as never)
+    renderPage()
+    await user.click(await screen.findByText('PAY-001'))
+
+    await user.click(screen.getAllByRole('button', { name: 'common.edit' })[1])
+    const description = await screen.findByLabelText('journal.description')
+    await user.clear(description)
+    await user.type(description, 'Corrected deposit')
+    await user.click(screen.getByRole('button', { name: 'journal.update' }))
+
+    await waitFor(() =>
+      expect(AccountingService.updateJournal).toHaveBeenCalledWith(1001, {
+        date: '2026-08-01',
+        description: 'Corrected deposit',
+      }),
+    )
+  })
+
+  it('deletes a journal entry after confirmation', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    vi.mocked(AccountingService.deleteJournal).mockResolvedValue(undefined as never)
+    renderPage()
+    await user.click(await screen.findByText('PAY-001'))
+
+    await user.click(screen.getAllByRole('button', { name: 'common.delete' })[2])
+
+    await waitFor(() => expect(AccountingService.deleteJournal).toHaveBeenCalledWith(1002))
   })
 })

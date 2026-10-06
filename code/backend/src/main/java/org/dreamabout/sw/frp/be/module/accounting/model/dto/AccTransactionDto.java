@@ -10,4 +10,8 @@ public record AccTransactionDto(
     BigDecimal fxRate,
     BigDecimal totalAmount,
     List<AccJournalDto> journals
-) {}
+) {
+    public AccTransactionDto {
+        journals = journals == null ? null : List.copyOf(journals);
+    }
+}

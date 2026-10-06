@@ -35,12 +35,7 @@ public class AccountingSchemaListener implements SchemaCreationListener {
             log.info("Creating base currency {} ({}) for schema {}", baseCurrencyCode, currencyName, schemaName);
 
             String sql = """
-                    INSERT INTO "%s".acc_currency (
-                        id, code, name, is_base, scale, created_at, created_by_user_id, updated_at, updated_by_user_id, version
-                    ) VALUES (
-                        nextval('"%s".acc_currency_id_seq'), ?, ?, true, ?, ?, ?, ?, ?, 0
-                    )
-                    """.formatted(schemaName, schemaName);
+                    INSERT INTO "%s".acc_currency (                         id, code, name, is_base, scale, created_at, created_by_user_id, updated_at, updated_by_user_id, version                     ) VALUES (                         nextval('"%s".acc_currency_id_seq'), ?, ?, true, ?, ?, ?, ?, ?, 0                     )""".formatted(schemaName, schemaName);
 
             jdbcTemplate.update(sql,
                     baseCurrencyCode,

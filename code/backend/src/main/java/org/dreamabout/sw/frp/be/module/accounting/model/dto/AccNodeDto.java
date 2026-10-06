@@ -9,4 +9,8 @@ public record AccNodeDto(
     AccAccountDto account,
     Integer orderIndex,
     List<AccNodeDto> children
-) {}
+) {
+    public AccNodeDto {
+        children = children == null ? null : List.copyOf(children);
+    }
+}

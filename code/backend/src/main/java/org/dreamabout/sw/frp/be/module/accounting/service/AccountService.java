@@ -257,54 +257,55 @@ public class AccountService {
 
         node.setIsPlaceholder(request.isPlaceholder());
 
-        // Handle parent change
         Long currentParentId = node.getParent() == null ? null : node.getParent().getId();
-        Long newParentId = request.parentId();
-
-        if (!Objects.equals(currentParentId, newParentId)) {
-            AccNodeEntity oldParent = node.getParent();
-            AccNodeEntity newParent = resolveNewParent(newParentId, nodeId);
-
-            shiftOldSiblings(node, oldParent);
-
-            // Calculate new order index (append to end)
-            List<AccNodeEntity> newSiblings = getSiblings(newParent);
-            // If we are moving within same parent (should not happen due to equals check above),
-            // we would need to filter out 'node'. But since parent changed, newSiblings doesn't contain 'node'.
-            
-            int newOrderIndex = newSiblings.isEmpty() ? 0 : newSiblings.getLast().getOrderIndex() + 1;
-            
-            node.setParent(newParent);
-            node.setOrderIndex(newOrderIndex);
+        if (!Objects.equals(currentParentId, request.parentId())) {
+            moveToNewParent(node, request.parentId());
         }
 
-        if (request.currencyCode() != null && !request.currencyCode().isEmpty()) {
-            if (account.getCurrency() == null || !account.getCurrency().getCode().equals(request.currencyCode())) {
-                AccCurrencyEntity currency = accCurrencyRepository.findByCode(request.currencyCode())
-                        .orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_FOUND + request.currencyCode()));
-                account.setCurrency(currency);
-            }
-        } else if (Boolean.FALSE.equals(request.isPlaceholder())) {
-            if (account.getCurrency() == null) {
+        updateCurrency(account, request);
+
+        accAccountRepository.save(account);
+        node = accNodeRepository.save(node);
+        return accountMapper.toDto(node, balanceOf(node));
+    }
+
+    private void moveToNewParent(AccNodeEntity node, Long newParentId) {
+        AccNodeEntity newParent = resolveNewParent(newParentId, node.getId());
+        shiftOldSiblings(node, node.getParent());
+
+        // Append to the end of the new parent's children; node is not among them because the parent changed
+        List<AccNodeEntity> newSiblings = getSiblings(newParent);
+        int newOrderIndex = newSiblings.isEmpty() ? 0 : newSiblings.getLast().getOrderIndex() + 1;
+
+        node.setParent(newParent);
+        node.setOrderIndex(newOrderIndex);
+    }
+
+    private void updateCurrency(AccAccountEntity account, AccAccountCreateRequestDto request) {
+        String currencyCode = request.currencyCode();
+        if (currencyCode == null || currencyCode.isEmpty()) {
+            if (Boolean.FALSE.equals(request.isPlaceholder()) && account.getCurrency() == null) {
                 throw new IllegalArgumentException("Currency is required for non-placeholder accounts");
             }
+            return;
         }
+        if (account.getCurrency() == null || !account.getCurrency().getCode().equals(currencyCode)) {
+            AccCurrencyEntity currency = accCurrencyRepository.findByCode(currencyCode)
+                    .orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_FOUND + currencyCode));
+            account.setCurrency(currency);
+        }
+    }
 
-        account = accAccountRepository.save(account);
-        node = accNodeRepository.save(node);
-
+    private Map<Long, BigDecimal> balanceOf(AccNodeEntity node) {
+        AccAccountEntity account = node.getAccount();
+        if (!Boolean.FALSE.equals(node.getIsPlaceholder()) || account == null) {
+            return Map.of();
+        }
         BigDecimal balance = BigDecimal.ZERO;
-        Map<Long, BigDecimal> balances = Map.of();
-
-        if (Boolean.FALSE.equals(node.getIsPlaceholder()) && node.getAccount() != null) {
-            Object[] sums = accJournalRepository.findBalanceByAccountId(node.getAccount().getId());
-            if (sums != null && sums.length >= 2) {
-                BigDecimal credit = (BigDecimal) sums[0];
-                BigDecimal debit = (BigDecimal) sums[1];
-                balance = calculateBalance(node.getAccount().getAccountType(), credit, debit);
-            }
-            balances = Map.of(node.getAccount().getId(), balance);
+        Object[] sums = accJournalRepository.findBalanceByAccountId(account.getId());
+        if (sums != null && sums.length >= 2) {
+            balance = calculateBalance(account.getAccountType(), (BigDecimal) sums[0], (BigDecimal) sums[1]);
         }
-        return accountMapper.toDto(node, balances);
+        return Map.of(account.getId(), balance);
     }
 }

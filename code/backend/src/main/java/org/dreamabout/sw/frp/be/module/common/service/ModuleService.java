@@ -28,7 +28,7 @@ public class ModuleService {
             ClassPathResource resource = new ClassPathResource("modules.yaml");
             if (resource.exists()) {
                 Map<String, List<ModuleDefinitionDto>> map = mapper.readValue(resource.getInputStream(), new TypeReference<>() {});
-                modules = map.getOrDefault("modules", Collections.emptyList());
+                modules = List.copyOf(map.getOrDefault("modules", Collections.emptyList()));
                 log.info("Loaded {} modules from definition file.", modules.size());
             } else {
                 log.warn("modules.yaml not found.");

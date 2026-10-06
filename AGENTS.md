@@ -56,6 +56,8 @@ relying on this file.
   Status option ids: Backlog `f75ad846`, In progress `47fc9ee4`, Done `98236657`. Set In progress when you
   start the work and Done when you close the issue (`gh project field-list 10 --owner dvdmchl` lists all fields).
   Close the issue when the work is done and pushed.
+- **CI.** GitHub Actions (`.github/workflows/ci.yml`) runs `mvn verify` for the backend and `npm run check-all` for
+  the frontend on every push to `main`. Check that the run is green after pushing.
 - **No remote file tools.** Make all changes locally and push with git; do not edit or delete files through
   the GitHub API.
 
@@ -95,7 +97,7 @@ wsl docker compose -p frp-dev up -d               # isolated environment
 ```bash
 mvn clean compile -pl code/backend        # compile (Checkstyle runs in validate)
 mvn test -pl code/backend                 # unit + integration tests (Testcontainers)
-mvn verify -pl code/backend               # incl. SpotBugs and coverage report
+mvn verify -pl code/backend               # incl. SpotBugs and JaCoCo coverage gate (80 % lines)
 mvn spring-boot:run -pl code/backend      # run (needs the db service)
 mvn verify -Psonar sonar:sonar -pl code/backend   # Sonar analysis (needs the sonarqube container)
 ```
@@ -162,8 +164,9 @@ These apply to all code (backend, frontend, tests) and complement the convention
   `TableCopyPriorityProvider` beans; `SchemaCreationListener` beans seed new schemas (they get the owner id).
 - **Migrations.** Flyway; shared schema in `db/migration/common`, per-tenant module migrations in
   `db/migration/modules/<module>`. Never edit an applied migration, add a new version instead.
-- **Static analysis.** Checkstyle (`code/backend/checkstyle.xml`, runs in `validate`) and SpotBugs
-  (`process-classes`/`verify`) fail the build on any violation. Fix the code, do not fight or suppress the tools.
+- **Static analysis.** Checkstyle (`code/backend/checkstyle.xml`, runs in `validate`; method length, complexity,
+  parameter count, imports, empty catch, switch default), SpotBugs (threshold Medium, `process-classes`) and the JaCoCo
+  line coverage gate (80 %, `verify`) fail the build on any violation. Fix the code, do not fight or suppress the tools.
 - **Sonar.** Runs only explicitly (command above) with a strict quality gate; any bug, smell, duplication or gate
   failure must be fixed.
 

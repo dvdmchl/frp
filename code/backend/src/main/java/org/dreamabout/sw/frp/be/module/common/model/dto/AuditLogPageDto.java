@@ -9,4 +9,7 @@ public record AuditLogPageDto(
         long totalElements,
         int totalPages
 ) {
+    public AuditLogPageDto {
+        items = items == null ? null : List.copyOf(items);
+    }
 }

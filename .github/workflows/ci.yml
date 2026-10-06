@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # The multitenancy library is not on Maven Central; build it into the local repository first
+      - uses: actions/checkout@v5
+        with:
+          repository: dvdmchl/spring-pg-multitenancy
+          path: spring-pg-multitenancy
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Install spring-pg-multitenancy
+        run: mvn -B -ntp install -DskipTests -f spring-pg-multitenancy/pom.xml
+
+      - name: Build and verify backend
+        run: mvn -B -ntp verify -pl code/backend -am -Dtest.docker.host=unix:///var/run/docker.sock
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: code/frontend/frp-fe
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: code/frontend/frp-fe/package-lock.json
+
+      - run: npm ci
+
+      - name: Lint, type check and test with coverage
+        run: npm run check-all

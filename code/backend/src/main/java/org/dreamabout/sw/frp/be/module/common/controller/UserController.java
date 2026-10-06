@@ -8,11 +8,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.dreamabout.sw.frp.be.domain.ApiPath;
-import org.dreamabout.sw.frp.be.module.common.model.dto.*;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserChangePasswordRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserLoginResponseDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserRegisterRequestDto;
+import org.dreamabout.sw.frp.be.module.common.model.dto.UserUpdateInfoRequestDto;
 import org.dreamabout.sw.frp.be.module.common.service.JwtService;
 import org.dreamabout.sw.frp.be.module.common.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor

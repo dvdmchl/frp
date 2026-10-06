@@ -9,4 +9,8 @@ public record AccTransactionCreateRequestDto(
     String description,
     BigDecimal fxRate,
     @NotEmpty List<AccJournalCreateRequestDto> journals
-) {}
+) {
+    public AccTransactionCreateRequestDto {
+        journals = journals == null ? null : List.copyOf(journals);
+    }
+}

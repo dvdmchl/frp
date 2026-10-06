@@ -31,5 +31,27 @@
             <property name="id" value="MagicStringInController"/>
             <property name="query" value="//ANNOTATION[./IDENT[@text='RequestMapping' or @text='GetMapping' or @text='PostMapping' or @text='PutMapping' or @text='DeleteMapping' or @text='PatchMapping' or @text='RequestHeader']]//STRING_LITERAL"/>
         </module>
+
+        <!-- 5. Size and complexity limits -->
+        <module name="MethodLength">
+            <property name="max" value="50"/>
+            <property name="countEmpty" value="false"/>
+        </module>
+        <module name="CyclomaticComplexity">
+            <property name="max" value="10"/>
+            <property name="switchBlockAsSingleDecisionPoint" value="true"/>
+        </module>
+        <module name="ParameterNumber">
+            <property name="max" value="7"/>
+            <property name="ignoreOverriddenMethods" value="true"/>
+        </module>
+
+        <!-- 6. Imports -->
+        <module name="UnusedImports"/>
+        <module name="AvoidStarImport"/>
+
+        <!-- 7. Error handling and control flow -->
+        <module name="EmptyCatchBlock"/>
+        <module name="MissingSwitchDefault"/>
     </module>
 </module>
