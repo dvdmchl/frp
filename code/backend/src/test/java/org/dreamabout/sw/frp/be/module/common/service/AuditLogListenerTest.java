@@ -18,15 +18,15 @@ class AuditLogListenerTest {
     void schemaDropped_isRecordedForCurrentUser() {
         listener.onSchemaDropped(new TenantSchemaDroppedEvent("tenant_a"));
 
-        verify(auditLogService).record(new AuditEvent(AuditAction.SCHEMA_DROPPED, null, null, "schema:tenant_a", null));
+        verify(auditLogService).recordEvent(new AuditEvent(AuditAction.SCHEMA_DROPPED, null, null, "schema:tenant_a", null));
     }
 
     @Test
     void failureToRecord_doesNotBreakAuditedAction() {
-        doThrow(new DataAccessResourceFailureException("db down")).when(auditLogService).record(any());
+        doThrow(new DataAccessResourceFailureException("db down")).when(auditLogService).recordEvent(any());
         var event = AuditEvent.ofUser(AuditAction.LOGIN, 1L, "a@b.c", null);
 
         assertThatCode(() -> listener.onAuditEvent(event)).doesNotThrowAnyException();
-        verify(auditLogService).record(event);
+        verify(auditLogService).recordEvent(event);
     }
 }

@@ -63,6 +63,7 @@ class MaintenanceControllerTest extends AbstractDbTest {
     @Test
     void dropOrphanSchemas_ok_test() throws Exception {
         jdbcTemplate.execute("CREATE SCHEMA orphan_maint_2");
+        jdbcTemplate.execute("CREATE SCHEMA orphan_maint_3");
 
         mockMvc.perform(delete(ApiPath.MAINTENANCE_FULL + ApiPath.ORPHAN_SCHEMAS)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -76,7 +77,9 @@ class MaintenanceControllerTest extends AbstractDbTest {
                 .andReturn().getResponse().getContentAsString();
 
         List<String> orphans = objectMapper.readValue(json, List.class);
-        assertThat(orphans).doesNotContain("orphan_maint_2");
+        assertThat(orphans)
+                .contains("orphan_maint_3")
+                .doesNotContain("orphan_maint_2");
     }
 
     @Test

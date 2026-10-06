@@ -24,6 +24,7 @@ import java.util.List;
 public class AuditLogService {
 
     static final int MAX_PAGE_SIZE = 200;
+    private static final String CREATED_AT = "createdAt";
 
     private final AuditLogRepository auditLogRepository;
     private final SecurityContextService securityContextService;
@@ -33,7 +34,7 @@ public class AuditLogService {
      * Without an explicit user in the event, the currently authenticated user (if any) is recorded.
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void record(AuditEvent event) {
+    public void recordEvent(AuditEvent event) {
         var userId = event.userId();
         var userEmail = event.userEmail();
         if (userId == null && userEmail == null) {
@@ -65,12 +66,12 @@ public class AuditLogService {
             specs.add((root, query, cb) -> cb.equal(root.get("userId"), userId));
         }
         if (from != null) {
-            specs.add((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("createdAt"), from));
+            specs.add((root, query, cb) -> cb.greaterThanOrEqualTo(root.get(CREATED_AT), from));
         }
         if (to != null) {
-            specs.add((root, query, cb) -> cb.lessThan(root.get("createdAt"), to));
+            specs.add((root, query, cb) -> cb.lessThan(root.get(CREATED_AT), to));
         }
-        var pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id")));
+        var pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.desc(CREATED_AT), Sort.Order.desc("id")));
         var result = auditLogRepository.findAll(Specification.allOf(specs), pageRequest);
         List<AuditLogDto> items = result.getContent().stream().map(AuditLogService::toDto).toList();
         return new AuditLogPageDto(items, pageNumber, pageSize, result.getTotalElements(), result.getTotalPages());

@@ -82,9 +82,9 @@ class SchemaServiceTest extends AbstractDbTest {
         schemaService.createSchema("tracked_1", user.getId());
 
         var orphans = schemaService.getOrphanSchemas();
-        assertThat(orphans).contains("orphan_1");
-        assertThat(orphans).doesNotContain("tracked_1");
-        assertThat(orphans).doesNotContain(Constant.TEMPLATE_SCHEMA);
+        assertThat(orphans)
+                .contains("orphan_1")
+                .doesNotContain("tracked_1", Constant.TEMPLATE_SCHEMA);
 
         // Drop orphans
         schemaService.dropOrphanSchemas(List.of("orphan_1"));
@@ -124,7 +124,8 @@ class SchemaServiceTest extends AbstractDbTest {
         var other = createOwner("copy-other@owner.com");
         schemaService.createSchema("copy_private", owner.getId());
 
-        assertThatThrownBy(() -> schemaService.copySchema("copy_private", "copy_stolen", other.getId()))
+        var otherId = other.getId();
+        assertThatThrownBy(() -> schemaService.copySchema("copy_private", "copy_stolen", otherId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Insufficient access level");
         assertThat(schemaExists("copy_stolen")).isFalse();

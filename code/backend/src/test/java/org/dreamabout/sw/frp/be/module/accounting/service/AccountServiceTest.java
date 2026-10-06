@@ -157,7 +157,7 @@ class AccountServiceTest {
         var moveRequest = new AccNodeMoveRequestDto(null, 0);
         accountService.moveNode(1L, moveRequest);
 
-        assertThat(node.getOrderIndex()).isEqualTo(0);
+        assertThat(node.getOrderIndex()).isZero();
         verify(accNodeRepository).save(node);
     }
 
@@ -211,7 +211,7 @@ class AccountServiceTest {
         when(accJournalRepository.findBalanceByAccountId(any())).thenReturn(new Object[]{null, null});
         when(accountMapper.toDto(any(AccNodeEntity.class), any())).thenReturn(new AccNodeDto(1L, null, false, null, 0, null));
 
-        var result = accountService.updateAccount(1L, request);
+        accountService.updateAccount(1L, request);
 
         assertThat(node.getIsPlaceholder()).isFalse();
         assertThat(node.getAccount()).isNotNull();

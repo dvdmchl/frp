@@ -23,30 +23,30 @@ public class AuditLogListener {
 
     @TransactionalEventListener(fallbackExecution = true)
     public void onAuditEvent(AuditEvent event) {
-        record(event);
+        recordSafely(event);
     }
 
     @TransactionalEventListener(fallbackExecution = true)
     public void onSchemaCreated(TenantSchemaCreatedEvent event) {
-        record(AuditEvent.ofCurrentUser(AuditAction.SCHEMA_CREATED,
+        recordSafely(AuditEvent.ofCurrentUser(AuditAction.SCHEMA_CREATED,
                 AuditEvent.schemaResource(event.schemaName()), null));
     }
 
     @TransactionalEventListener(fallbackExecution = true)
     public void onSchemaCopied(TenantSchemaCopiedEvent event) {
-        record(AuditEvent.ofCurrentUser(AuditAction.SCHEMA_COPIED,
+        recordSafely(AuditEvent.ofCurrentUser(AuditAction.SCHEMA_COPIED,
                 AuditEvent.schemaResource(event.targetSchemaName()), "source=" + event.sourceSchemaName()));
     }
 
     @TransactionalEventListener(fallbackExecution = true)
     public void onSchemaDropped(TenantSchemaDroppedEvent event) {
-        record(AuditEvent.ofCurrentUser(AuditAction.SCHEMA_DROPPED,
+        recordSafely(AuditEvent.ofCurrentUser(AuditAction.SCHEMA_DROPPED,
                 AuditEvent.schemaResource(event.schemaName()), null));
     }
 
-    private void record(AuditEvent event) {
+    private void recordSafely(AuditEvent event) {
         try {
-            auditLogService.record(event);
+            auditLogService.recordEvent(event);
         } catch (RuntimeException e) {
             log.error("Failed to write audit log entry {}", event, e);
         }

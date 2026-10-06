@@ -99,7 +99,7 @@ mvn clean compile -pl code/backend        # compile (Checkstyle runs in validate
 mvn test -pl code/backend                 # unit + integration tests (Testcontainers)
 mvn verify -pl code/backend               # incl. SpotBugs and JaCoCo coverage gate (80 % lines)
 mvn spring-boot:run -pl code/backend      # run (needs the db service)
-mvn verify -Psonar sonar:sonar -pl code/backend   # Sonar analysis (needs the sonarqube container)
+mvn verify -Psonar sonar:sonar -f code/backend/pom.xml   # Sonar analysis (needs the sonarqube container and SONAR_TOKEN)
 ```
 
 ### Frontend (in `code/frontend/frp-fe`)
