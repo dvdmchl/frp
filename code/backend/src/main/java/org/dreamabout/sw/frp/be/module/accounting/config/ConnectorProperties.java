@@ -27,4 +27,10 @@ public class ConnectorProperties {
      * Retired keys by version, kept so credentials encrypted before a rotation can still be decrypted.
      */
     private Map<Integer, String> previousEncryptionKeys = new HashMap<>();
+
+    /**
+     * How many days back from today a synchronization fetches records. Records in this window that the source no
+     * longer returns are marked deleted.
+     */
+    private int syncWindowDays = 90;
 }

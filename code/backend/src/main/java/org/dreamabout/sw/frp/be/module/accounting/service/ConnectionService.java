@@ -98,8 +98,13 @@ public class ConnectionService {
         audit(AuditAction.CONNECTION_DELETED, connection);
     }
 
-    private AccConnectionEntity findConnection(Long id) {
+    public AccConnectionEntity findConnection(Long id) {
         return connectionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(CONNECTION_NOT_FOUND));
+    }
+
+    public ConnectorCredentials credentialsOf(AccConnectionEntity connection) {
+        return credentialCipher.decrypt(
+                new EncryptedCredentials(connection.getCredentialsKeyVersion(), connection.getCredentials()));
     }
 
     private static ConnectorCredentials verifiedCredentials(AccountingConnector connector, Map<String, String> values) {
