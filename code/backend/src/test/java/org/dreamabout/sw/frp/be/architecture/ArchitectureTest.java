@@ -8,6 +8,7 @@ import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
+import org.dreamabout.sw.frp.be.module.accounting.connector.AccountingConnector;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -75,6 +76,15 @@ public class ArchitectureTest {
             .that().resideInAPackage("..service..")
             .should().dependOnClassesThat().resideInAPackage("..controller..")
             .because("Services must not depend on controllers");
+
+    // --- Accounting Connector Rules ---
+
+    @ArchTest
+    static final ArchRule accounting_connectors_must_not_access_repositories = noClasses()
+            .that().resideInAPackage("..accounting.connector..")
+            .or().implement(AccountingConnector.class)
+            .should().dependOnClassesThat().resideInAPackage("..repository..")
+            .because("Connectors only fetch and translate source data; the import pipeline persists it");
 
     // --- Service Rules ---
 
