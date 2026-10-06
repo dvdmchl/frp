@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,6 +76,34 @@ public class AccountService {
 
         node = accNodeRepository.save(node);
         return accountMapper.toDto(node, Map.of());
+    }
+
+    /**
+     * Checks that the account exists, is not a placeholder and is of one of the types, so records can be posted to it.
+     */
+    @Transactional(readOnly = true)
+    public void validatePostableAccount(Long accountId, Set<AccAcountType> allowedTypes) {
+        AccAccountEntity account = accAccountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+        if (!allowedTypes.contains(account.getAccountType())) {
+            throw new IllegalArgumentException("Account " + account.getName() + " must be of type "
+                    + new TreeSet<>(allowedTypes));
+        }
+        if (accNodeRepository.findByAccountId(accountId).map(AccNodeEntity::isPlaceholder).orElse(false)) {
+            throw new IllegalArgumentException("Account " + account.getName() + " is a placeholder");
+        }
+    }
+
+    /**
+     * The name, or the name with the lowest free numeric suffix ({@code "Cash (2)"}) when an account already uses it.
+     */
+    @Transactional(readOnly = true)
+    public String uniqueAccountName(String name) {
+        String candidate = name;
+        for (int suffix = 2; accAccountRepository.existsByName(candidate); suffix++) {
+            candidate = name + " (" + suffix + ")";
+        }
+        return candidate;
     }
 
     @Transactional(readOnly = true)

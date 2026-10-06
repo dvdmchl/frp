@@ -17,9 +17,14 @@ public class FakeAccountingConnector implements AccountingConnector {
     public static final String TOKEN = "token";
     public static final String VALID_TOKEN = "valid-token";
 
+    private static final List<ExternalAccount> DEFAULT_ACCOUNTS = List.of(new ExternalAccount("acc-1", "Cash", "CZK", "{}"));
+    private static final List<ExternalCategory> DEFAULT_CATEGORIES = List.of(new ExternalCategory("cat-1", "Food", null, "{}"));
+
     private final String type;
     private final List<String> requestedCursors = Collections.synchronizedList(new ArrayList<>());
     private volatile List<ExternalRecord> records;
+    private volatile List<ExternalAccount> accounts = DEFAULT_ACCOUNTS;
+    private volatile List<ExternalCategory> categories = DEFAULT_CATEGORIES;
     private volatile Consumer<String> beforeFetch = cursor -> { };
 
     public FakeAccountingConnector(String type, List<ExternalRecord> records) {
@@ -59,8 +64,18 @@ public class FakeAccountingConnector implements AccountingConnector {
         }
     }
 
+    public void setAccounts(List<ExternalAccount> accounts) {
+        this.accounts = List.copyOf(accounts);
+    }
+
+    public void setCategories(List<ExternalCategory> categories) {
+        this.categories = List.copyOf(categories);
+    }
+
     public void reset() {
         records = List.of();
+        accounts = DEFAULT_ACCOUNTS;
+        categories = DEFAULT_CATEGORIES;
         beforeFetch = cursor -> { };
         requestedCursors.clear();
     }
@@ -85,13 +100,13 @@ public class FakeAccountingConnector implements AccountingConnector {
     @Override
     public List<ExternalAccount> fetchAccounts(ConnectorCredentials credentials) {
         testConnection(credentials);
-        return List.of(new ExternalAccount("acc-1", "Cash", "CZK", "{}"));
+        return accounts;
     }
 
     @Override
     public List<ExternalCategory> fetchCategories(ConnectorCredentials credentials) {
         testConnection(credentials);
-        return List.of(new ExternalCategory("cat-1", "Food", null, "{}"));
+        return categories;
     }
 
     @Override

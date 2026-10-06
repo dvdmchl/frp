@@ -58,4 +58,10 @@ public class AccConnectionEntity extends AuditableEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "sync_state", comment = "Connector cursor and state of the synchronization")
     private HashMap<String, String> syncState;
+
+    @Column(name = "fallback_expense_account_id", comment = "Account for outgoing records without a mapped category")
+    private Long fallbackExpenseAccountId;
+
+    @Column(name = "fallback_revenue_account_id", comment = "Account for incoming records without a mapped category")
+    private Long fallbackRevenueAccountId;
 }

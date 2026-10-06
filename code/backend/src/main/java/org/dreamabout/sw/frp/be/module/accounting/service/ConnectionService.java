@@ -5,9 +5,11 @@ import org.dreamabout.sw.frp.be.module.accounting.connector.AccountingConnector;
 import org.dreamabout.sw.frp.be.module.accounting.connector.ConnectorCredentials;
 import org.dreamabout.sw.frp.be.module.accounting.connector.ConnectorRegistry;
 import org.dreamabout.sw.frp.be.module.accounting.connector.CredentialField;
+import org.dreamabout.sw.frp.be.module.accounting.domain.AccAcountType;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccConnectionEntity;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionCreateRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionFallbackRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionUpdateRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.mapper.ConnectionMapper;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccConnectionRepository;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages the tenant's connections to external sources. Credentials are verified against the connector before they
@@ -36,6 +39,7 @@ public class ConnectionService {
     private final ConnectorCredentialCipher credentialCipher;
     private final ConnectionMapper connectionMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final AccountService accountService;
 
     @Transactional
     public AccConnectionDto createConnection(AccConnectionCreateRequestDto request) {
@@ -91,6 +95,20 @@ public class ConnectionService {
         return connectionMapper.toDto(connectionRepository.save(connection));
     }
 
+    /**
+     * Sets the accounts for records whose category is not mapped: an EXPENSE account for outgoing records and a REVENUE
+     * account for incoming ones; {@code null} removes a fallback.
+     */
+    @Transactional
+    public AccConnectionDto setFallbackAccounts(Long id, AccConnectionFallbackRequestDto request) {
+        var connection = findConnection(id);
+        validateFallback(request.expenseAccountId(), AccAcountType.EXPENSE);
+        validateFallback(request.revenueAccountId(), AccAcountType.REVENUE);
+        connection.setFallbackExpenseAccountId(request.expenseAccountId());
+        connection.setFallbackRevenueAccountId(request.revenueAccountId());
+        return connectionMapper.toDto(connectionRepository.save(connection));
+    }
+
     @Transactional
     public void deleteConnection(Long id) {
         var connection = findConnection(id);
@@ -123,6 +141,12 @@ public class ConnectionService {
         var credentials = new ConnectorCredentials(values);
         connector.testConnection(credentials);
         return credentials;
+    }
+
+    private void validateFallback(Long accountId, AccAcountType type) {
+        if (accountId != null) {
+            accountService.validatePostableAccount(accountId, Set.of(type));
+        }
     }
 
     private void storeCredentials(AccConnectionEntity connection, ConnectorCredentials credentials) {

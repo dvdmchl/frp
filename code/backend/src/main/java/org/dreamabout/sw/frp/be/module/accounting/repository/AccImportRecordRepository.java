@@ -1,5 +1,6 @@
 package org.dreamabout.sw.frp.be.module.accounting.repository;
 
+import org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccImportRecordEntity;
 import org.dreamabout.sw.multitenancy.core.Multitenant;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +21,41 @@ public interface AccImportRecordRepository extends JpaRepository<AccImportRecord
     Optional<AccImportRecordEntity> findByConnectionIdAndExternalId(Long connectionId, String externalId);
 
     List<AccImportRecordEntity> findByConnectionIdAndExternalIdIn(Long connectionId, Collection<String> externalIds);
+
+    List<AccImportRecordEntity> findByConnectionIdAndStatusIn(Long connectionId, Collection<ImportRecordStatus> statuses);
+
+    /**
+     * Net amount of the connection's records per external category, as rows of category id and sum.
+     */
+    @Query("""
+            SELECT r.externalCategoryId, SUM(r.amount) FROM AccImportRecordEntity r
+            WHERE r.connectionId = :connectionId AND r.externalCategoryId IS NOT NULL
+            GROUP BY r.externalCategoryId""")
+    List<Object[]> sumAmountByCategory(Long connectionId);
+
+    /**
+     * Returns the skipped records of the external account to {@link ImportRecordStatus#NEW}.
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+            UPDATE AccImportRecordEntity r
+            SET r.status = org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus.NEW,
+                r.version = r.version + 1
+            WHERE r.connectionId = :connectionId AND r.externalAccountId = :externalId
+              AND r.status = org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus.SKIPPED""")
+    int reopenSkippedOfAccount(Long connectionId, String externalId);
+
+    /**
+     * Returns the skipped records of the external category to {@link ImportRecordStatus#NEW}.
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+            UPDATE AccImportRecordEntity r
+            SET r.status = org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus.NEW,
+                r.version = r.version + 1
+            WHERE r.connectionId = :connectionId AND r.externalCategoryId = :externalId
+              AND r.status = org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus.SKIPPED""")
+    int reopenSkippedOfCategory(Long connectionId, String externalId);
 
     /**
      * Notes that the records were fetched again; nothing else changes (status and version stay).

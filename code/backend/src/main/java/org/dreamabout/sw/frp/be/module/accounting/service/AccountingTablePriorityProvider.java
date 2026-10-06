@@ -16,6 +16,7 @@ public class AccountingTablePriorityProvider implements TableCopyPriorityProvide
             case "acc_node" -> 5;
             case "acc_connection" -> 6;
             case "acc_import_record" -> 7;
+            case "acc_external_mapping" -> 8;
             default -> null;
         };
     }

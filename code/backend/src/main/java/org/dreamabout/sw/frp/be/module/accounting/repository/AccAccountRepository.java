@@ -12,5 +12,6 @@ import java.util.Optional;
 @Multitenant
 public interface AccAccountRepository extends JpaRepository<AccAccountEntity, Long> {
     Optional<AccAccountEntity> findByName(String name);
+    boolean existsByName(String name);
     boolean existsByCurrency(AccCurrencyEntity currency);
 }

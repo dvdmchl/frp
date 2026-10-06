@@ -5,6 +5,9 @@ import java.util.Map;
 
 /**
  * Connection to an external source. Credentials are write-only: only {@code credentialsSet} tells whether they exist.
+ *
+ * @param fallbackExpenseAccountId account for outgoing records whose category is not mapped
+ * @param fallbackRevenueAccountId account for incoming records whose category is not mapped
  */
 public record AccConnectionDto(
     Long id,
@@ -13,7 +16,9 @@ public record AccConnectionDto(
     boolean enabled,
     boolean credentialsSet,
     Map<String, String> syncSettings,
-    Instant lastSuccessfulSyncAt
+    Instant lastSuccessfulSyncAt,
+    Long fallbackExpenseAccountId,
+    Long fallbackRevenueAccountId
 ) {
     public AccConnectionDto {
         syncSettings = syncSettings == null ? null : Map.copyOf(syncSettings);

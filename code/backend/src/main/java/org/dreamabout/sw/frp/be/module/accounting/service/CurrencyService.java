@@ -95,6 +95,13 @@ public class CurrencyService {
         accCurrencyRepository.save(newBase);
     }
 
+    @Transactional(readOnly = true)
+    public String getBaseCurrencyCode() {
+        return accCurrencyRepository.findByIsBaseTrue()
+                .map(AccCurrencyEntity::getCode)
+                .orElseThrow(() -> new IllegalStateException("Base currency is not set"));
+    }
+
     private void validateNoJournalEntries() {
         if (accJournalRepository.count() > 0) {
             throw new IllegalStateException("Cannot change base currency when journal entries exist.");

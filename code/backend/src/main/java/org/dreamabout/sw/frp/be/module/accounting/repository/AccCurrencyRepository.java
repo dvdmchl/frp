@@ -11,4 +11,6 @@ import java.util.Optional;
 @Multitenant
 public interface AccCurrencyRepository extends JpaRepository<AccCurrencyEntity, Long> {
     Optional<AccCurrencyEntity> findByCode(String code);
+
+    Optional<AccCurrencyEntity> findByIsBaseTrue();
 }
