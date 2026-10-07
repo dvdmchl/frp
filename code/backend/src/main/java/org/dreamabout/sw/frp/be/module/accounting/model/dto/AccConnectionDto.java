@@ -8,6 +8,9 @@ import java.util.Map;
  *
  * @param fallbackExpenseAccountId account for outgoing records whose category is not mapped
  * @param fallbackRevenueAccountId account for incoming records whose category is not mapped
+ * @param syncIntervalMinutes      minutes between scheduled synchronizations
+ * @param nextSyncAt               earliest next scheduled synchronization; {@code null} = as soon as possible
+ * @param credentialsRejected      the source rejected the credentials; scheduled synchronization waits for new ones
  */
 public record AccConnectionDto(
     Long id,
@@ -18,7 +21,10 @@ public record AccConnectionDto(
     Map<String, String> syncSettings,
     Instant lastSuccessfulSyncAt,
     Long fallbackExpenseAccountId,
-    Long fallbackRevenueAccountId
+    Long fallbackRevenueAccountId,
+    int syncIntervalMinutes,
+    Instant nextSyncAt,
+    boolean credentialsRejected
 ) {
     public AccConnectionDto {
         syncSettings = syncSettings == null ? null : Map.copyOf(syncSettings);

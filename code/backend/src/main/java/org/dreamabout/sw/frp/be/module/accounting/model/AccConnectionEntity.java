@@ -24,6 +24,8 @@ import java.util.HashMap;
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class AccConnectionEntity extends AuditableEntity {
 
+    public static final int DEFAULT_SYNC_INTERVAL_MINUTES = 360;
+
     @Id
     @Column(name = "id")
     @SequenceGenerator(name = "acc_connection_id_seq", allocationSize = 1)
@@ -64,4 +66,14 @@ public class AccConnectionEntity extends AuditableEntity {
 
     @Column(name = "fallback_revenue_account_id", comment = "Account for incoming records without a mapped category")
     private Long fallbackRevenueAccountId;
+
+    @Column(name = "sync_interval_minutes", nullable = false, comment = "Minutes between scheduled synchronizations")
+    private Integer syncIntervalMinutes = DEFAULT_SYNC_INTERVAL_MINUTES;
+
+    @Column(name = "next_sync_at", comment = "Earliest next scheduled synchronization; NULL = as soon as possible")
+    private Instant nextSyncAt;
+
+    @Column(name = "credentials_rejected", nullable = false,
+            comment = "The source rejected the credentials; scheduled synchronization waits for new ones")
+    private Boolean credentialsRejected = false;
 }

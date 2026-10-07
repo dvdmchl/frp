@@ -167,17 +167,53 @@ class ConnectionServiceTest extends AbstractDbTest {
         var created = create("Wallet");
 
         var updated = connectionService.updateConnection(created.id(),
-                new AccConnectionUpdateRequestDto("My Wallet", Map.of("intervalHours", "12")));
+                new AccConnectionUpdateRequestDto("My Wallet", Map.of("intervalHours", "12"), null));
 
         assertThat(updated).returns("My Wallet", AccConnectionDto::name)
                 .returns(Map.of("intervalHours", "12"), AccConnectionDto::syncSettings);
     }
 
     @Test
+    void shouldScheduleNewConnectionEverySixHoursAsSoonAsPossible() {
+        var created = create("Wallet");
+
+        assertThat(created).returns(360, AccConnectionDto::syncIntervalMinutes)
+                .returns(null, AccConnectionDto::nextSyncAt)
+                .returns(false, AccConnectionDto::credentialsRejected);
+    }
+
+    @Test
+    void shouldChangeSyncIntervalAndKeepItWhenNotGiven() {
+        var created = create("Wallet");
+
+        var changed = connectionService.updateConnection(created.id(),
+                new AccConnectionUpdateRequestDto("Wallet", Map.of(), 60));
+        var kept = connectionService.updateConnection(created.id(),
+                new AccConnectionUpdateRequestDto("Wallet", Map.of(), null));
+
+        assertThat(changed.syncIntervalMinutes()).isEqualTo(60);
+        assertThat(kept.syncIntervalMinutes()).isEqualTo(60);
+    }
+
+    @Test
+    void shouldResumeScheduleWhenRejectedCredentialsAreReplaced() {
+        var created = create("Wallet");
+        var connection = connectionRepository.findById(created.id()).orElseThrow();
+        connection.setCredentialsRejected(true);
+        connection.setNextSyncAt(Instant.parse("2026-03-01T00:00:00Z"));
+        connectionRepository.save(connection);
+
+        var updated = connectionService.setCredentials(created.id(), VALID);
+
+        assertThat(updated).returns(false, AccConnectionDto::credentialsRejected)
+                .returns(null, AccConnectionDto::nextSyncAt);
+    }
+
+    @Test
     void shouldRejectRenameToExistingName() {
         create("Wallet");
         var other = create("Other");
-        var request = new AccConnectionUpdateRequestDto("Wallet", Map.of());
+        var request = new AccConnectionUpdateRequestDto("Wallet", Map.of(), null);
 
         var otherId = other.id();
 

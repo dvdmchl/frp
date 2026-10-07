@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,4 +34,14 @@ public class ConnectorProperties {
      * longer returns are marked deleted.
      */
     private int syncWindowDays = 90;
+
+    /**
+     * Delay of the next scheduled synchronization when the source is not ready to serve data yet.
+     */
+    private Duration syncNotReadyRetry = Duration.ofMinutes(30);
+
+    /**
+     * How many of the latest synchronization runs are kept per connection; older ones are deleted.
+     */
+    private int syncRunsKept = 50;
 }

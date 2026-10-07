@@ -8,6 +8,7 @@ import org.dreamabout.sw.frp.be.module.accounting.connector.RecordPage;
 import org.dreamabout.sw.frp.be.module.accounting.connector.RecordWindow;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccConnectionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
@@ -34,13 +35,8 @@ public class ImportService {
 
     @Transactional
     public ImportResult sync(Long connectionId) {
-        if (!connectionRepository.tryLockForSync(connectionId)) {
-            throw new IllegalStateException("Synchronization of connection " + connectionId + " is already running");
-        }
-        var connection = connectionService.findConnection(connectionId);
-        if (!Boolean.TRUE.equals(connection.getEnabled())) {
-            throw new IllegalStateException("Connection " + connectionId + " is disabled");
-        }
+        takeSyncLock(connectionId);
+        var connection = connectionService.findEnabledConnection(connectionId);
         var connector = connectorRegistry.get(connection.getConnectorType());
         var credentials = connectionService.credentialsOf(connection);
         var run = ImportRun.fromState(connection.getSyncState()).orElseGet(this::startRun);
@@ -55,6 +51,22 @@ public class ImportService {
 
         log.info("Synchronized connection {}: {}", connectionId, result);
         return result;
+    }
+
+    /**
+     * Takes the sync lock of the connection until the end of the current transaction; the lock is reentrant within it.
+     *
+     * @throws IllegalStateException when another transaction synchronizes the connection
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void lockForSync(Long connectionId) {
+        takeSyncLock(connectionId);
+    }
+
+    private void takeSyncLock(Long connectionId) {
+        if (!connectionRepository.tryLockForSync(connectionId)) {
+            throw new IllegalStateException("Synchronization of connection " + connectionId + " is already running");
+        }
     }
 
     private ImportRun startRun() {

@@ -68,17 +68,25 @@ public class ConnectionService {
         }
         connection.setName(request.name());
         connection.setSyncSettings(syncSettingsOf(request.syncSettings()));
+        if (request.syncIntervalMinutes() != null) {
+            connection.setSyncIntervalMinutes(request.syncIntervalMinutes());
+        }
         return connectionMapper.toDto(connectionRepository.save(connection));
     }
 
     /**
-     * Sets or rotates the credentials; the stored ones stay unchanged when the source rejects the new ones.
+     * Sets or rotates the credentials; the stored ones stay unchanged when the source rejects the new ones. Accepted
+     * credentials resume a schedule paused because the source rejected the previous ones.
      */
     @Transactional
     public AccConnectionDto setCredentials(Long id, Map<String, String> credentialValues) {
         var connection = findConnection(id);
         var connector = connectorRegistry.get(connection.getConnectorType());
         storeCredentials(connection, verifiedCredentials(connector, credentialValues));
+        if (Boolean.TRUE.equals(connection.getCredentialsRejected())) {
+            connection.setCredentialsRejected(false);
+            connection.setNextSyncAt(null);
+        }
         var saved = connectionRepository.save(connection);
 
         audit(AuditAction.CONNECTION_CREDENTIALS_CHANGED, saved);
@@ -118,6 +126,19 @@ public class ConnectionService {
 
     public AccConnectionEntity findConnection(Long id) {
         return connectionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(CONNECTION_NOT_FOUND));
+    }
+
+    /**
+     * The connection, provided it may be synchronized.
+     *
+     * @throws IllegalStateException when the connection is disabled
+     */
+    public AccConnectionEntity findEnabledConnection(Long id) {
+        var connection = findConnection(id);
+        if (!Boolean.TRUE.equals(connection.getEnabled())) {
+            throw new IllegalStateException("Connection " + id + " is disabled");
+        }
+        return connection;
     }
 
     public ConnectorCredentials credentialsOf(AccConnectionEntity connection) {

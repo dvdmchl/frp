@@ -3,10 +3,10 @@ package org.dreamabout.sw.frp.be.module.accounting.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccImportRecordRepository;
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -24,6 +24,11 @@ public class ImportPostingService {
     private final RecordMappingService recordMappingService;
     private final RecordPostingService recordPostingService;
 
+    /**
+     * Runs outside of a caller's transaction (e.g. the one holding the sync lock), so the resolution of the mappings
+     * commits before the records are posted in their own transactions.
+     */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public PostingResult post(Long connectionId) {
         var result = PostingResult.EMPTY;
         for (Long importRecordId : importRecordRepository.findDeletedWithTransaction(connectionId)) {
@@ -41,13 +46,8 @@ public class ImportPostingService {
             return posting.get();
         } catch (RuntimeException e) {
             log.warn("Posting of import record {} failed", importRecordId, e);
-            recordPostingService.markFailed(importRecordId, messageOf(e));
+            recordPostingService.markFailed(importRecordId, ExceptionMessages.of(e));
             return PostingOutcome.FAILED;
         }
-    }
-
-    private static String messageOf(RuntimeException e) {
-        Throwable cause = NestedExceptionUtils.getMostSpecificCause(e);
-        return Objects.requireNonNullElse(cause.getMessage(), cause.getClass().getSimpleName());
     }
 }
