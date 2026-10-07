@@ -32,6 +32,7 @@ describe('AppNavigation', () => {
     await waitFor(() => expect(screen.getByText('Accounting')).toBeInTheDocument())
     expect(screen.getByRole('link', { name: 'account.title' })).toHaveAttribute('href', '/modules/ACC')
     expect(screen.getByRole('link', { name: 'currency.title' })).toHaveAttribute('href', '/modules/ACC/currencies')
+    expect(screen.getByRole('link', { name: 'connection.title' })).toHaveAttribute('href', '/modules/ACC/connections')
     expect(screen.queryByText('Disabled module')).not.toBeInTheDocument()
   })
 

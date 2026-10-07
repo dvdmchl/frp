@@ -29,15 +29,15 @@ vi.mock('./Connections/ConnectionDetailPage', () => ({
 }))
 
 describe('AccountingModule', () => {
-  it('renders dashboard at root', () => {
+  it('renders the account tree at root without links to other pages', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <AccountingModule />
       </MemoryRouter>,
     )
-    expect(screen.getByText('currency.title')).toBeDefined()
-    expect(screen.getByText('connection.title')).toBeDefined()
     expect(screen.getByText('MockAccountTree')).toBeDefined()
+    expect(screen.queryByText('currency.title')).toBeNull()
+    expect(screen.queryByText('connection.title')).toBeNull()
   })
 
   it('renders currency manager at /currencies', () => {

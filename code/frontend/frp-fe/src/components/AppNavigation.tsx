@@ -141,6 +141,9 @@ export function AppNavigation({ user, mobileOpen, onClose }: Readonly<AppNavigat
                           <NavigationLink to={`${modulePath}/${Paths.ACCOUNTING_CURRENCIES}`} onClick={linkClick}>
                             {t('currency.title')}
                           </NavigationLink>
+                          <NavigationLink to={`${modulePath}/${Paths.ACCOUNTING_CONNECTIONS}`} onClick={linkClick}>
+                            {t('connection.title')}
+                          </NavigationLink>
                         </div>
                       </details>
                     )
