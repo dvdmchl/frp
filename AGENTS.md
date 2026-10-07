@@ -47,6 +47,9 @@ relying on this file.
 - **Review before commit.** Before every commit, review your own diff and fix the findings, then rerun the
   relevant tests. Claude Code runs the `/code-review` skill, Codex `/review`; without such a tool, go through the
   diff yourself (bugs, missed edge cases, duplication, rules in this file).
+- **Language.** The repository is public and may get more contributors, so everything in it and around it is in
+  English: issues and issue comments, commit messages, code and code comments, README and wiki. Talk to the user
+  (David) in Czech.
 - **Issues.** Work is tracked in GitHub issues in dvdmchl/frp. Every new issue must also be added to the linked
   GitHub Project **FRP** (https://github.com/users/dvdmchl/projects/10) with a Status; an issue only in the repo
   is not tracked. The gh token needs the `project` scope (`gh auth refresh -s project`, ask the user to run it).
