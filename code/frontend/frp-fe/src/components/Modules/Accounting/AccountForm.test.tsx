@@ -107,4 +107,39 @@ describe('AccountForm', () => {
       expect(screen.queryByLabelText('account.isLiquid')).not.toBeInTheDocument()
     })
   })
+
+  it('hides account type for placeholder', async () => {
+    render(
+      <AccountForm currencies={mockCurrencies} possibleParents={mockParents} onSubmit={vi.fn()} onCancel={vi.fn()} />,
+    )
+
+    fireEvent.click(screen.getByLabelText('account.isPlaceholder'))
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('account.type')).not.toBeInTheDocument()
+    })
+  })
+
+  it('submits placeholder without account type', async () => {
+    const onSubmit = vi.fn()
+    const initialData = { id: 123, name: 'Assets', currencyCode: 'USD', accountType: 'ASSET' as const }
+    render(
+      <AccountForm
+        initialData={initialData}
+        currencies={mockCurrencies}
+        possibleParents={mockParents}
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+      />,
+    )
+    await waitFor(() => expect(screen.getByDisplayValue('Assets')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByLabelText('account.isPlaceholder'))
+    fireEvent.click(screen.getByText('account.update'))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: 'Assets', isPlaceholder: true }))
+    })
+    expect(onSubmit.mock.calls[0][0].accountType).toBeUndefined()
+  })
 })

@@ -54,6 +54,10 @@ export const AccountForm: React.FC<AccountFormProps> = ({
     if (!data.parentId || data.parentId.toString() === '') {
       data.parentId = undefined
     }
+    // a placeholder only groups accounts and has no type
+    if (data.isPlaceholder) {
+      data.accountType = undefined
+    }
     await onSubmit(data)
   }
 
@@ -86,6 +90,18 @@ export const AccountForm: React.FC<AccountFormProps> = ({
       {!isPlaceholder && (
         <>
           <div>
+            <Label htmlFor="accountType">{t('account.type')}</Label>
+            <Select id="accountType" {...register('accountType', { required: true })}>
+              <option value="ASSET">{t('account.types.ASSET')}</option>
+              <option value="LIABILITY">{t('account.types.LIABILITY')}</option>
+              <option value="EQUITY">{t('account.types.EQUITY')}</option>
+              <option value="REVENUE">{t('account.types.REVENUE')}</option>
+              <option value="EXPENSE">{t('account.types.EXPENSE')}</option>
+            </Select>
+            {errors.accountType && <span className="text-red-500 text-sm">Required</span>}
+          </div>
+
+          <div>
             <Label htmlFor="currencyCode">{t('account.currency')}</Label>
             <Select id="currencyCode" {...register('currencyCode', { required: !isPlaceholder })}>
               <option value="">{t('common.none')}</option>
@@ -106,18 +122,6 @@ export const AccountForm: React.FC<AccountFormProps> = ({
           </div>
         </>
       )}
-
-      <div>
-        <Label htmlFor="accountType">{t('account.type')}</Label>
-        <Select id="accountType" {...register('accountType', { required: true })}>
-          <option value="ASSET">{t('account.types.ASSET')}</option>
-          <option value="LIABILITY">{t('account.types.LIABILITY')}</option>
-          <option value="EQUITY">{t('account.types.EQUITY')}</option>
-          <option value="REVENUE">{t('account.types.REVENUE')}</option>
-          <option value="EXPENSE">{t('account.types.EXPENSE')}</option>
-        </Select>
-        {errors.accountType && <span className="text-red-500 text-sm">Required</span>}
-      </div>
 
       <div>
         <Label htmlFor="parentId">{t('account.parent')}</Label>

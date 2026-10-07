@@ -50,7 +50,7 @@ public class AccAccountEntity extends AuditableEntity {
     private Boolean isLiquid;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "account_type", nullable = false,
-            comment = "Type of the account: ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE")
+    @Column(name = "account_type",
+            comment = "Type of the account: ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE; empty for placeholders")
     private AccAcountType accountType;
 }

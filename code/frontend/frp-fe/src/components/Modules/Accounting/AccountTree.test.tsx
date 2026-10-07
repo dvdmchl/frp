@@ -44,7 +44,8 @@ describe('AccountTree', () => {
   const mockTree = [
     {
       id: 1,
-      account: { id: 1, name: 'Assets', accountType: 'ASSET' },
+      isPlaceholder: true,
+      account: { id: 1, name: 'Assets' },
       children: [
         {
           id: 2,
@@ -77,6 +78,14 @@ describe('AccountTree', () => {
       expect(screen.getByText('Cash')).toBeInTheDocument()
       expect(screen.getByRole('link', { name: 'Cash' })).toHaveAttribute('href', '/accounts/2')
     })
+  })
+
+  it('shows account type only for non-placeholder accounts', async () => {
+    renderTree()
+
+    await waitFor(() => expect(screen.getByText('Cash')).toBeInTheDocument())
+    expect(screen.getByText('(account.types.ASSET)')).toBeInTheDocument()
+    expect(screen.queryByText('(account.types.undefined)')).not.toBeInTheDocument()
   })
 
   it('opens create modal on add button click', async () => {

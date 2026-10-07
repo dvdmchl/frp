@@ -188,6 +188,18 @@ class ExternalMappingServiceTest extends AbstractDbTest {
     }
 
     @Test
+    void shouldRejectMappingToPlaceholderAccountWithoutType() {
+        var placeholder = accountService.createAccount(new AccAccountCreateRequestDto(null, "Expenses", null, null,
+                false, null, true)).account().id();
+        var mappingId = mappingId(FOOD);
+        var request = new AccExternalMappingUpdateRequestDto(placeholder, false);
+
+        assertThatThrownBy(() -> mappingService.updateMapping(connectionId, mappingId, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Account Expenses is a placeholder");
+    }
+
+    @Test
     void shouldRejectUpdateOfMappingOfOtherConnection() {
         var otherConnectionId = connectionService.createConnection(new AccConnectionCreateRequestDto(TYPE, "Bank",
                 Map.of(FakeAccountingConnector.TOKEN, FakeAccountingConnector.VALID_TOKEN), Map.of())).id();

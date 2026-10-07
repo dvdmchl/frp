@@ -19,7 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -294,5 +296,45 @@ class AccountServiceTest {
 
         assertThat(node.getParent().getId()).isEqualTo(20L);
         assertThat(node.getOrderIndex()).isEqualTo(1); // Should be after newSibling (0) -> 1
+    }
+
+    @Test
+    void createAccount_shouldRejectNonPlaceholderWithoutAccountType() {
+        var request = new AccAccountCreateRequestDto(null, "Cash", null, "CZK", true, null, false);
+
+        assertThatThrownBy(() -> accountService.createAccount(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Account type is required for non-placeholder accounts");
+    }
+
+    @Test
+    void updateAccount_shouldRejectNonPlaceholderWithoutAccountType() {
+        var node = new AccNodeEntity();
+        node.setId(1L);
+        node.setIsPlaceholder(true);
+        node.setAccount(new AccAccountEntity());
+        var request = new AccAccountCreateRequestDto(null, "Cash", null, "CZK", true, null, false);
+        when(accNodeRepository.findById(1L)).thenReturn(Optional.of(node));
+
+        assertThatThrownBy(() -> accountService.updateAccount(1L, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Account type is required for non-placeholder accounts");
+    }
+
+    @Test
+    void getTree_shouldReturnZeroBalanceWhenPlaceholderWithoutTypeHasJournals() {
+        var account = new AccAccountEntity();
+        account.setId(5L);
+        var node = new AccNodeEntity();
+        node.setId(1L);
+        node.setAccount(account);
+        when(accNodeRepository.findAll()).thenReturn(List.of(node));
+        when(accJournalRepository.findBalances()).thenReturn(List.<Object[]>of(
+                new Object[]{5L, BigDecimal.ONE, BigDecimal.TEN}));
+        when(accountMapper.toDto(any(AccNodeEntity.class), any())).thenReturn(new AccNodeDto(1L, null, true, null, 0, null));
+
+        accountService.getTree();
+
+        verify(accountMapper).toDto(node, Map.of(5L, BigDecimal.ZERO));
     }
 }

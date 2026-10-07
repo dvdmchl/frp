@@ -39,6 +39,7 @@ public class AccountService {
 
     @Transactional
     public AccNodeDto createAccount(AccAccountCreateRequestDto request) {
+        requireTypeOfNonPlaceholder(request);
         AccNodeEntity parent = null;
         if (request.parentId() != null) {
             parent = accNodeRepository.findById(request.parentId())
@@ -78,6 +79,12 @@ public class AccountService {
         return accountMapper.toDto(node, Map.of());
     }
 
+    private static void requireTypeOfNonPlaceholder(AccAccountCreateRequestDto request) {
+        if (Boolean.FALSE.equals(request.isPlaceholder()) && request.accountType() == null) {
+            throw new IllegalArgumentException("Account type is required for non-placeholder accounts");
+        }
+    }
+
     /**
      * Checks that the account exists, is not a placeholder and is of one of the types, so records can be posted to it.
      */
@@ -85,12 +92,12 @@ public class AccountService {
     public void validatePostableAccount(Long accountId, Set<AccAcountType> allowedTypes) {
         AccAccountEntity account = accAccountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+        if (accNodeRepository.findByAccountId(accountId).map(AccNodeEntity::isPlaceholder).orElse(false)) {
+            throw new IllegalArgumentException("Account " + account.getName() + " is a placeholder");
+        }
         if (!allowedTypes.contains(account.getAccountType())) {
             throw new IllegalArgumentException("Account " + account.getName() + " must be of type "
                     + new TreeSet<>(allowedTypes));
-        }
-        if (accNodeRepository.findByAccountId(accountId).map(AccNodeEntity::isPlaceholder).orElse(false)) {
-            throw new IllegalArgumentException("Account " + account.getName() + " is a placeholder");
         }
     }
 
@@ -167,7 +174,11 @@ public class AccountService {
         );
     }
 
+    /**
+     * Balance in the account's normal side; zero for a placeholder without a type, which has no normal side.
+     */
     private BigDecimal calculateBalance(AccAcountType type, BigDecimal credit, BigDecimal debit) {
+        if (type == null) return BigDecimal.ZERO;
         if (credit == null) credit = BigDecimal.ZERO;
         if (debit == null) debit = BigDecimal.ZERO;
         return switch (type) {
@@ -272,6 +283,7 @@ public class AccountService {
     public AccNodeDto updateAccount(Long nodeId, AccAccountCreateRequestDto request) {
         AccNodeEntity node = accNodeRepository.findById(nodeId)
                 .orElseThrow(() -> new IllegalArgumentException(NODE_NOT_FOUND));
+        requireTypeOfNonPlaceholder(request);
 
         AccAccountEntity account = node.getAccount();
         if (account == null) {

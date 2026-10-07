@@ -50,9 +50,13 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, onEdit, onDelete, onAddChild,
             </Link>
           )}
           {!node.isPlaceholder && (
-            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{node.account?.currencyCode}</span>
+            <>
+              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                {node.account?.currencyCode}
+              </span>
+              <span className="text-xs text-gray-400">({t(`account.types.${node.account?.accountType}`)})</span>
+            </>
           )}
-          <span className="text-xs text-gray-400">({t(`account.types.${node.account?.accountType}`)})</span>
         </div>
 
         {!node.isPlaceholder && <div className="mr-4 font-mono font-semibold">{node.account?.balance?.toFixed(2)}</div>}
