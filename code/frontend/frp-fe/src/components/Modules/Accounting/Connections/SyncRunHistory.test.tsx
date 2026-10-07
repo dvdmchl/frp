@@ -1,9 +1,9 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AccountingService } from '../../../../api/services/AccountingService'
 import { apiError } from '../../../../test/apiError'
-import { SyncRunHistory } from './SyncRunHistory'
+import { RUNNING_REFRESH_MS, SyncRunHistory } from './SyncRunHistory'
 
 vi.mock('../../../../api/services/AccountingService')
 
@@ -60,6 +60,43 @@ describe('SyncRunHistory', () => {
     rerender(<SyncRunHistory connectionId={7} refreshKey={1} />)
 
     await waitFor(() => expect(AccountingService.getRuns).toHaveBeenCalledTimes(3))
+  })
+
+  describe('while a run is running', () => {
+    const runningRun = { id: 3, trigger: 'MANUAL', status: 'RUNNING', startedAt: '2026-10-02T08:00:00Z' } as const
+    const finishedRun = { ...runningRun, status: 'SUCCESS', finishedAt: '2026-10-02T08:00:01Z' } as const
+
+    beforeEach(() => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('reloads the runs until the run finishes and reports its end', async () => {
+      const onRunFinished = vi.fn()
+      vi.mocked(AccountingService.getRuns).mockResolvedValueOnce([runningRun]).mockResolvedValue([finishedRun])
+      render(<SyncRunHistory connectionId={7} refreshKey={0} onRunFinished={onRunFinished} />)
+      await screen.findByText('syncRun.statuses.RUNNING')
+      expect(onRunFinished).not.toHaveBeenCalled()
+
+      await vi.advanceTimersByTimeAsync(RUNNING_REFRESH_MS)
+
+      expect(await screen.findByText('syncRun.statuses.SUCCESS')).toBeInTheDocument()
+      expect(onRunFinished).toHaveBeenCalledTimes(1)
+      await vi.advanceTimersByTimeAsync(RUNNING_REFRESH_MS * 2)
+      expect(AccountingService.getRuns).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not reload the runs when none is running', async () => {
+      render(<SyncRunHistory connectionId={7} refreshKey={0} />)
+      await screen.findByText('syncRun.statuses.PARTIAL')
+
+      await vi.advanceTimersByTimeAsync(RUNNING_REFRESH_MS * 2)
+
+      expect(AccountingService.getRuns).toHaveBeenCalledTimes(1)
+    })
   })
 
   it('shows the API error when loading fails', async () => {

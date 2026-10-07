@@ -36,11 +36,13 @@ export const ConnectionDetailPage: React.FC = () => {
     load()
   }, [load])
 
+  const refresh = useCallback(() => setRefreshKey((key) => key + 1), [])
+
   const syncNow = async () => {
     setSyncStarted(false)
     if (await run(() => AccountingService.syncNow(connectionId))) {
       setSyncStarted(true)
-      setRefreshKey((key) => key + 1)
+      refresh()
       tabsRef.current?.setActiveTab(RUNS_TAB_INDEX)
     }
   }
@@ -85,7 +87,7 @@ export const ConnectionDetailPage: React.FC = () => {
           <ConnectionMappings connection={connection} onConnectionChange={setConnection} />
         </TabItem>
         <TabItem active={runsTabOpened} title={t('connection.tabs.runs')}>
-          <SyncRunHistory connectionId={connectionId} refreshKey={refreshKey} />
+          <SyncRunHistory connectionId={connectionId} refreshKey={refreshKey} onRunFinished={refresh} />
         </TabItem>
       </Tabs>
     </div>

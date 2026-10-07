@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AccountingService } from '../../../../api/services/AccountingService'
 import { apiError } from '../../../../test/apiError'
 import { ConnectionDetailPage } from './ConnectionDetailPage'
+import { RUNNING_REFRESH_MS } from './SyncRunHistory'
 
 vi.mock('../../../../api/services/AccountingService')
 
@@ -56,6 +57,21 @@ describe('ConnectionDetailPage', () => {
     expect(AccountingService.syncNow).toHaveBeenCalledWith(7)
     await waitFor(() => expect(AccountingService.getRecords).toHaveBeenCalledTimes(2))
     expect(screen.getByRole('tab', { name: 'connection.tabs.runs' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('reloads the records when a running synchronization finishes', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const running = { id: 3, trigger: 'MANUAL', status: 'RUNNING' } as const
+    vi.mocked(AccountingService.getRuns)
+      .mockResolvedValueOnce([running])
+      .mockResolvedValue([{ ...running, status: 'SUCCESS' }])
+    renderPage()
+    await waitFor(() => expect(AccountingService.getRecords).toHaveBeenCalledTimes(1))
+
+    await vi.advanceTimersByTimeAsync(RUNNING_REFRESH_MS)
+
+    await waitFor(() => expect(AccountingService.getRecords).toHaveBeenCalledTimes(2))
+    vi.useRealTimers()
   })
 
   it('opens the records tab by default', async () => {

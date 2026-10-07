@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from 'flowbite-react'
 import { AccountingService } from '../../../../api/services/AccountingService'
@@ -13,16 +13,21 @@ const STATUS_COLORS: Record<NonNullable<AccSyncRunDto['status']>, string> = {
   FAILED: 'failure',
 }
 const COUNTS = ['fetched', 'created', 'updated', 'deleted', 'posted', 'errors'] as const
+/** How often the runs reload while one of them is running. */
+export const RUNNING_REFRESH_MS = 3000
 
 interface SyncRunHistoryProps {
   connectionId: number
   refreshKey: number
+  onRunFinished?: () => void
 }
 
-export const SyncRunHistory: React.FC<SyncRunHistoryProps> = ({ connectionId, refreshKey }) => {
+export const SyncRunHistory: React.FC<SyncRunHistoryProps> = ({ connectionId, refreshKey, onRunFinished }) => {
   const { t } = useTranslation()
   const [runs, setRuns] = useState<AccSyncRunDto[]>([])
   const { busy, error, run } = useApiAction('syncRun.error')
+  const running = runs.some((syncRun) => syncRun.status === 'RUNNING')
+  const wasRunning = useRef(false)
 
   const load = useCallback(
     () => run(async () => setRuns(await AccountingService.getRuns(connectionId))),
@@ -32,6 +37,17 @@ export const SyncRunHistory: React.FC<SyncRunHistoryProps> = ({ connectionId, re
   useEffect(() => {
     load()
   }, [load, refreshKey])
+
+  useEffect(() => {
+    if (!running) return
+    const timer = setTimeout(load, RUNNING_REFRESH_MS)
+    return () => clearTimeout(timer)
+  }, [running, runs, load])
+
+  useEffect(() => {
+    if (wasRunning.current && !running) onRunFinished?.()
+    wasRunning.current = running
+  }, [running, onRunFinished])
 
   return (
     <div className="space-y-3">
