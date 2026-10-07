@@ -24,6 +24,13 @@ public interface AccImportRecordRepository extends JpaRepository<AccImportRecord
 
     List<AccImportRecordEntity> findByConnectionIdAndStatusIn(Long connectionId, Collection<ImportRecordStatus> statuses);
 
+    List<AccImportRecordEntity> findByConnectionIdAndStatusInOrderByRecordDateDescIdDesc(
+            Long connectionId, Collection<ImportRecordStatus> statuses);
+
+    Optional<AccImportRecordEntity> findByIdAndConnectionId(Long id, Long connectionId);
+
+    boolean existsByIdAndConnectionIdAndStatus(Long id, Long connectionId, ImportRecordStatus status);
+
     /**
      * Net amount of the connection's records per external category, as rows of category id and sum.
      */
@@ -66,12 +73,13 @@ public interface AccImportRecordRepository extends JpaRepository<AccImportRecord
 
     /**
      * Marks records of the connection dated in {@code [from, to]} that were not fetched since {@code seenSince} as
-     * deleted.
+     * deleted, also in the source.
      */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
             UPDATE AccImportRecordEntity r
             SET r.status = org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus.DELETED,
+                r.sourceState = org.dreamabout.sw.frp.be.module.accounting.connector.ExternalRecordState.DELETED,
                 r.errorMessage = NULL, r.version = r.version + 1
             WHERE r.connectionId = :connectionId
               AND r.status <> org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus.DELETED

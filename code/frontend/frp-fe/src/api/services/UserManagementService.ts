@@ -32,7 +32,10 @@ export class UserManagementService {
                 401: `Unauthorized`,
                 403: `User not authenticated`,
                 409: `Conflict`,
+                422: `Unprocessable Content`,
+                429: `Too Many Requests`,
                 500: `Internal Server Error`,
+                502: `Bad Gateway`,
             },
         });
     }
@@ -56,7 +59,10 @@ export class UserManagementService {
                 401: `Unauthorized`,
                 403: `User not authenticated`,
                 409: `Conflict`,
+                422: `Unprocessable Content`,
+                429: `Too Many Requests`,
                 500: `Internal Server Error`,
+                502: `Bad Gateway`,
             },
         });
     }
@@ -78,8 +84,12 @@ export class UserManagementService {
             errors: {
                 400: `Invalid input`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
                 409: `User with email already exists`,
+                422: `Unprocessable Content`,
+                429: `Too Many Requests`,
                 500: `Internal Server Error`,
+                502: `Bad Gateway`,
             },
         });
     }
@@ -98,7 +108,10 @@ export class UserManagementService {
                 401: `Unauthorized`,
                 403: `User not authenticated`,
                 409: `Conflict`,
+                422: `Unprocessable Content`,
+                429: `Too Many Requests`,
                 500: `Internal Server Error`,
+                502: `Bad Gateway`,
             },
         });
     }
@@ -120,8 +133,12 @@ export class UserManagementService {
             errors: {
                 400: `Bad Request`,
                 401: `Invalid credentials`,
+                403: `Forbidden`,
                 409: `Conflict`,
+                422: `Unprocessable Content`,
+                429: `Too Many Requests`,
                 500: `Internal Server Error`,
+                502: `Bad Gateway`,
             },
         });
     }
@@ -140,7 +157,10 @@ export class UserManagementService {
                 401: `Unauthorized`,
                 403: `User not authenticated`,
                 409: `Conflict`,
+                422: `Unprocessable Content`,
+                429: `Too Many Requests`,
                 500: `Internal Server Error`,
+                502: `Bad Gateway`,
             },
         });
     }

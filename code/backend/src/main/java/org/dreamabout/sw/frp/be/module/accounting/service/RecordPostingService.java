@@ -1,6 +1,8 @@
 package org.dreamabout.sw.frp.be.module.accounting.service;
 
 import lombok.RequiredArgsConstructor;
+import org.dreamabout.sw.frp.be.module.accounting.connector.ExternalRecordState;
+import org.dreamabout.sw.frp.be.module.accounting.domain.ConflictResolution;
 import org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccImportRecordEntity;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccJournalCreateRequestDto;
@@ -96,6 +98,23 @@ public class RecordPostingService {
             importRecord.setStatus(ImportRecordStatus.ERROR);
         }
         importRecord.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * Resolves the conflict of the record together with the other leg of its transfer.
+     * {@link ConflictResolution#KEEP_FRP} accepts the transaction as it is in FRP now, or its deletion, as the posted
+     * state of the record. {@link ConflictResolution#USE_SOURCE} lets the next posting overwrite, recreate or (for a
+     * record deleted in the source) delete the transaction.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void resolveConflict(Long importRecordId, ConflictResolution resolution) {
+        var importRecord = findRecord(importRecordId);
+        var currentHash = Optional.ofNullable(importRecord.getTransactionId())
+                .map(transactionId -> postedHash(transactionService.getTransaction(transactionId)))
+                .orElse(null);
+        Stream.concat(Stream.of(importRecord), otherLegsOf(importRecord))
+                .filter(conflicting -> conflicting.getStatus() == ImportRecordStatus.CONFLICT)
+                .forEach(conflicting -> resolve(conflicting, resolution == ConflictResolution.KEEP_FRP, currentHash));
     }
 
     /**
@@ -227,6 +246,36 @@ public class RecordPostingService {
         importRecord.setPostedHash(postedHash);
         importRecord.setStatus(ImportRecordStatus.POSTED);
         importRecord.setErrorMessage(null);
+    }
+
+    private Stream<AccImportRecordEntity> otherLegsOf(AccImportRecordEntity importRecord) {
+        if (importRecord.getTransferLinkId() == null) {
+            return Stream.empty();
+        }
+        return importRecordRepository.findByConnectionIdAndTransferLinkIdAndIdNot(importRecord.getConnectionId(),
+                importRecord.getTransferLinkId(), importRecord.getId()).stream();
+    }
+
+    /**
+     * A record deleted in the source either lets go of the kept transaction or stays deleted with the current
+     * fingerprint, so the next posting deletes the transaction. Otherwise a kept transaction becomes the posted state
+     * of the record and a used source is posted again; a transaction deleted in FRP is recreated only from the source.
+     */
+    private static void resolve(AccImportRecordEntity importRecord, boolean keepFrp, String currentHash) {
+        importRecord.setErrorMessage(null);
+        if (importRecord.getSourceState() == ExternalRecordState.DELETED) {
+            importRecord.setStatus(ImportRecordStatus.DELETED);
+            if (keepFrp) {
+                importRecord.setTransactionId(null);
+            }
+            importRecord.setPostedHash(keepFrp ? null : currentHash);
+        } else if (importRecord.getTransactionId() == null) {
+            importRecord.setStatus(keepFrp ? ImportRecordStatus.SKIPPED : ImportRecordStatus.NEW);
+            importRecord.setPostedHash(null);
+        } else {
+            importRecord.setStatus(keepFrp ? ImportRecordStatus.POSTED : ImportRecordStatus.NEW);
+            importRecord.setPostedHash(currentHash);
+        }
     }
 
     private static void markConflict(AccImportRecordEntity importRecord, String reason) {

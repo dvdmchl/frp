@@ -6,7 +6,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.ConstraintViolationException;
 import org.dreamabout.sw.frp.be.domain.exception.UserAlreadyExistsException;
+import org.dreamabout.sw.frp.be.module.accounting.connector.ConnectorAuthException;
+import org.dreamabout.sw.frp.be.module.accounting.connector.ConnectorException;
+import org.dreamabout.sw.frp.be.module.accounting.connector.ConnectorRateLimitedException;
+import org.dreamabout.sw.frp.be.module.accounting.connector.UnknownConnectorTypeException;
 import org.dreamabout.sw.frp.be.module.common.model.dto.ErrorDto;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -25,7 +30,10 @@ import java.util.stream.Collectors;
         @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorDto.class))),
         @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = ErrorDto.class))),
         @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = ErrorDto.class))),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorDto.class)))
+        @ApiResponse(responseCode = "422", description = "Unprocessable Content", content = @Content(schema = @Schema(implementation = ErrorDto.class))),
+        @ApiResponse(responseCode = "429", description = "Too Many Requests", content = @Content(schema = @Schema(implementation = ErrorDto.class))),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorDto.class))),
+        @ApiResponse(responseCode = "502", description = "Bad Gateway", content = @Content(schema = @Schema(implementation = ErrorDto.class)))
 })
 public class RestExceptionHandler {
 
@@ -69,6 +77,38 @@ public class RestExceptionHandler {
     public ResponseEntity<ErrorDto> handleUserAlreadyExists(UserAlreadyExistsException ex) {
         ErrorDto errorDto = new ErrorDto("UserAlreadyExists", ex.getMessage(), null);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorDto);
+    }
+
+    @ExceptionHandler(UnknownConnectorTypeException.class)
+    public ResponseEntity<ErrorDto> handleUnknownConnectorType(UnknownConnectorTypeException ex) {
+        return ResponseEntity.badRequest().body(errorOf(ex));
+    }
+
+    /**
+     * The source rejected the credentials; the user has to fix them.
+     */
+    @ExceptionHandler(ConnectorAuthException.class)
+    public ResponseEntity<ErrorDto> handleConnectorAuth(ConnectorAuthException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(errorOf(ex));
+    }
+
+    @ExceptionHandler(ConnectorRateLimitedException.class)
+    public ResponseEntity<ErrorDto> handleConnectorRateLimited(ConnectorRateLimitedException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.retryAfter().toSeconds()))
+                .body(errorOf(ex));
+    }
+
+    /**
+     * Any other failure of the external source (unavailable, not ready yet).
+     */
+    @ExceptionHandler(ConnectorException.class)
+    public ResponseEntity<ErrorDto> handleConnector(ConnectorException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(errorOf(ex));
+    }
+
+    private static ErrorDto errorOf(Exception ex) {
+        return new ErrorDto(ex.getClass().getSimpleName(), ex.getMessage(), null);
     }
 
     @ExceptionHandler(Exception.class)

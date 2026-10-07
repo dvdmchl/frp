@@ -69,4 +69,22 @@ public class ApiPath {
     public static final String JOURNALS = "/journals";
     public static final String ACCOUNTS_TREE = "/tree";
     public static final String MOVE = "/move";
+
+    public static final String CONNECTORS = "/connectors";
+    public static final String CONNECTIONS = "/connections";
+    public static final String CREDENTIALS = "/credentials";
+    public static final String ENABLED = "/enabled";
+    public static final String FALLBACK_ACCOUNTS = "/fallback-accounts";
+    public static final String TEST = "/test";
+    public static final String MAPPINGS = "/mappings";
+    public static final String MAPPING_ID_PARAM = "/{mappingId}";
+    public static final String REFRESH = "/refresh";
+    public static final String CREATE_MISSING_ACCOUNTS = "/create-missing-accounts";
+    public static final String SYNC = "/sync";
+    public static final String RUNS = "/runs";
+    public static final String RECORDS = "/records";
+    public static final String RECORD_ID_PARAM = "/{recordId}";
+    public static final String RETRY = "/retry";
+    public static final String IGNORE = "/ignore";
+    public static final String RESOLVE = "/resolve";
 }

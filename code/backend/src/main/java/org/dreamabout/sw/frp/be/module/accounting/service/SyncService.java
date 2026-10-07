@@ -9,7 +9,10 @@ import org.dreamabout.sw.frp.be.module.accounting.connector.ConnectorRateLimited
 import org.dreamabout.sw.frp.be.module.accounting.domain.SyncTrigger;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccConnectionEntity;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccSyncRunEntity;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccSyncRunDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.mapper.SyncRunMapper;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccConnectionRepository;
+import org.dreamabout.sw.frp.be.module.accounting.repository.AccSyncRunRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,8 @@ public class SyncService {
     private final ImportService importService;
     private final ImportPostingService postingService;
     private final SyncRunRecorder runRecorder;
+    private final AccSyncRunRepository syncRunRepository;
+    private final SyncRunMapper syncRunMapper;
     private final ConnectorProperties connectorProperties;
     private final Clock clock;
 
@@ -55,6 +60,17 @@ public class SyncService {
             runRecorder.finish(runId, failed(connection, e));
             throw e;
         }
+    }
+
+    /**
+     * History of the connection's synchronizations, the latest first.
+     */
+    @Transactional(readOnly = true)
+    public List<AccSyncRunDto> getRuns(Long connectionId) {
+        connectionService.findConnection(connectionId);
+        return syncRunRepository.findByConnectionIdOrderByStartedAtDescIdDesc(connectionId).stream()
+                .map(syncRunMapper::toDto)
+                .toList();
     }
 
     /**

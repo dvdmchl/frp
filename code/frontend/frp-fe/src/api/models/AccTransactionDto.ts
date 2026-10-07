@@ -10,5 +10,7 @@ export type AccTransactionDto = {
     fxRate?: number;
     totalAmount?: number;
     journals?: Array<AccJournalDto>;
+    sourceConnectionId?: number;
+    sourceExternalId?: string;
 };
 

@@ -12,6 +12,8 @@ import java.util.List;
 @Repository
 @Multitenant
 public interface AccConnectionRepository extends JpaRepository<AccConnectionEntity, Long> {
+    List<AccConnectionEntity> findAllByOrderByNameAsc();
+
     boolean existsByName(String name);
 
     boolean existsByNameAndIdNot(String name, Long id);

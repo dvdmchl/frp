@@ -74,8 +74,10 @@ public class ExternalMappingService {
      * staged records of the connection again; records skipped because of the flag come back when it is cleared.
      */
     @Transactional
-    public AccExternalMappingDto updateMapping(Long mappingId, AccExternalMappingUpdateRequestDto request) {
+    public AccExternalMappingDto updateMapping(Long connectionId, Long mappingId,
+                                               AccExternalMappingUpdateRequestDto request) {
         var mapping = mappingRepository.findById(mappingId)
+                .filter(found -> found.getConnectionId().equals(connectionId))
                 .orElseThrow(() -> new IllegalArgumentException("Mapping not found"));
         if (request.accountId() != null) {
             accountService.validatePostableAccount(request.accountId(), mapping.getKind().targetTypes());

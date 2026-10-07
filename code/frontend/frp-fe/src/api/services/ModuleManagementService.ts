@@ -20,8 +20,12 @@ export class ModuleManagementService {
             errors: {
                 400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
                 409: `Conflict`,
+                422: `Unprocessable Content`,
+                429: `Too Many Requests`,
                 500: `Internal Server Error`,
+                502: `Bad Gateway`,
             },
         });
     }
@@ -44,8 +48,12 @@ export class ModuleManagementService {
             errors: {
                 400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
                 409: `Conflict`,
+                422: `Unprocessable Content`,
+                429: `Too Many Requests`,
                 500: `Internal Server Error`,
+                502: `Bad Gateway`,
             },
         });
     }

@@ -137,7 +137,7 @@ class ExternalMappingServiceTest extends AbstractDbTest {
     @Test
     void shouldKeepMappingAndUpdateNameWhenRefreshedAgain() {
         var cashAccountId = createAccount("Wallet cash", AccAcountType.ASSET);
-        mappingService.updateMapping(mappingId(CASH), new AccExternalMappingUpdateRequestDto(cashAccountId, false));
+        mappingService.updateMapping(connectionId, mappingId(CASH), new AccExternalMappingUpdateRequestDto(cashAccountId, false));
         connector.setAccounts(List.of(new ExternalAccount(CASH, "Pocket money", "CZK", "{}")));
         connector.setCategories(List.of());
 
@@ -154,7 +154,7 @@ class ExternalMappingServiceTest extends AbstractDbTest {
     void shouldMapExternalAccountToAssetAccount() {
         var cashAccountId = createAccount("Wallet cash", AccAcountType.ASSET);
 
-        var mapping = mappingService.updateMapping(mappingId(CASH),
+        var mapping = mappingService.updateMapping(connectionId, mappingId(CASH),
                 new AccExternalMappingUpdateRequestDto(cashAccountId, false));
 
         assertThat(mapping.accountId()).isEqualTo(cashAccountId);
@@ -170,7 +170,7 @@ class ExternalMappingServiceTest extends AbstractDbTest {
         var mappingId = mappingId(CASH);
         var request = new AccExternalMappingUpdateRequestDto(expenseId, false);
 
-        assertThatThrownBy(() -> mappingService.updateMapping(mappingId, request))
+        assertThatThrownBy(() -> mappingService.updateMapping(connectionId, mappingId, request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Account Groceries must be of type [ASSET, LIABILITY]");
     }
@@ -182,9 +182,25 @@ class ExternalMappingServiceTest extends AbstractDbTest {
         var mappingId = mappingId(FOOD);
         var request = new AccExternalMappingUpdateRequestDto(placeholder, false);
 
-        assertThatThrownBy(() -> mappingService.updateMapping(mappingId, request))
+        assertThatThrownBy(() -> mappingService.updateMapping(connectionId, mappingId, request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Account Expenses is a placeholder");
+    }
+
+    @Test
+    void shouldRejectUpdateOfMappingOfOtherConnection() {
+        var otherConnectionId = connectionService.createConnection(new AccConnectionCreateRequestDto(TYPE, "Bank",
+                Map.of(FakeAccountingConnector.TOKEN, FakeAccountingConnector.VALID_TOKEN), Map.of())).id();
+        var mappingId = mappingId(CASH);
+        var request = new AccExternalMappingUpdateRequestDto(null, true);
+
+        assertThatThrownBy(() -> mappingService.updateMapping(otherConnectionId, mappingId, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Mapping not found");
+        assertThat(mappingService.getMappings(connectionId))
+                .filteredOn(dto -> dto.externalId().equals(CASH))
+                .extracting(AccExternalMappingDto::ignored)
+                .containsExactly(false);
     }
 
     @Test
@@ -240,9 +256,9 @@ class ExternalMappingServiceTest extends AbstractDbTest {
 
     @Test
     void shouldNotCreateAccountsForIgnoredOrMappedExternalAccounts() {
-        mappingService.updateMapping(mappingId(CARD), new AccExternalMappingUpdateRequestDto(null, true));
+        mappingService.updateMapping(connectionId, mappingId(CARD), new AccExternalMappingUpdateRequestDto(null, true));
         var cashAccountId = createAccount("Wallet cash", AccAcountType.ASSET);
-        mappingService.updateMapping(mappingId(CASH), new AccExternalMappingUpdateRequestDto(cashAccountId, false));
+        mappingService.updateMapping(connectionId, mappingId(CASH), new AccExternalMappingUpdateRequestDto(cashAccountId, false));
 
         assertThat(mappingService.createMissingAccounts(connectionId, ExternalMappingKind.ACCOUNT, null)).isEmpty();
     }
@@ -340,10 +356,10 @@ class ExternalMappingServiceTest extends AbstractDbTest {
     void shouldSkipRecordsOfIgnoredAccountAndReturnThemWhenNoLongerIgnored() {
         var importRecord = stage("r1", CARD, FOOD, "-10");
 
-        mappingService.updateMapping(mappingId(CARD), new AccExternalMappingUpdateRequestDto(null, true));
+        mappingService.updateMapping(connectionId, mappingId(CARD), new AccExternalMappingUpdateRequestDto(null, true));
         assertThat(statusOf(importRecord)).isEqualTo(ImportRecordStatus.SKIPPED);
 
-        mappingService.updateMapping(mappingId(CARD), new AccExternalMappingUpdateRequestDto(null, false));
+        mappingService.updateMapping(connectionId, mappingId(CARD), new AccExternalMappingUpdateRequestDto(null, false));
         assertThat(statusOf(importRecord)).isEqualTo(ImportRecordStatus.NEW);
     }
 
@@ -351,10 +367,10 @@ class ExternalMappingServiceTest extends AbstractDbTest {
     void shouldSkipRecordsOfIgnoredCategoryAndReturnThemWhenNoLongerIgnored() {
         var importRecord = stage("r1", CASH, SALARY, "1000");
 
-        mappingService.updateMapping(mappingId(SALARY), new AccExternalMappingUpdateRequestDto(null, true));
+        mappingService.updateMapping(connectionId, mappingId(SALARY), new AccExternalMappingUpdateRequestDto(null, true));
         assertThat(statusOf(importRecord)).isEqualTo(ImportRecordStatus.SKIPPED);
 
-        mappingService.updateMapping(mappingId(SALARY), new AccExternalMappingUpdateRequestDto(null, false));
+        mappingService.updateMapping(connectionId, mappingId(SALARY), new AccExternalMappingUpdateRequestDto(null, false));
         assertThat(statusOf(importRecord)).isEqualTo(ImportRecordStatus.NEW);
     }
 
@@ -370,7 +386,7 @@ class ExternalMappingServiceTest extends AbstractDbTest {
     }
 
     private Long map(String externalId, Long accountId) {
-        mappingService.updateMapping(mappingId(externalId), new AccExternalMappingUpdateRequestDto(accountId, false));
+        mappingService.updateMapping(connectionId, mappingId(externalId), new AccExternalMappingUpdateRequestDto(accountId, false));
         return accountId;
     }
 

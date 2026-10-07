@@ -17,6 +17,7 @@ import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccAccountCreateRequ
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionCreateRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionFallbackRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccExternalMappingUpdateRequestDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccSyncRunDto;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccConnectionRepository;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccSyncRunRepository;
 import org.dreamabout.sw.frp.be.module.common.model.UserEntity;
@@ -45,6 +46,7 @@ import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.dreamabout.sw.frp.be.module.accounting.connector.FakeAccountingConnector.bookedRecord;
 
 // shares the application context (fake connector and clock) with ImportServiceTest
@@ -126,6 +128,27 @@ class SyncServiceTest extends AbstractDbTest {
                 .returns(2, AccSyncRunEntity::getPosted)
                 .returns(0, AccSyncRunEntity::getErrors)
                 .returns(null, AccSyncRunEntity::getErrorMessage));
+    }
+
+    @Test
+    void shouldListRunsOfConnectionLatestFirst() {
+        var first = syncService.sync(connectionId, SyncTrigger.SCHEDULED);
+        clock.setInstant(NOW.plus(INTERVAL));
+        var second = syncService.sync(connectionId, SyncTrigger.MANUAL);
+        syncService.sync(createConnection("Bank"), SyncTrigger.MANUAL);
+
+        assertThat(syncService.getRuns(connectionId))
+                .extracting(AccSyncRunDto::id, AccSyncRunDto::trigger, AccSyncRunDto::status, AccSyncRunDto::startedAt)
+                .containsExactly(
+                        tuple(second.getId(), SyncTrigger.MANUAL, SyncRunStatus.SUCCESS, NOW.plus(INTERVAL)),
+                        tuple(first.getId(), SyncTrigger.SCHEDULED, SyncRunStatus.SUCCESS, NOW));
+    }
+
+    @Test
+    void shouldRejectRunsOfMissingConnection() {
+        assertThatThrownBy(() -> syncService.getRuns(-1L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Connection not found");
     }
 
     @Test
@@ -371,7 +394,7 @@ class SyncServiceTest extends AbstractDbTest {
         var mappingId = mappingService.refreshMappings(id).stream()
                 .filter(mapping -> mapping.externalId().equals("acc-1"))
                 .findFirst().orElseThrow().id();
-        mappingService.updateMapping(mappingId, new AccExternalMappingUpdateRequestDto(cash, false));
+        mappingService.updateMapping(id, mappingId, new AccExternalMappingUpdateRequestDto(cash, false));
         connectionService.setFallbackAccounts(id, new AccConnectionFallbackRequestDto(expense, null));
     }
 

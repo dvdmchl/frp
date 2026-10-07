@@ -11,6 +11,8 @@ import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionCreateR
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionFallbackRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionUpdateRequestDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectorDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccCredentialFieldDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.mapper.ConnectionMapper;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccConnectionRepository;
 import org.dreamabout.sw.frp.be.module.common.domain.AuditAction;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,6 +43,41 @@ public class ConnectionService {
     private final ConnectionMapper connectionMapper;
     private final ApplicationEventPublisher eventPublisher;
     private final AccountService accountService;
+
+    /**
+     * Connector types available for new connections with the credential fields they need.
+     */
+    public List<AccConnectorDto> getConnectors() {
+        return connectorRegistry.types().stream()
+                .map(connectorRegistry::get)
+                .map(connector -> new AccConnectorDto(connector.type(), connector.credentialFields().stream()
+                        .map(field -> new AccCredentialFieldDto(field.name(), field.secret()))
+                        .toList()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AccConnectionDto> getConnections() {
+        return connectionRepository.findAllByOrderByNameAsc().stream().map(connectionMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AccConnectionDto getConnection(Long id) {
+        return connectionMapper.toDto(findConnection(id));
+    }
+
+    /**
+     * Verifies the stored credentials against the source; throws the connector exception when
+     * the source does not accept them.
+     */
+    @Transactional(readOnly = true)
+    public void testConnection(Long id) {
+        var connection = findConnection(id);
+        if (connection.getCredentials() == null) {
+            throw new IllegalStateException("Connection has no credentials");
+        }
+        connectorRegistry.get(connection.getConnectorType()).testConnection(credentialsOf(connection));
+    }
 
     @Transactional
     public AccConnectionDto createConnection(AccConnectionCreateRequestDto request) {

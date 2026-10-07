@@ -239,7 +239,9 @@ class ImportServiceTest extends AbstractDbTest {
         var result = importService.sync(connectionId);
 
         assertThat(result).isEqualTo(new ImportResult(1, 0, 0, 1));
-        assertThat(staged("r1").getStatus()).isEqualTo(ImportRecordStatus.DELETED);
+        assertThat(staged("r1"))
+                .returns(ImportRecordStatus.DELETED, AccImportRecordEntity::getStatus)
+                .returns(ExternalRecordState.DELETED, AccImportRecordEntity::getSourceState);
         assertThat(staged("r2").getStatus()).isEqualTo(ImportRecordStatus.NEW);
     }
 
@@ -282,6 +284,26 @@ class ImportServiceTest extends AbstractDbTest {
 
         assertThat(result).isEqualTo(new ImportResult(1, 0, 1, 0));
         assertThat(staged("r1").getStatus()).isEqualTo(ImportRecordStatus.NEW);
+    }
+
+    @Test
+    void shouldRestoreRecordInConflictWhenItReappearsInSource() {
+        connector.setRecords(List.of(bookedRecord("r1", "10")));
+        importService.sync(connectionId);
+        connector.setRecords(List.of());
+        clock.advance(Duration.ofHours(6));
+        importService.sync(connectionId);
+        var inConflict = staged("r1");
+        inConflict.setStatus(ImportRecordStatus.CONFLICT);
+        importRecordRepository.save(inConflict);
+        connector.setRecords(List.of(bookedRecord("r1", "10")));
+        clock.advance(Duration.ofHours(6));
+
+        importService.sync(connectionId);
+
+        assertThat(staged("r1"))
+                .returns(ImportRecordStatus.NEW, AccImportRecordEntity::getStatus)
+                .returns(ExternalRecordState.BOOKED, AccImportRecordEntity::getSourceState);
     }
 
     @Test

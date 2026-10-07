@@ -11,6 +11,8 @@ import org.dreamabout.sw.frp.be.module.accounting.model.AccConnectionEntity;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionCreateRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionUpdateRequestDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectorDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccCredentialFieldDto;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccConnectionRepository;
 import org.dreamabout.sw.frp.be.module.common.domain.AuditAction;
 import org.dreamabout.sw.frp.be.module.common.model.AuditLogEntity;
@@ -35,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Import(ConnectionServiceTest.FakeConnectorConfig.class)
@@ -317,6 +320,52 @@ class ConnectionServiceTest extends AbstractDbTest {
                 .extracting(AccConnectionEntity::getCredentials).isNotNull();
     }
 
+    @Test
+    void shouldListConnectorTypesWithTheirCredentialFields() {
+        assertThat(connectionService.getConnectors())
+                .contains(new AccConnectorDto(TYPE, List.of(new AccCredentialFieldDto(FakeAccountingConnector.TOKEN, true))));
+    }
+
+    @Test
+    void shouldListConnectionsByName() {
+        create("Wallet");
+        create("Bank");
+
+        assertThat(connectionService.getConnections()).extracting(AccConnectionDto::name).containsExactly("Bank", "Wallet");
+    }
+
+    @Test
+    void shouldGetConnectionById() {
+        var created = create("Wallet");
+
+        assertThat(connectionService.getConnection(created.id())).isEqualTo(created);
+    }
+
+    @Test
+    void shouldPassTestWhenSourceAcceptsStoredCredentials() {
+        var id = create("Wallet").id();
+
+        assertThatCode(() -> connectionService.testConnection(id)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldFailTestWhenSourceRejectsStoredCredentials() {
+        var id = create("Wallet").id();
+        storeCredentials(id, Map.of(FakeAccountingConnector.TOKEN, "revoked"));
+
+        assertThatThrownBy(() -> connectionService.testConnection(id)).isInstanceOf(ConnectorAuthException.class);
+    }
+
+    @Test
+    void shouldFailTestOfConnectionWithoutCredentials() {
+        var id = create("Wallet").id();
+        clearCredentials(id);
+
+        assertThatThrownBy(() -> connectionService.testConnection(id))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Connection has no credentials");
+    }
+
     private AccConnectionDto create(String name) {
         return connectionService.createConnection(
                 new AccConnectionCreateRequestDto(TYPE, name, VALID, Map.of("intervalHours", "6")));
@@ -325,6 +374,14 @@ class ConnectionServiceTest extends AbstractDbTest {
     private void clearCredentials(Long id) {
         jdbcTemplate.update("UPDATE " + SCHEMA + ".acc_connection SET credentials = NULL, credentials_key_version = NULL"
                 + " WHERE id = ?", id);
+    }
+
+    private void storeCredentials(Long id, Map<String, String> values) {
+        var connection = connectionRepository.findById(id).orElseThrow();
+        var encrypted = cipher.encrypt(new ConnectorCredentials(values));
+        connection.setCredentials(encrypted.ciphertext());
+        connection.setCredentialsKeyVersion(encrypted.keyVersion());
+        connectionRepository.save(connection);
     }
 
     private void markSynced(Long id) {

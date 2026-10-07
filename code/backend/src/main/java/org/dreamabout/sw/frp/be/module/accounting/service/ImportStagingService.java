@@ -98,7 +98,7 @@ public class ImportStagingService {
     }
 
     private static boolean isChanged(AccImportRecordEntity stagedRecord, ExternalRecord source, String hash) {
-        boolean reappeared = stagedRecord.getStatus() == ImportRecordStatus.DELETED
+        boolean reappeared = stagedRecord.getSourceState() == ExternalRecordState.DELETED
                 && source.state() != ExternalRecordState.DELETED;
         return reappeared || !hash.equals(stagedRecord.getPayloadHash());
     }
