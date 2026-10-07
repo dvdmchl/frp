@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -25,7 +26,9 @@ public class FakeAccountingConnector implements AccountingConnector {
     private volatile List<ExternalRecord> records;
     private volatile List<ExternalAccount> accounts = DEFAULT_ACCOUNTS;
     private volatile List<ExternalCategory> categories = DEFAULT_CATEGORIES;
+    private final List<RecordWindow> requestedWindows = Collections.synchronizedList(new ArrayList<>());
     private volatile Consumer<String> beforeFetch = cursor -> { };
+    private volatile String dataRevision;
 
     public FakeAccountingConnector(String type, List<ExternalRecord> records) {
         this.type = type;
@@ -64,6 +67,22 @@ public class FakeAccountingConnector implements AccountingConnector {
         }
     }
 
+    /**
+     * Windows of all page requests in order.
+     */
+    public List<RecordWindow> requestedWindows() {
+        synchronized (requestedWindows) {
+            return Collections.unmodifiableList(new ArrayList<>(requestedWindows));
+        }
+    }
+
+    /**
+     * Revision of the source data; {@code null} = the source does not tell.
+     */
+    public void setDataRevision(String dataRevision) {
+        this.dataRevision = dataRevision;
+    }
+
     public void setAccounts(List<ExternalAccount> accounts) {
         this.accounts = List.copyOf(accounts);
     }
@@ -77,7 +96,9 @@ public class FakeAccountingConnector implements AccountingConnector {
         accounts = DEFAULT_ACCOUNTS;
         categories = DEFAULT_CATEGORIES;
         beforeFetch = cursor -> { };
+        dataRevision = null;
         requestedCursors.clear();
+        requestedWindows.clear();
     }
 
     @Override
@@ -98,6 +119,13 @@ public class FakeAccountingConnector implements AccountingConnector {
     }
 
     @Override
+    public Optional<String> dataRevision(ConnectorCredentials credentials) {
+        testConnection(credentials);
+        String revision = dataRevision;
+        return revision == null ? AccountingConnector.super.dataRevision(credentials) : Optional.of(revision);
+    }
+
+    @Override
     public List<ExternalAccount> fetchAccounts(ConnectorCredentials credentials) {
         testConnection(credentials);
         return accounts;
@@ -113,6 +141,7 @@ public class FakeAccountingConnector implements AccountingConnector {
     public RecordPage fetchRecords(ConnectorCredentials credentials, RecordWindow window, String cursor) {
         testConnection(credentials);
         requestedCursors.add(cursor);
+        requestedWindows.add(window);
         beforeFetch.accept(cursor);
         List<ExternalRecord> served = records;
         if (served.isEmpty()) {

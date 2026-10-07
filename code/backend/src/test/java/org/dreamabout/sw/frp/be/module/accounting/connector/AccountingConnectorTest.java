@@ -59,6 +59,11 @@ class AccountingConnectorTest {
     }
 
     @Test
+    void shouldReportNoDataRevisionWhenSourceDoesNotTellIt() {
+        assertThat(connector.dataRevision(VALID)).isEmpty();
+    }
+
+    @Test
     void shouldCarryRetryAfterWhenRateLimited() {
         var exception = new ConnectorRateLimitedException("Too many requests", Duration.ofMinutes(5));
 

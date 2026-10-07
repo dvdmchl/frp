@@ -1,0 +1,21 @@
+{
+  "categories": [
+    {
+      "id": "04f8dea1-33dc-411a-b2eb-b348c3168fa3",
+      "name": "Groceries",
+      "systemId": "food_and_drinks__groceries",
+      "customCategory": false,
+      "archived": false
+    },
+    {
+      "id": "c1d2e3f4-a5b6-4c7d-8e9f-001122334455",
+      "name": "Farmers market",
+      "customCategory": true,
+      "parentId": "04f8dea1-33dc-411a-b2eb-b348c3168fa3",
+      "parentName": "Groceries",
+      "archived": false
+    }
+  ],
+  "limit": 200,
+  "offset": 0
+}

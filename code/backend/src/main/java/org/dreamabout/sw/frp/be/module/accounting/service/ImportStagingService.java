@@ -50,13 +50,23 @@ public class ImportStagingService {
 
         var connection = connectionRepository.findById(connectionId).orElseThrow();
         if (page.isLast()) {
-            connection.setSyncState(null);
+            connection.setSyncState(run.finishedState());
             connection.setLastSuccessfulSyncAt(seenAt);
         } else {
             connection.setSyncState(run.withCursor(page.nextCursor()).toState());
         }
         connectionRepository.save(connection);
         return result.plus(new ImportResult(0, 0, 0, deleted));
+    }
+
+    /**
+     * Finishes a synchronization that found the source data unchanged since the last one.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void finishUnchanged(Long connectionId) {
+        var connection = connectionRepository.findById(connectionId).orElseThrow();
+        connection.setLastSuccessfulSyncAt(clock.instant());
+        connectionRepository.save(connection);
     }
 
     private ImportResult upsert(Long connectionId, List<ExternalRecord> records, Instant seenAt) {

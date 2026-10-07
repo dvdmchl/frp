@@ -7,6 +7,7 @@ import org.dreamabout.sw.frp.be.module.accounting.connector.ExternalAmount;
 import org.dreamabout.sw.frp.be.module.accounting.connector.ExternalRecord;
 import org.dreamabout.sw.frp.be.module.accounting.connector.ExternalRecordState;
 import org.dreamabout.sw.frp.be.module.accounting.connector.FakeAccountingConnector;
+import org.dreamabout.sw.frp.be.module.accounting.connector.RecordWindow;
 import org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccConnectionEntity;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccImportRecordEntity;
@@ -307,6 +308,108 @@ class ImportServiceTest extends AbstractDbTest {
     }
 
     @Test
+    void shouldFetchLastSyncWindowDaysWhenNoImportStartDateIsSet() {
+        importService.sync(connectionId);
+
+        assertThat(connector.requestedWindows())
+                .containsExactly(RecordWindow.between(LocalDate.of(2025, 11, 3), LocalDate.of(2026, 2, 1)));
+    }
+
+    @Test
+    void shouldStartFirstSyncAtImportStartDate() {
+        setImportStartDate("2024-06-01");
+
+        importService.sync(connectionId);
+
+        assertThat(connector.requestedWindows())
+                .containsExactly(RecordWindow.between(LocalDate.of(2024, 6, 1), LocalDate.of(2026, 2, 1)));
+    }
+
+    @Test
+    void shouldFetchOnlySyncWindowDaysAfterFirstSync() {
+        setImportStartDate("2024-06-01");
+        importService.sync(connectionId);
+        clock.advance(Duration.ofDays(1));
+
+        importService.sync(connectionId);
+
+        assertThat(connector.requestedWindows()).last()
+                .isEqualTo(RecordWindow.between(LocalDate.of(2025, 11, 4), LocalDate.of(2026, 2, 2)));
+    }
+
+    @Test
+    void shouldNotFetchRecordsBeforeImportStartDateWithinSyncWindow() {
+        setImportStartDate("2026-01-20");
+        importService.sync(connectionId);
+        clock.advance(Duration.ofDays(1));
+
+        importService.sync(connectionId);
+
+        assertThat(connector.requestedWindows()).containsOnly(
+                RecordWindow.between(LocalDate.of(2026, 1, 20), LocalDate.of(2026, 2, 1)),
+                RecordWindow.between(LocalDate.of(2026, 1, 20), LocalDate.of(2026, 2, 2)));
+    }
+
+    @Test
+    void shouldFetchOnlyTodayWhenImportStartDateIsInFuture() {
+        setImportStartDate("2026-05-01");
+
+        importService.sync(connectionId);
+
+        assertThat(connector.requestedWindows())
+                .containsExactly(RecordWindow.between(LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 1)));
+    }
+
+    @Test
+    void shouldSkipSyncWhenSourceDataRevisionIsUnchanged() {
+        connector.setDataRevision("rev-1");
+        connector.setRecords(List.of(bookedRecord("r1", "10")));
+        importService.sync(connectionId);
+        clock.advance(Duration.ofHours(6));
+
+        var result = importService.sync(connectionId);
+
+        assertThat(result).isEqualTo(ImportResult.EMPTY);
+        assertThat(connector.requestedCursors()).hasSize(1);
+        assertThat(connection())
+                .returns(NOW.plus(Duration.ofHours(6)), AccConnectionEntity::getLastSuccessfulSyncAt)
+                .returns(Map.of("dataRevision", "rev-1"), AccConnectionEntity::getSyncState);
+    }
+
+    @Test
+    void shouldSyncWhenSourceDataRevisionChanged() {
+        connector.setDataRevision("rev-1");
+        connector.setRecords(List.of(bookedRecord("r1", "10")));
+        importService.sync(connectionId);
+        connector.setDataRevision("rev-2");
+        connector.setRecords(List.of(bookedRecord("r1", "15")));
+
+        var result = importService.sync(connectionId);
+
+        assertThat(result).isEqualTo(new ImportResult(1, 0, 1, 0));
+        assertThat(connection().getSyncState()).isEqualTo(Map.of("dataRevision", "rev-2"));
+    }
+
+    @Test
+    void shouldResumeUnfinishedRunWithItsDataRevisionWithoutAskingSourceAgain() {
+        connector.setDataRevision("rev-1");
+        connector.setRecords(List.of(bookedRecord("r1", "10"), bookedRecord("r2", "20")));
+        connector.setBeforeFetch(cursor -> {
+            if ("1".equals(cursor)) {
+                throw new ConnectorTransientException("Source unavailable", new IllegalStateException("reset"));
+            }
+        });
+        assertThatThrownBy(() -> importService.sync(connectionId)).isInstanceOf(ConnectorTransientException.class);
+        connector.setBeforeFetch(cursor -> { });
+        connector.setDataRevision("rev-2");
+
+        importService.sync(connectionId);
+
+        assertThat(connector.requestedCursors()).containsExactly(null, "1", "1");
+        assertThat(connection().getSyncState()).isEqualTo(Map.of("dataRevision", "rev-1"));
+    }
+
+    @Test
     void shouldRejectSecondSyncOfSameConnectionWhileOneIsRunning() {
         var tenant = TenantContext.getCurrentTenant();
         var concurrentFailure = new AtomicReference<Throwable>();
@@ -377,6 +480,12 @@ class ImportServiceTest extends AbstractDbTest {
 
     private AccImportRecordEntity staged(String externalId) {
         return importRecordRepository.findByConnectionIdAndExternalId(connectionId, externalId).orElseThrow();
+    }
+
+    private void setImportStartDate(String date) {
+        var connection = connection();
+        connection.getSyncSettings().put(ImportService.IMPORT_START_DATE_SETTING, date);
+        connectionRepository.save(connection);
     }
 
     private AccConnectionEntity connection() {

@@ -203,6 +203,9 @@
     "connectorTypes": {
       "WALLET": "BudgetBakers Wallet"
     },
+    "credentialFields": {
+      "apiToken": "API token"
+    },
     "name": "Název",
     "credentialsHint": "Uložené přihlašovací údaje se nikdy nezobrazují. Vyplňte pole jen tehdy, když je chcete nahradit.",
     "syncInterval": "Interval synchronizace (minuty)",

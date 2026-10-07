@@ -222,6 +222,9 @@
     "connectorTypes": {
       "WALLET": "BudgetBakers Wallet"
     },
+    "credentialFields": {
+      "apiToken": "API token"
+    },
     "name": "Name",
     "credentialsHint": "Stored credentials are never shown. Fill in the fields only to replace them.",
     "syncInterval": "Sync interval (minutes)",

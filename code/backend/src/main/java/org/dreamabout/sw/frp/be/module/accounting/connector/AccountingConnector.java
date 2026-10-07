@@ -1,6 +1,7 @@
 package org.dreamabout.sw.frp.be.module.accounting.connector;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * SPI for an external source of accounting data (e.g. BudgetBakers Wallet, a bank).
@@ -27,6 +28,16 @@ public interface AccountingConnector {
      * Verifies that the source accepts the credentials; throws a {@link ConnectorException} otherwise.
      */
     void testConnection(ConnectorCredentials credentials);
+
+    /**
+     * Revision of the data in the source, changing with every change of it. The import pipeline skips a
+     * synchronization when the revision is the same as at the start of the last finished one.
+     *
+     * @return empty when the source does not tell (every synchronization then fetches the records)
+     */
+    default Optional<String> dataRevision(ConnectorCredentials credentials) {
+        return Optional.empty();
+    }
 
     List<ExternalAccount> fetchAccounts(ConnectorCredentials credentials);
 
