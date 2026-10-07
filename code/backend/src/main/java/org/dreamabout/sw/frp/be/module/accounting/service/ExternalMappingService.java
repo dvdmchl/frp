@@ -100,7 +100,8 @@ public class ExternalMappingService {
      * Creates an account under the parent node for every unmapped, not ignored external account or category of the
      * kind and maps it. External accounts become liquid ASSET accounts in their source currency; categories become
      * REVENUE accounts when their staged records add up to income, otherwise EXPENSE accounts, in the base currency.
-     * A name already used in the accounting gets a numeric suffix.
+     * A source currency missing in the accounting is added. A name already used in the accounting gets a numeric
+     * suffix.
      */
     @Transactional
     public List<AccExternalMappingDto> createMissingAccounts(Long connectionId, ExternalMappingKind kind,
@@ -111,14 +112,21 @@ public class ExternalMappingService {
         var netAmounts = account ? Map.<String, BigDecimal>of() : netAmountByCategory(connectionId);
         for (var mapping : missing) {
             var type = account ? AccAcountType.ASSET : categoryType(netAmounts.get(mapping.getExternalId()));
-            var currencyCode = mapping.getCurrencyCode() != null
-                    ? mapping.getCurrencyCode() : currencyService.getBaseCurrencyCode();
+            var currencyCode = sourceOrBaseCurrency(mapping.getCurrencyCode());
             var request = new AccAccountCreateRequestDto(parentNodeId,
                     accountService.uniqueAccountName(mapping.getExternalName()),
                     "Imported from " + connection.getName(), currencyCode, account, type, false);
             mapping.setAccountId(accountService.createAccount(request).account().id());
         }
         return mappingRepository.saveAll(missing).stream().map(mappingMapper::toDto).toList();
+    }
+
+    private String sourceOrBaseCurrency(String sourceCurrencyCode) {
+        if (sourceCurrencyCode == null) {
+            return currencyService.getBaseCurrencyCode();
+        }
+        currencyService.ensureCurrency(sourceCurrencyCode);
+        return sourceCurrencyCode;
     }
 
     private List<AccExternalMappingDto> mappingDtos(Long connectionId) {

@@ -15,6 +15,7 @@ import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccAccountCreateRequ
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionCreateRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConnectionFallbackRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccCurrencyCreateRequestDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccCurrencyDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccExternalMappingDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccExternalMappingUpdateRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccAccountRepository;
@@ -276,11 +277,14 @@ class ExternalMappingServiceTest extends AbstractDbTest {
     }
 
     @Test
-    void shouldFailCreatingAccountWhenSourceCurrencyDoesNotExist() {
+    void shouldAddSourceCurrencyWhenCreatingAccountInCurrencyThatDoesNotExist() {
+        var created = mappingService.createMissingAccounts(connectionId, ExternalMappingKind.ACCOUNT, null);
 
-        assertThatThrownBy(() -> mappingService.createMissingAccounts(connectionId, ExternalMappingKind.ACCOUNT, null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Currency not found: EUR");
+        assertThat(created).extracting(mapping -> describe(mapping.accountId()))
+                .containsExactlyInAnyOrder("Cash/ASSET/CZK", "Card/ASSET/EUR");
+        assertThat(currencyService.getAllCurrencies())
+                .extracting(AccCurrencyDto::code, AccCurrencyDto::name, AccCurrencyDto::isBase, AccCurrencyDto::scale)
+                .contains(tuple("EUR", "Euro", false, 2));
     }
 
     @Test

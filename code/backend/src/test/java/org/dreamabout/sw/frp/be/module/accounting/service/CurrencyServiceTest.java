@@ -9,6 +9,7 @@ import org.dreamabout.sw.frp.be.module.accounting.repository.AccCurrencyReposito
 import org.dreamabout.sw.frp.be.module.accounting.repository.AccJournalRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -124,5 +126,40 @@ class CurrencyServiceTest {
 
         verify(accCurrencyRepository).save(currency);
         assertTrue(currency.getIsBase());
+    }
+
+    @Test
+    void ensureCurrency_shouldCreateIsoCurrencyWithItsNameAndScaleWhenMissing() {
+        when(accCurrencyRepository.findByCode("JPY")).thenReturn(Optional.empty());
+        var captor = ArgumentCaptor.forClass(AccCurrencyEntity.class);
+
+        currencyService.ensureCurrency("JPY");
+
+        verify(accCurrencyRepository).save(captor.capture());
+        assertEquals("JPY", captor.getValue().getCode());
+        assertEquals("Japanese Yen", captor.getValue().getName());
+        assertEquals(0, captor.getValue().getScale());
+        assertFalse(captor.getValue().getIsBase());
+    }
+
+    @Test
+    void ensureCurrency_shouldUseCodeAsNameAndDefaultScaleWhenCodeIsNotIso() {
+        when(accCurrencyRepository.findByCode("XYZ")).thenReturn(Optional.empty());
+        var captor = ArgumentCaptor.forClass(AccCurrencyEntity.class);
+
+        currencyService.ensureCurrency("XYZ");
+
+        verify(accCurrencyRepository).save(captor.capture());
+        assertEquals("XYZ", captor.getValue().getName());
+        assertEquals(2, captor.getValue().getScale());
+    }
+
+    @Test
+    void ensureCurrency_shouldNotCreateCurrencyWhenItExists() {
+        when(accCurrencyRepository.findByCode("EUR")).thenReturn(Optional.of(new AccCurrencyEntity()));
+
+        currencyService.ensureCurrency("EUR");
+
+        verify(accCurrencyRepository, never()).save(any());
     }
 }

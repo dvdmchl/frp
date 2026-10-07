@@ -12,13 +12,16 @@ import org.dreamabout.sw.frp.be.module.accounting.repository.AccJournalRepositor
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
 public class CurrencyService {
 
     private static final String CURRENCY_NOT_FOUND = "Currency not found";
+    private static final int DEFAULT_SCALE = 2;
 
     private final AccCurrencyRepository accCurrencyRepository;
     private final AccAccountRepository accAccountRepository;
@@ -43,13 +46,38 @@ public class CurrencyService {
             unsetExistingBaseCurrency();
         }
 
+        return currencyMapper.toDto(saveCurrency(request));
+    }
+
+    /**
+     * Adds the currency when it does not exist yet. Name and scale come from ISO 4217; a code it does not know gets
+     * the code as its name and two decimal places.
+     */
+    @Transactional
+    public void ensureCurrency(String code) {
+        if (accCurrencyRepository.findByCode(code).isEmpty()) {
+            saveCurrency(isoCurrency(code));
+        }
+    }
+
+    private AccCurrencyEntity saveCurrency(AccCurrencyCreateRequestDto request) {
         AccCurrencyEntity currency = new AccCurrencyEntity();
         currency.setCode(request.code());
         currency.setName(request.name());
         currency.setScale(request.scale());
         currency.setIsBase(Boolean.TRUE.equals(request.isBase()));
+        return accCurrencyRepository.save(currency);
+    }
 
-        return currencyMapper.toDto(accCurrencyRepository.save(currency));
+    private static AccCurrencyCreateRequestDto isoCurrency(String code) {
+        try {
+            var currency = Currency.getInstance(code);
+            int scale = currency.getDefaultFractionDigits();
+            return new AccCurrencyCreateRequestDto(code, currency.getDisplayName(Locale.ENGLISH), false,
+                    scale < 0 ? DEFAULT_SCALE : scale);
+        } catch (IllegalArgumentException _) {
+            return new AccCurrencyCreateRequestDto(code, code, false, DEFAULT_SCALE);
+        }
     }
 
     @Transactional
