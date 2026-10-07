@@ -311,6 +311,26 @@
     "keepFrp": "Ponechat verzi z FRP",
     "useSource": "Použít verzi ze zdroje",
     "empty": "Žádné záznamy nevyžadují pozornost.",
-    "error": "Operace se záznamem importu selhala"
+    "error": "Operace se záznamem importu selhala",
+    "detail": {
+      "title": "Importovaný záznam",
+      "loading": "Načítám záznam",
+      "baseAmount": "Přepočtená částka",
+      "counterparty": "Protistrana",
+      "note": "Poznámka",
+      "account": "Účet",
+      "category": "Kategorie",
+      "transferAccount": "Účet převodu",
+      "notMapped": "nenamapováno",
+      "unknown": "Neznámý účet",
+      "uncategorized": "Bez kategorie",
+      "otherLegMissing": "Druhá strana převodu ještě není importovaná",
+      "sourceState": "Stav ve zdroji",
+      "externalId": "Id ve zdroji",
+      "sourceUpdatedAt": "Změněno ve zdroji",
+      "firstSeenAt": "Poprvé importováno",
+      "lastSeenAt": "Naposledy synchronizováno",
+      "rawPayload": "Surová data ze zdroje"
+    }
   }
 }

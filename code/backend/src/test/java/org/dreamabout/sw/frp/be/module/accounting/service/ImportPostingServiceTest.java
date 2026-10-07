@@ -223,8 +223,21 @@ class ImportPostingServiceTest extends AbstractImportPostingTest {
         assertThat(result).isEqualTo(new PostingResult(1, 0, 0, 1));
         assertThat(reload(zero))
                 .returns(ImportRecordStatus.ERROR, AccImportRecordEntity::getStatus)
-                .returns("Record r1 has a zero amount", AccImportRecordEntity::getErrorMessage);
+                .returns("Record Wallet cash → Groceries has a zero amount", AccImportRecordEntity::getErrorMessage);
         assertThat(reload(expense).getStatus()).isEqualTo(ImportRecordStatus.POSTED);
+    }
+
+    @Test
+    void shouldDescribeZeroAmountRecordByItsAccountsAndDescription() {
+        var zero = stage("r1", CASH, FOOD, "0", importRecord -> {
+            importRecord.setCounterparty("Bistro");
+            importRecord.setNote("Lunch");
+        });
+
+        postingService.post(connectionId);
+
+        assertThat(reload(zero).getErrorMessage())
+                .isEqualTo("Record Wallet cash → Groceries (Bistro - Lunch) has a zero amount");
     }
 
     @Test
@@ -252,7 +265,7 @@ class ImportPostingServiceTest extends AbstractImportPostingTest {
 
         assertThat(reload(outgoing))
                 .returns(ImportRecordStatus.ERROR, AccImportRecordEntity::getStatus)
-                .returns("Amounts of transfer t-1 do not match", AccImportRecordEntity::getErrorMessage);
+                .returns("Amounts of transfer Wallet cash → Bank account do not match", AccImportRecordEntity::getErrorMessage);
     }
 
 }

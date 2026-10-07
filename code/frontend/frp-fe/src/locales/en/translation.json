@@ -330,6 +330,26 @@
     "keepFrp": "Keep FRP version",
     "useSource": "Use source version",
     "empty": "No records need attention.",
-    "error": "Import record operation failed"
+    "error": "Import record operation failed",
+    "detail": {
+      "title": "Imported record",
+      "loading": "Loading record",
+      "baseAmount": "Converted amount",
+      "counterparty": "Counterparty",
+      "note": "Note",
+      "account": "Account",
+      "category": "Category",
+      "transferAccount": "Transfer account",
+      "notMapped": "not mapped",
+      "unknown": "Unknown account",
+      "uncategorized": "Uncategorized",
+      "otherLegMissing": "Other leg of the transfer is not imported yet",
+      "sourceState": "State in source",
+      "externalId": "Id in source",
+      "sourceUpdatedAt": "Changed in source",
+      "firstSeenAt": "First imported",
+      "lastSeenAt": "Last synchronized",
+      "rawPayload": "Raw data from source"
+    }
   }
 }

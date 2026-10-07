@@ -17,6 +17,7 @@ import type { AccCurrencyDto } from '../models/AccCurrencyDto';
 import type { AccCurrencyUpdateRequestDto } from '../models/AccCurrencyUpdateRequestDto';
 import type { AccExternalMappingDto } from '../models/AccExternalMappingDto';
 import type { AccExternalMappingUpdateRequestDto } from '../models/AccExternalMappingUpdateRequestDto';
+import type { AccImportRecordDetailDto } from '../models/AccImportRecordDetailDto';
 import type { AccImportRecordDto } from '../models/AccImportRecordDto';
 import type { AccJournalDto } from '../models/AccJournalDto';
 import type { AccJournalUpdateRequestDto } from '../models/AccJournalUpdateRequestDto';
@@ -1083,6 +1084,37 @@ export class AccountingService {
             },
             query: {
                 'status': status,
+            },
+            errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                409: `Conflict`,
+                422: `Unprocessable Content`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
+                502: `Bad Gateway`,
+            },
+        });
+    }
+    /**
+     * Get import record detail
+     * Returns a staged record with the mappings of its account and category, the account of the other leg of a transfer and the representation of the record in the source.
+     * @param id
+     * @param recordId
+     * @returns AccImportRecordDetailDto OK
+     * @throws ApiError
+     */
+    public static getRecordDetail(
+        id: number,
+        recordId: number,
+    ): CancelablePromise<AccImportRecordDetailDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/accounting/connections/{id}/records/{recordId}',
+            path: {
+                'id': id,
+                'recordId': recordId,
             },
             errors: {
                 400: `Bad Request`,

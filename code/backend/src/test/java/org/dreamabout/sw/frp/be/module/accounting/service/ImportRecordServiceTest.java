@@ -7,6 +7,7 @@ import org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus;
 import org.dreamabout.sw.frp.be.module.accounting.model.AccImportRecordEntity;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccCurrencyCreateRequestDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccImportRecordDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccMappedItemDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,6 +46,59 @@ class ImportRecordServiceTest extends AbstractImportPostingTest {
         assertThatThrownBy(() -> importRecordService.getRecords(-1L, statuses))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Connection not found");
+    }
+
+    @Test
+    void shouldDescribeRecordWithItsMappingsAndRawPayload() {
+        var expense = stage("r1", CASH, FOOD, "-100", importRecord -> {
+            importRecord.setBaseAmount(new BigDecimal("-4.00"));
+            importRecord.setBaseCurrencyCode("EUR");
+            importRecord.setRawPayload("{\"note\": \"Lunch\"}");
+        });
+
+        var detail = importRecordService.getRecordDetail(connectionId, expense.getId());
+
+        assertThat(detail.importRecord().externalId()).isEqualTo("r1");
+        assertThat(detail.account()).isEqualTo(new AccMappedItemDto(CASH, "Cash", "Wallet cash"));
+        assertThat(detail.category()).isEqualTo(new AccMappedItemDto(FOOD, "Food", "Groceries"));
+        assertThat(detail.transferAccount()).isNull();
+        assertThat(detail.baseAmount()).isEqualByComparingTo("-4");
+        assertThat(detail.baseCurrencyCode()).isEqualTo("EUR");
+        assertThat(detail.firstSeenAt()).isNotNull();
+        assertThat(detail.rawPayload()).contains("Lunch");
+    }
+
+    @Test
+    void shouldDescribeTransferByAccountOfOtherLegAndShowUnmappedAccount() {
+        var outgoing = stage("t-out", CARD, null, "-500", transferLeg());
+        stage("t-in", BANK, null, "500", transferLeg());
+
+        var detail = importRecordService.getRecordDetail(connectionId, outgoing.getId());
+
+        assertThat(detail.account()).isEqualTo(new AccMappedItemDto(CARD, "Card", null));
+        assertThat(detail.category()).isNull();
+        assertThat(detail.transferAccount()).isEqualTo(new AccMappedItemDto(BANK, "Bank", "Bank account"));
+    }
+
+    @Test
+    void shouldNotDescribeTransferByOtherLegDeletedInSource() {
+        var outgoing = stage("t-out", CASH, null, "-500", transferLeg());
+        stage("t-in", BANK, null, "500",
+                transferLeg().andThen(importRecord -> importRecord.setStatus(ImportRecordStatus.DELETED)));
+
+        var detail = importRecordService.getRecordDetail(connectionId, outgoing.getId());
+
+        assertThat(detail.transferAccount()).isNull();
+    }
+
+    @Test
+    void shouldRejectDetailOfRecordOfOtherConnection() {
+        var recordId = stage("r1", CASH, FOOD, "-100").getId();
+        var otherConnectionId = connectionId + 1;
+
+        assertThatThrownBy(() -> importRecordService.getRecordDetail(otherConnectionId, recordId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Import record not found: " + recordId);
     }
 
     @Test

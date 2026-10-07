@@ -92,6 +92,33 @@ describe('ImportRecordReview', () => {
     await waitFor(() => expect(AccountingService.resolveConflict).toHaveBeenCalledWith(7, 2, { resolution }))
   })
 
+  it('opens the detail of a record from its reason and closes it', async () => {
+    const user = userEvent.setup()
+    vi.mocked(AccountingService.getRecordDetail).mockResolvedValue({ importRecord: records[0] })
+    renderReview()
+
+    await user.click(await screen.findByRole('button', { name: 'Currency USD is missing' }))
+
+    expect(await screen.findByText('importRecord.detail.title')).toBeInTheDocument()
+    expect(AccountingService.getRecordDetail).toHaveBeenCalledWith(7, 1)
+    await user.click(screen.getByRole('button', { name: 'common.close' }))
+    await waitFor(() => expect(screen.queryByText('importRecord.detail.title')).not.toBeInTheDocument())
+  })
+
+  it('opens the detail of a record by clicking its row but not its actions', async () => {
+    const user = userEvent.setup()
+    vi.mocked(AccountingService.getRecordDetail).mockResolvedValue({ importRecord: records[2] })
+    vi.mocked(AccountingService.ignoreRecord).mockResolvedValue({})
+    renderReview()
+
+    await user.click(within(await row('Unmapped')).getByRole('button', { name: 'importRecord.ignore' }))
+    await waitFor(() => expect(AccountingService.ignoreRecord).toHaveBeenCalled())
+    expect(AccountingService.getRecordDetail).not.toHaveBeenCalled()
+
+    await user.click(await screen.findByText('Unmapped'))
+    await waitFor(() => expect(AccountingService.getRecordDetail).toHaveBeenCalledWith(7, 3))
+  })
+
   it('shows the error of a failed action and keeps the list', async () => {
     const user = userEvent.setup()
     vi.mocked(AccountingService.retryRecord).mockRejectedValue(apiError('Sync is running', 409))

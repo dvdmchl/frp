@@ -4,7 +4,9 @@ import org.dreamabout.sw.frp.be.module.accounting.connector.ExternalRecordState;
 import org.dreamabout.sw.frp.be.module.accounting.domain.ConflictResolution;
 import org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConflictResolutionRequestDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccImportRecordDetailDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccImportRecordDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccMappedItemDto;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -33,6 +35,20 @@ class ImportRecordControllerTest extends AbstractConnectionApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].status").value("ERROR"))
                 .andExpect(jsonPath("$[0].errorMessage").value("Failed"));
+    }
+
+    @Test
+    void shouldGetRecordDetail() throws Exception {
+        when(importRecordService.getRecordDetail(1L, 5L)).thenReturn(new AccImportRecordDetailDto(
+                recordIn(ImportRecordStatus.ERROR), new AccMappedItemDto("acc-cash", "Cash", "Wallet cash"), null, null,
+                null, null, null, Instant.parse("2026-01-15T10:00:00Z"), "{\"note\":\"Lunch\"}"));
+
+        perform(get(RECORDS + "/5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.importRecord.externalId").value("r1"))
+                .andExpect(jsonPath("$.account.externalName").value("Cash"))
+                .andExpect(jsonPath("$.account.accountName").value("Wallet cash"))
+                .andExpect(jsonPath("$.rawPayload").value("{\"note\":\"Lunch\"}"));
     }
 
     @Test

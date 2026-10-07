@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.dreamabout.sw.frp.be.domain.ApiPath;
 import org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccConflictResolutionRequestDto;
+import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccImportRecordDetailDto;
 import org.dreamabout.sw.frp.be.module.accounting.model.dto.AccImportRecordDto;
 import org.dreamabout.sw.frp.be.module.accounting.service.ImportRecordService;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,15 @@ public class ImportRecordController {
     public ResponseEntity<List<AccImportRecordDto>> getRecords(@PathVariable Long id,
                                                                @RequestParam Set<ImportRecordStatus> status) {
         return ResponseEntity.ok(importRecordService.getRecords(id, status));
+    }
+
+    @Operation(summary = "Get import record detail",
+            description = "Returns a staged record with the mappings of its account and category, the account of the "
+                    + "other leg of a transfer and the representation of the record in the source.")
+    @GetMapping(ApiPath.RECORD_ID_PARAM)
+    public ResponseEntity<AccImportRecordDetailDto> getRecordDetail(@PathVariable Long id,
+                                                                    @PathVariable Long recordId) {
+        return ResponseEntity.ok(importRecordService.getRecordDetail(id, recordId));
     }
 
     @Operation(summary = "Retry import record",

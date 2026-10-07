@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -99,6 +100,14 @@ public class AccountService {
             throw new IllegalArgumentException("Account " + account.getName() + " must be of type "
                     + new TreeSet<>(allowedTypes));
         }
+    }
+
+    /**
+     * Name of the account; empty when it does not exist.
+     */
+    @Transactional(readOnly = true)
+    public Optional<String> findAccountName(Long accountId) {
+        return accAccountRepository.findById(accountId).map(AccAccountEntity::getName);
     }
 
     /**

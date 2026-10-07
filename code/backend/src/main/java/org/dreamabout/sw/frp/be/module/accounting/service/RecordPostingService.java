@@ -44,6 +44,7 @@ public class RecordPostingService {
     private final RecordMappingService recordMappingService;
     private final TransactionService transactionService;
     private final CurrencyService currencyService;
+    private final AccountService accountService;
 
     /**
      * Posts a {@link ImportRecordStatus#NEW} record as a new transaction, or rewrites the journals of the transaction
@@ -189,10 +190,12 @@ public class RecordPostingService {
         return legs.sorted(Comparator.comparing(Leg::amount)).toList();
     }
 
-    private static void validate(List<Leg> legs) {
-        var first = legs.getFirst().importRecord();
+    private void validate(List<Leg> legs) {
         if (legs.stream().anyMatch(leg -> leg.amount().signum() == 0)) {
-            throw new IllegalStateException("Record " + first.getExternalId() + " has a zero amount");
+            var description = Optional.ofNullable(descriptionOf(legs.getFirst().importRecord()))
+                    .map(text -> " (" + text + ")")
+                    .orElse("");
+            throw new IllegalStateException("Record " + accountsOf(legs) + description + " has a zero amount");
         }
         var currencies = legs.stream().map(leg -> leg.importRecord().getCurrencyCode()).distinct().toList();
         if (currencies.size() > 1) {
@@ -201,8 +204,17 @@ public class RecordPostingService {
         }
         var balance = legs.stream().map(Leg::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
         if (balance.signum() != 0) {
-            throw new IllegalStateException("Amounts of transfer " + first.getTransferLinkId() + " do not match");
+            throw new IllegalStateException("Amounts of transfer " + accountsOf(legs) + " do not match");
         }
+    }
+
+    /**
+     * Names of the accounts of the legs for an error message, e.g. {@code "Cash → Groceries"}.
+     */
+    private String accountsOf(List<Leg> legs) {
+        return legs.stream()
+                .map(leg -> accountService.findAccountName(leg.accountId()).orElse("#" + leg.accountId()))
+                .collect(Collectors.joining(" → "));
     }
 
     private AccTransactionCreateRequestDto requestOf(List<Leg> legs) {

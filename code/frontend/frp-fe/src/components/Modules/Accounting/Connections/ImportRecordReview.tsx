@@ -5,6 +5,7 @@ import { AccountingService } from '../../../../api/services/AccountingService'
 import type { AccImportRecordDto } from '../../../../api/models/AccImportRecordDto'
 import { ErrorDisplay } from '../../../UIComponent/ErrorDisplay'
 import { useApiAction } from '../accountingUtils'
+import { ImportRecordDetail } from './ImportRecordDetail'
 
 type RecordStatus = NonNullable<AccImportRecordDto['status']>
 
@@ -23,6 +24,7 @@ interface ImportRecordReviewProps {
 export const ImportRecordReview: React.FC<ImportRecordReviewProps> = ({ connectionId, refreshKey }) => {
   const { t } = useTranslation()
   const [records, setRecords] = useState<AccImportRecordDto[]>([])
+  const [detailId, setDetailId] = useState<number | null>(null)
   const { busy, error, run } = useApiAction('importRecord.error')
 
   const load = useCallback(
@@ -104,7 +106,11 @@ export const ImportRecordReview: React.FC<ImportRecordReviewProps> = ({ connecti
           </TableHead>
           <TableBody className="divide-y">
             {records.map((record) => (
-              <TableRow key={record.id} className="bg-white">
+              <TableRow
+                key={record.id}
+                className="cursor-pointer bg-white hover:bg-gray-50"
+                onClick={() => setDetailId(record.id ?? null)}
+              >
                 <TableCell>{record.recordDate}</TableCell>
                 <TableCell>{[record.amount?.toFixed(2), record.currencyCode].filter(Boolean).join(' ')}</TableCell>
                 <TableCell>{[record.counterparty, record.note].filter(Boolean).join(' - ') || '—'}</TableCell>
@@ -113,8 +119,12 @@ export const ImportRecordReview: React.FC<ImportRecordReviewProps> = ({ connecti
                     <Badge color={STATUS_COLORS[record.status]}>{t(`importRecord.statuses.${record.status}`)}</Badge>
                   )}
                 </TableCell>
-                <TableCell>{record.errorMessage ?? t(`importRecord.reasons.${record.status}`)}</TableCell>
                 <TableCell>
+                  <button type="button" className="text-left text-blue-700 hover:underline">
+                    {record.errorMessage ?? t(`importRecord.reasons.${record.status}`)}
+                  </button>
+                </TableCell>
+                <TableCell onClick={(event) => event.stopPropagation()}>
                   <fieldset disabled={busy} className="flex flex-wrap gap-2">
                     {actions(record)}
                   </fieldset>
@@ -131,6 +141,9 @@ export const ImportRecordReview: React.FC<ImportRecordReviewProps> = ({ connecti
           </TableBody>
         </Table>
       </div>
+      {detailId !== null && (
+        <ImportRecordDetail connectionId={connectionId} recordId={detailId} onClose={() => setDetailId(null)} />
+      )}
     </div>
   )
 }
