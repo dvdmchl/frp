@@ -344,6 +344,7 @@ export const AccountDetailPage: React.FC = () => {
                       <JournalTable
                         journals={transaction.journals ?? []}
                         accounts={accounts}
+                        currentAccountId={selectedAccountId}
                         onEdit={openJournalEdit}
                         onDelete={deleteJournal}
                       />
@@ -422,11 +423,12 @@ const SummaryCard: React.FC<{ label: string; value: string }> = ({ label, value 
 interface JournalTableProps {
   journals: AccJournalDto[]
   accounts: AccAccountDto[]
+  currentAccountId: number
   onEdit: (journal: AccJournalDto) => void
   onDelete: (journal: AccJournalDto) => void
 }
 
-const JournalTable: React.FC<JournalTableProps> = ({ journals, accounts, onEdit, onDelete }) => {
+const JournalTable: React.FC<JournalTableProps> = ({ journals, accounts, currentAccountId, onEdit, onDelete }) => {
   const { t } = useTranslation()
   const accountNames = new Map(accounts.map((account) => [account.id, account.name]))
 
@@ -444,25 +446,36 @@ const JournalTable: React.FC<JournalTableProps> = ({ journals, accounts, onEdit,
           </TableRow>
         </TableHead>
         <TableBody className="divide-y">
-          {journals.map((journal) => (
-            <TableRow key={journal.id} className="bg-white">
-              <TableCell>{journal.date}</TableCell>
-              <TableCell>{accountNames.get(journal.accountId) ?? journal.accountId}</TableCell>
-              <TableCell>{journal.description || '—'}</TableCell>
-              <TableCell>{(journal.debit ?? 0).toFixed(2)}</TableCell>
-              <TableCell>{(journal.credit ?? 0).toFixed(2)}</TableCell>
-              <TableCell>
-                <div className="flex flex-wrap gap-2">
-                  <Button size="xs" color="light" onClick={() => onEdit(journal)}>
-                    {t('common.edit')}
-                  </Button>
-                  <Button size="xs" color="failure" onClick={() => onDelete(journal)}>
-                    {t('common.delete')}
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+          {journals.map((journal) => {
+            const accountName = accountNames.get(journal.accountId) ?? journal.accountId
+            return (
+              <TableRow key={journal.id} className="bg-white">
+                <TableCell>{journal.date}</TableCell>
+                <TableCell>
+                  {journal.accountId === currentAccountId ? (
+                    accountName
+                  ) : (
+                    <Link to={`../accounts/${journal.accountId}`} className="text-blue-600 hover:underline">
+                      {accountName}
+                    </Link>
+                  )}
+                </TableCell>
+                <TableCell>{journal.description || '—'}</TableCell>
+                <TableCell>{(journal.debit ?? 0).toFixed(2)}</TableCell>
+                <TableCell>{(journal.credit ?? 0).toFixed(2)}</TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="xs" color="light" onClick={() => onEdit(journal)}>
+                      {t('common.edit')}
+                    </Button>
+                    <Button size="xs" color="failure" onClick={() => onDelete(journal)}>
+                      {t('common.delete')}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
     </div>

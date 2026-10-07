@@ -104,6 +104,18 @@ describe('AccountDetailPage', () => {
     expect(screen.getByText('Income')).toBeInTheDocument()
   })
 
+  it('shouldLinkOtherJournalAccountsToTheirDetailWhenTransactionIsExpanded', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(await screen.findByText('PAY-001'))
+
+    expect(screen.queryByRole('link', { name: 'Checking' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: 'Income' }))
+
+    expect(await screen.findByRole('heading', { name: 'Income' })).toBeInTheDocument()
+    expect(screen.getByText('OTHER')).toBeInTheDocument()
+  })
+
   it('deletes a transaction after confirmation', async () => {
     const user = userEvent.setup()
     vi.spyOn(window, 'confirm').mockReturnValue(true)
