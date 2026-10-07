@@ -36,6 +36,19 @@ describe('AppNavigation', () => {
     expect(screen.queryByText('Disabled module')).not.toBeInTheDocument()
   })
 
+  it('keeps its width next to wide page content and shows labels on one line', async () => {
+    vi.spyOn(ModuleManagementService, 'listModules').mockResolvedValue([])
+    render(
+      <MemoryRouter>
+        <AppNavigation user={{ id: 1, email: 'user@example.com', admin: false }} mobileOpen={false} onClose={vi.fn()} />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('complementary', { name: 'navigation.main' })).toHaveClass('md:w-64', 'md:shrink-0')
+    expect(screen.getByRole('link', { name: 'navigation.home' })).toHaveClass('truncate', 'text-sm')
+    await waitFor(() => expect(ModuleManagementService.listModules).toHaveBeenCalled())
+  })
+
   it('hides administration from non-admin users', async () => {
     vi.spyOn(ModuleManagementService, 'listModules').mockResolvedValue([])
 

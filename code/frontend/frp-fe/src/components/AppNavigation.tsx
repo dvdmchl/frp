@@ -12,6 +12,10 @@ type AppNavigationProps = {
   onClose: () => void
 }
 
+const SUMMARY_CLASS =
+  'cursor-pointer select-none rounded-md px-3 py-1.5 text-left text-sm font-semibold text-gray-900 hover:bg-gray-100'
+const GROUP_CLASS = 'ml-2 mt-0.5 space-y-0.5 border-l border-gray-200 pl-2'
+
 type NavigationLinkProps = {
   to: string
   children: React.ReactNode
@@ -26,7 +30,7 @@ function NavigationLink({ to, children, end, onClick }: Readonly<NavigationLinkP
       end={end}
       onClick={onClick}
       className={({ isActive }) =>
-        `block rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-blue-100 hover:text-blue-900 ${
+        `block truncate rounded-md px-3 py-1.5 text-left text-sm transition-colors hover:bg-blue-100 hover:text-blue-900 ${
           isActive ? 'bg-blue-600 font-medium text-white hover:bg-blue-700 hover:text-white' : 'text-gray-700'
         }`
       }
@@ -66,7 +70,7 @@ export function AppNavigation({ user, mobileOpen, onClose }: Readonly<AppNavigat
       <aside
         id="application-navigation"
         aria-label={t('navigation.main')}
-        className={`fixed inset-y-0 left-0 z-40 w-72 overflow-y-auto border-r border-gray-200 bg-white p-4 shadow-xl transition-transform md:static md:z-auto md:w-64 md:translate-x-0 md:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-40 w-72 overflow-y-auto border-r border-gray-200 bg-white p-4 shadow-xl transition-transform md:static md:z-auto md:w-64 md:shrink-0 md:translate-x-0 md:shadow-none ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -82,16 +86,14 @@ export function AppNavigation({ user, mobileOpen, onClose }: Readonly<AppNavigat
           </button>
         </div>
 
-        <nav className="space-y-2">
+        <nav className="space-y-1">
           <NavigationLink to={Paths.HOME} end onClick={linkClick}>
             {t('navigation.home')}
           </NavigationLink>
 
           <details open={location.pathname.startsWith(Paths.PROFILE)} className="group">
-            <summary className="cursor-pointer rounded-md px-3 py-2 text-left font-medium text-gray-900 hover:bg-gray-100">
-              {t('navigation.profile')}
-            </summary>
-            <div className="ml-3 mt-1 space-y-1 border-l border-gray-200 pl-3">
+            <summary className={SUMMARY_CLASS}>{t('navigation.profile')}</summary>
+            <div className={GROUP_CLASS}>
               <NavigationLink to={Paths.PROFILE_PERSONAL_INFO} onClick={linkClick}>
                 {t('profile.personalInfo')}
               </NavigationLink>
@@ -106,10 +108,8 @@ export function AppNavigation({ user, mobileOpen, onClose }: Readonly<AppNavigat
 
           {user.admin && (
             <details open={location.pathname.startsWith(Paths.ADMIN)} className="group">
-              <summary className="cursor-pointer rounded-md px-3 py-2 text-left font-medium text-gray-900 hover:bg-gray-100">
-                {t('admin.title')}
-              </summary>
-              <div className="ml-3 mt-1 space-y-1 border-l border-gray-200 pl-3">
+              <summary className={SUMMARY_CLASS}>{t('admin.title')}</summary>
+              <div className={GROUP_CLASS}>
                 <NavigationLink to={Paths.ADMIN_USERS} onClick={linkClick}>
                   {t('admin.userManagement.title')}
                 </NavigationLink>
@@ -122,19 +122,15 @@ export function AppNavigation({ user, mobileOpen, onClose }: Readonly<AppNavigat
 
           {modules.length > 0 && (
             <details open={location.pathname.startsWith('/modules/')} className="group">
-              <summary className="cursor-pointer rounded-md px-3 py-2 text-left font-medium text-gray-900 hover:bg-gray-100">
-                {t('modules.menuTitle')}
-              </summary>
-              <div className="ml-3 mt-1 space-y-1 border-l border-gray-200 pl-3">
+              <summary className={SUMMARY_CLASS}>{t('modules.menuTitle')}</summary>
+              <div className={GROUP_CLASS}>
                 {modules.map((module) => {
                   const modulePath = Paths.MODULES.replace(':moduleCode', module.code ?? '')
                   if (module.code === 'ACC') {
                     return (
                       <details key={module.code} open={location.pathname.startsWith(modulePath)}>
-                        <summary className="cursor-pointer rounded-md px-3 py-2 text-left text-sm font-medium text-gray-800 hover:bg-gray-100">
-                          {module.title ?? module.code}
-                        </summary>
-                        <div className="ml-3 mt-1 space-y-1 border-l border-gray-200 pl-3">
+                        <summary className={SUMMARY_CLASS}>{module.title ?? module.code}</summary>
+                        <div className={GROUP_CLASS}>
                           <NavigationLink to={modulePath} end onClick={linkClick}>
                             {t('account.title')}
                           </NavigationLink>
