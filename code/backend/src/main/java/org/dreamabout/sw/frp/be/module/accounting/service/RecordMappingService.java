@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,6 +53,17 @@ public class RecordMappingService {
             }
         }
         return mapped;
+    }
+
+    /**
+     * Account the external account of the connection is mapped to; empty when it is unmapped or ignored.
+     */
+    @Transactional(readOnly = true)
+    public Optional<Long> mappedAccountOf(Long connectionId, String externalAccountId) {
+        return mappingRepository.findByConnectionIdAndKindAndExternalId(connectionId, ExternalMappingKind.ACCOUNT,
+                        externalAccountId)
+                .filter(mapping -> !Boolean.TRUE.equals(mapping.getIgnored()))
+                .map(AccExternalMappingEntity::getAccountId);
     }
 
     private ConnectionMappings mappingsOf(Long connectionId) {

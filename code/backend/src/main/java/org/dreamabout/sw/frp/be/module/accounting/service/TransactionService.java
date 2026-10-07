@@ -40,28 +40,16 @@ public class TransactionService {
 
     @Transactional
     public AccTransactionDto createTransaction(AccTransactionCreateRequestDto request) {
-        AccTransactionEntity transaction = new AccTransactionEntity();
-        transaction.setReference(request.reference());
-        transaction.setDescription(request.description());
-        transaction.setFxRate(request.fxRate());
-        transaction.setJournals(new ArrayList<>());
+        return create(request, null, null);
+    }
 
-        for (AccJournalCreateRequestDto journalDto : request.journals()) {
-            AccAccountEntity account = accAccountRepository.findById(journalDto.accountId())
-                    .orElseThrow(() -> new IllegalArgumentException("Account not found: " + journalDto.accountId()));
-
-            AccJournalEntity journal = new AccJournalEntity();
-            journal.setDate(journalDto.date());
-            journal.setDescription(journalDto.description());
-            journal.setAccount(account);
-            journal.setCredit(journalDto.credit());
-            journal.setDebit(journalDto.debit());
-            journal.setTransaction(transaction);
-
-            transaction.getJournals().add(journal);
-        }
-
-        return transactionMapper.toDto(accTransactionRepository.save(transaction));
+    /**
+     * Creates a transaction posted from a record of an external source and links it to that record.
+     */
+    @Transactional
+    public AccTransactionDto createImportedTransaction(AccTransactionCreateRequestDto request, Long connectionId,
+                                                       String externalId) {
+        return create(request, connectionId, externalId);
     }
 
     @Transactional
@@ -76,15 +64,24 @@ public class TransactionService {
     public AccTransactionDto updateTransaction(Long id, AccTransactionCreateRequestDto request) {
         AccTransactionEntity transaction = accTransactionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
+        transaction.getJournals().clear();
+        apply(transaction, request);
+        return transactionMapper.toDto(accTransactionRepository.save(transaction));
+    }
 
+    private AccTransactionDto create(AccTransactionCreateRequestDto request, Long connectionId, String externalId) {
+        AccTransactionEntity transaction = new AccTransactionEntity();
+        transaction.setJournals(new ArrayList<>());
+        transaction.setSourceConnectionId(connectionId);
+        transaction.setSourceExternalId(externalId);
+        apply(transaction, request);
+        return transactionMapper.toDto(accTransactionRepository.save(transaction));
+    }
+
+    private void apply(AccTransactionEntity transaction, AccTransactionCreateRequestDto request) {
         transaction.setReference(request.reference());
         transaction.setDescription(request.description());
         transaction.setFxRate(request.fxRate());
-        
-        // Clear existing journals
-        transaction.getJournals().clear();
-
-        // Add new journals
         for (AccJournalCreateRequestDto journalDto : request.journals()) {
             AccAccountEntity account = accAccountRepository.findById(journalDto.accountId())
                     .orElseThrow(() -> new IllegalArgumentException("Account not found: " + journalDto.accountId()));
@@ -99,7 +96,5 @@ public class TransactionService {
 
             transaction.getJournals().add(journal);
         }
-
-        return transactionMapper.toDto(accTransactionRepository.save(transaction));
     }
 }

@@ -74,6 +74,8 @@ public abstract class AbstractDbTest {
         registry.add("spring.datasource.url", POSTGRES_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES_CONTAINER::getUsername);
         registry.add("spring.datasource.password", POSTGRES_CONTAINER::getPassword);
+        // every cached test context keeps its own pool; keep them all below max_connections of the shared container
+        registry.add("spring.datasource.hikari.maximum-pool-size", () -> "5");
         registry.add("frp.flyway.clean", () -> "true");
         registry.add("spring.flyway.clean-on-validation-error", () -> "true");
         registry.add("spring.flyway.clean-disabled", () -> "false");

@@ -58,7 +58,7 @@ class TransactionServiceTest {
         var savedTxn = new AccTransactionEntity();
         savedTxn.setId(1L);
 
-        var expectedDto = new AccTransactionDto(1L, "REF123", "Txn Desc", BigDecimal.ONE, BigDecimal.TEN, List.of());
+        var expectedDto = new AccTransactionDto(1L, "REF123", "Txn Desc", BigDecimal.ONE, BigDecimal.TEN, List.of(), null, null);
 
         when(accAccountRepository.findById(100L)).thenReturn(Optional.of(account));
         when(accTransactionRepository.save(any(AccTransactionEntity.class))).thenReturn(savedTxn);
@@ -74,7 +74,7 @@ class TransactionServiceTest {
     @Test
     void getAllTransactions_shouldMapAllEntities() {
         var entity = new AccTransactionEntity();
-        var dto = new AccTransactionDto(1L, "REF", "Desc", BigDecimal.ONE, BigDecimal.TEN, List.of());
+        var dto = new AccTransactionDto(1L, "REF", "Desc", BigDecimal.ONE, BigDecimal.TEN, List.of(), null, null);
         when(accTransactionRepository.findAll()).thenReturn(List.of(entity));
         when(transactionMapper.toDto(entity)).thenReturn(dto);
 
@@ -86,7 +86,7 @@ class TransactionServiceTest {
     @Test
     void getTransaction_shouldReturnMappedTransactionWhenFound() {
         var entity = new AccTransactionEntity();
-        var dto = new AccTransactionDto(1L, "REF", "Desc", BigDecimal.ONE, BigDecimal.TEN, List.of());
+        var dto = new AccTransactionDto(1L, "REF", "Desc", BigDecimal.ONE, BigDecimal.TEN, List.of(), null, null);
         when(accTransactionRepository.findById(1L)).thenReturn(Optional.of(entity));
         when(transactionMapper.toDto(entity)).thenReturn(dto);
 
@@ -135,7 +135,7 @@ class TransactionServiceTest {
         var existing = new AccTransactionEntity();
         existing.setId(1L);
         existing.setJournals(new ArrayList<>(List.of(new AccJournalEntity())));
-        var dto = new AccTransactionDto(1L, "REF123", "Txn Desc", BigDecimal.ONE, BigDecimal.TEN, List.of());
+        var dto = new AccTransactionDto(1L, "REF123", "Txn Desc", BigDecimal.ONE, BigDecimal.TEN, List.of(), null, null);
         when(accTransactionRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(accAccountRepository.findById(100L)).thenReturn(Optional.of(account));
         when(accTransactionRepository.save(existing)).thenReturn(existing);

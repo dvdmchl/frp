@@ -48,6 +48,13 @@ public class AccTransactionEntity extends AuditableEntity {
             comment = "Foreign exchange rate applied to the transaction, if applicable")
     private BigDecimal fxRate;
 
+    @Column(name = "source_connection_id",
+            comment = "Connection the transaction was imported from; NULL when entered in FRP")
+    private Long sourceConnectionId;
+
+    @Column(name = "source_external_id", comment = "Id of the imported record in the source")
+    private String sourceExternalId;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     @NotEmpty
     private List<AccJournalEntity> journals;

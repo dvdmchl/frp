@@ -9,7 +9,9 @@ public record AccTransactionDto(
     String description,
     BigDecimal fxRate,
     BigDecimal totalAmount,
-    List<AccJournalDto> journals
+    List<AccJournalDto> journals,
+    Long sourceConnectionId,
+    String sourceExternalId
 ) {
     public AccTransactionDto {
         journals = journals == null ? null : List.copyOf(journals);

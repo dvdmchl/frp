@@ -10,6 +10,8 @@ import java.time.LocalDate;
  *
  * @param externalId         stable id in the source, key for idempotent import
  * @param externalAccountId  {@link ExternalAccount#externalId()} the record belongs to
+ * @param baseAmount         the amount converted by the source to its reference currency, {@code null} when the
+ *                           source does not convert; gives the exchange rate of a record in a foreign currency
  * @param externalCategoryId {@link ExternalCategory#externalId()}, {@code null} when uncategorized
  * @param transferLinkId     id shared by both halves of a transfer between own accounts, {@code null} otherwise
  * @param updatedAt          last change in the source, used for incremental sync
@@ -21,6 +23,7 @@ public record ExternalRecord(
         String externalAccountId,
         LocalDate date,
         ExternalAmount amount,
+        ExternalAmount baseAmount,
         String externalCategoryId,
         String note,
         String counterparty,

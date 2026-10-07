@@ -78,4 +78,19 @@ public interface AccImportRecordRepository extends JpaRepository<AccImportRecord
               AND r.recordDate BETWEEN :from AND :to
               AND r.lastSeenAt < :seenSince""")
     int markNotSeenAsDeleted(Long connectionId, LocalDate from, LocalDate to, Instant seenSince);
+
+    List<AccImportRecordEntity> findByConnectionIdAndTransferLinkIdAndIdNot(Long connectionId, String transferLinkId,
+                                                                         Long id);
+
+    List<AccImportRecordEntity> findByTransactionId(Long transactionId);
+
+    /**
+     * Ids of the connection's records deleted in the source whose transaction has not been deleted yet.
+     */
+    @Query("""
+            SELECT r.id FROM AccImportRecordEntity r
+            WHERE r.connectionId = :connectionId AND r.transactionId IS NOT NULL
+              AND r.status = org.dreamabout.sw.frp.be.module.accounting.domain.ImportRecordStatus.DELETED
+            ORDER BY r.id""")
+    List<Long> findDeletedWithTransaction(Long connectionId);
 }

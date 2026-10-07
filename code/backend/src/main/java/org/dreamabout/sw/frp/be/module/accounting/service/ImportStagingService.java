@@ -1,6 +1,7 @@
 package org.dreamabout.sw.frp.be.module.accounting.service;
 
 import lombok.RequiredArgsConstructor;
+import org.dreamabout.sw.frp.be.module.accounting.connector.ExternalAmount;
 import org.dreamabout.sw.frp.be.module.accounting.connector.ExternalRecord;
 import org.dreamabout.sw.frp.be.module.accounting.connector.ExternalRecordState;
 import org.dreamabout.sw.frp.be.module.accounting.connector.RecordPage;
@@ -12,18 +13,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -33,9 +30,6 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class ImportStagingService {
-
-    private static final char FIELD_SEPARATOR = '\u001f';
-    private static final String NULL_FIELD = "\u0000";
 
     private final AccImportRecordRepository importRecordRepository;
     private final AccConnectionRepository connectionRepository;
@@ -115,6 +109,9 @@ public class ImportStagingService {
         stagedRecord.setRecordDate(source.date());
         stagedRecord.setAmount(source.amount().value());
         stagedRecord.setCurrencyCode(source.amount().currencyCode());
+        var baseAmount = Optional.ofNullable(source.baseAmount());
+        stagedRecord.setBaseAmount(baseAmount.map(ExternalAmount::value).orElse(null));
+        stagedRecord.setBaseCurrencyCode(baseAmount.map(ExternalAmount::currencyCode).orElse(null));
         stagedRecord.setNote(source.note());
         stagedRecord.setCounterparty(source.counterparty());
         stagedRecord.setSourceState(source.state());
@@ -132,19 +129,11 @@ public class ImportStagingService {
      * SHA-256 over the content of the record; {@code updatedAt} is left out so a mere touch in the source is no change.
      */
     static String payloadHash(ExternalRecord source) {
-        var content = new StringBuilder();
-        Stream.of(source.externalAccountId(), source.date(), source.amount().value().stripTrailingZeros().toPlainString(),
-                        source.amount().currencyCode(), source.externalCategoryId(), source.note(), source.counterparty(),
-                        source.state(), source.transferLinkId(), source.rawPayload())
-                .forEach(field -> content.append(Objects.toString(field, NULL_FIELD)).append(FIELD_SEPARATOR));
-        return HexFormat.of().formatHex(sha256().digest(content.toString().getBytes(StandardCharsets.UTF_8)));
-    }
-
-    private static MessageDigest sha256() {
-        try {
-            return MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is not available", e);
-        }
+        var baseAmount = Optional.ofNullable(source.baseAmount());
+        return ContentHash.of(Stream.of(source.externalAccountId(), source.date(), source.amount().value(),
+                source.amount().currencyCode(), source.externalCategoryId(), source.note(), source.counterparty(),
+                source.state(), source.transferLinkId(), source.rawPayload(),
+                baseAmount.map(ExternalAmount::value).orElse(null),
+                baseAmount.map(ExternalAmount::currencyCode).orElse(null)));
     }
 }

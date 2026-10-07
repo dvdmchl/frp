@@ -62,6 +62,12 @@ public class AccImportRecordEntity implements IdAwareEntity {
     @Column(name = "currency_code", nullable = false, comment = "Currency of the amount")
     private String currencyCode;
 
+    @Column(name = "base_amount", comment = "Amount converted by the source; NULL when the source did not convert it")
+    private BigDecimal baseAmount;
+
+    @Column(name = "base_currency_code", comment = "Currency of the base amount")
+    private String baseCurrencyCode;
+
     @Column(name = "note", comment = "Note of the record")
     private String note;
 
@@ -94,6 +100,9 @@ public class AccImportRecordEntity implements IdAwareEntity {
 
     @Column(name = "transaction_id", comment = "Accounting transaction the record was posted as")
     private Long transactionId;
+
+    @Column(name = "posted_hash", comment = "Fingerprint of the transaction as posted; detects changes made in FRP")
+    private String postedHash;
 
     @Column(name = "first_seen_at", nullable = false, updatable = false,
             comment = "First synchronization that fetched the record")

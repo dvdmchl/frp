@@ -120,6 +120,7 @@ class ImportServiceTest extends AbstractDbTest {
                 .externalAccountId("acc-1")
                 .date(LocalDate.of(2026, 1, 20))
                 .amount(new ExternalAmount(new BigDecimal("-123.45"), "EUR"))
+                .baseAmount(new ExternalAmount(new BigDecimal("-3086.25"), "CZK"))
                 .externalCategoryId("cat-1")
                 .note("Lunch")
                 .counterparty("Bistro")
@@ -147,6 +148,8 @@ class ImportServiceTest extends AbstractDbTest {
                 .returns(NOW, AccImportRecordEntity::getFirstSeenAt)
                 .returns(NOW, AccImportRecordEntity::getLastSeenAt)
                 .satisfies(r -> assertThat(r.getAmount()).isEqualByComparingTo("-123.45"))
+                .satisfies(r -> assertThat(r.getBaseAmount()).isEqualByComparingTo("-3086.25"))
+                .returns("CZK", AccImportRecordEntity::getBaseCurrencyCode)
                 .satisfies(r -> assertThat(r.getPayloadHash()).hasSize(64))
                 .satisfies(r -> assertThat(r.getRawPayload()).contains("\"id\"").contains("\"r1\""));
     }
