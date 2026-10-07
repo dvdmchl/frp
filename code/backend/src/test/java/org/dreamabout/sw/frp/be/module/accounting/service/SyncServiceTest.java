@@ -334,6 +334,21 @@ class SyncServiceTest extends AbstractDbTest {
     }
 
     @Test
+    void shouldSyncNowInTenantOfSignedInUserWhenTenantContextIsNotSet() {
+        prepareForPosting(connectionId);
+        connector.setRecords(List.of(bookedRecord("r1", "-10")));
+        // HTTP requests carry the tenant only in the authenticated user, not in the TenantContext
+        TenantContext.clear();
+
+        var run = manualSyncService.syncNow(connectionId).join();
+
+        assertThat(run).returns(SyncTrigger.MANUAL, AccSyncRunEntity::getTrigger)
+                .returns(SyncRunStatus.SUCCESS, AccSyncRunEntity::getStatus);
+        TenantContext.setCurrentTenant(TenantIdentifier.of(SCHEMA));
+        assertThat(runs()).singleElement().returns(run.getId(), AccSyncRunEntity::getId);
+    }
+
+    @Test
     void shouldRejectSyncNowOfDisabledConnectionRightAway() {
         connectionService.setEnabled(connectionId, false);
 
