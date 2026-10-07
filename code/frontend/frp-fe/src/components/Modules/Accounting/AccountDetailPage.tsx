@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
+  Badge,
   Button,
   Label,
   Modal,
@@ -20,7 +21,7 @@ import {
 import { AccountingService } from '../../../api/services/AccountingService'
 import type { AccAccountDto } from '../../../api/models/AccAccountDto'
 import type { AccJournalDto } from '../../../api/models/AccJournalDto'
-import type { AccNodeDto } from '../../../api/models/AccNodeDto'
+import type { AccConnectionDto } from '../../../api/models/AccConnectionDto'
 import type { AccTransactionCreateRequestDto } from '../../../api/models/AccTransactionCreateRequestDto'
 import type { AccTransactionDto } from '../../../api/models/AccTransactionDto'
 import type { ErrorDto } from '../../../api/models/ErrorDto'
@@ -29,9 +30,7 @@ import { ErrorDisplay } from '../../UIComponent/ErrorDisplay'
 import { H2Title } from '../../UIComponent/Text'
 import { TransactionForm } from './TransactionForm'
 import { Paths } from '../../../constants/Paths'
-
-const flattenAccounts = (nodes: AccNodeDto[]): AccAccountDto[] =>
-  nodes.flatMap((node) => [node.account, ...flattenAccounts(node.children ?? [])]).filter(Boolean) as AccAccountDto[]
+import { flattenAccounts } from './accountingUtils'
 
 const transactionDate = (transaction: AccTransactionDto) =>
   transaction.journals
@@ -48,6 +47,7 @@ export const AccountDetailPage: React.FC = () => {
   const selectedAccountId = Number(accountId)
   const [accounts, setAccounts] = useState<AccAccountDto[]>([])
   const [transactions, setTransactions] = useState<AccTransactionDto[]>([])
+  const [connections, setConnections] = useState<AccConnectionDto[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<ErrorDto | null>(null)
   const [query, setQuery] = useState('')
@@ -75,12 +75,14 @@ export const AccountDetailPage: React.FC = () => {
     setLoading(true)
     setError(null)
     try {
-      const [tree, transactionList] = await Promise.all([
+      const [tree, transactionList, connectionList] = await Promise.all([
         AccountingService.getTree(),
         AccountingService.getAllTransactions(),
+        AccountingService.getConnections(),
       ])
       setAccounts(flattenAccounts(tree))
       setTransactions(transactionList)
+      setConnections(connectionList)
     } catch (caughtError) {
       handleError(caughtError)
     } finally {
@@ -311,7 +313,18 @@ export const AccountDetailPage: React.FC = () => {
                       )
                     }
                   >
-                    {transaction.description || '—'}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {transaction.description || '—'}
+                      {typeof transaction.sourceConnectionId === 'number' && (
+                        <Badge color="info">
+                          {t('transaction.importedFrom', {
+                            name:
+                              connections.find((connection) => connection.id === transaction.sourceConnectionId)
+                                ?.name ?? transaction.sourceConnectionId,
+                          })}
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>{formatAmount(transaction.totalAmount, account.currencyCode)}</TableCell>
                   <TableCell>

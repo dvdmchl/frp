@@ -75,7 +75,8 @@
     "delete": "Smazat",
     "close": "Zavřít",
     "none": "Žádné",
-    "id": "ID"
+    "id": "ID",
+    "reload": "Načíst znovu"
   },
   "user": {
     "fullName": "Celé jméno",
@@ -152,7 +153,8 @@
     "empty": "Vybranému účtu a filtrům neodpovídají žádné transakce.",
     "balanceSummary": "Dal: {{credit}} · Má dáti: {{debit}}",
     "deleteConfirm": "Opravdu chcete tuto transakci smazat?",
-    "error": "Operace s transakcí selhala"
+    "error": "Operace s transakcí selhala",
+    "importedFrom": "Importováno z {{name}}"
   },
   "journal": {
     "title": "Položky deníku",
@@ -192,5 +194,118 @@
       "dropConfirm": "Opravdu chcete smazat vybraná schémata? Tato akce je nevratná a smaže všechna data v těchto schématech.",
       "dropSuccess": "Vybraná schémata byla úspěšně smazána."
     }
+  },
+  "connection": {
+    "title": "Připojení",
+    "createTitle": "Přidat připojení",
+    "editTitle": "Upravit připojení",
+    "connectorType": "Zdroj",
+    "connectorTypes": {
+      "WALLET": "BudgetBakers Wallet"
+    },
+    "name": "Název",
+    "credentialsHint": "Uložené přihlašovací údaje se nikdy nezobrazují. Vyplňte pole jen tehdy, když je chcete nahradit.",
+    "syncInterval": "Interval synchronizace (minuty)",
+    "importStartDate": "Importovat záznamy od",
+    "save": "Uložit",
+    "saveSuccess": "Připojení bylo uloženo",
+    "error": "Operace s připojením selhala",
+    "stateTitle": "Stav",
+    "state": {
+      "active": "Aktivní",
+      "disabled": "Vypnuto",
+      "noCredentials": "Bez přihlašovacích údajů",
+      "credentialsRejected": "Přihlašovací údaje odmítnuty"
+    },
+    "lastSync": "Poslední synchronizace",
+    "nextSync": "Další synchronizace",
+    "enable": "Zapnout",
+    "disable": "Vypnout",
+    "enableSuccess": "Připojení bylo zapnuto",
+    "disableSuccess": "Připojení bylo vypnuto",
+    "test": "Otestovat",
+    "testSuccess": "Zdroj přihlašovací údaje přijal",
+    "syncNow": "Synchronizovat",
+    "syncStarted": "Synchronizace byla spuštěna, výsledek se objeví v historii synchronizací.",
+    "deleteConfirm": "Smazat toto připojení? Zaúčtované transakce zůstanou.",
+    "deleteSuccess": "Připojení bylo smazáno",
+    "empty": "Zatím žádná připojení.",
+    "backToAccounting": "Zpět na účetnictví",
+    "backToList": "Zpět na připojení",
+    "notFound": "Připojení nebylo nalezeno.",
+    "tabs": {
+      "records": "Záznamy ke kontrole",
+      "mappings": "Mapování",
+      "runs": "Historie synchronizací"
+    }
+  },
+  "mapping": {
+    "kinds": {
+      "ACCOUNT": "Externí účty",
+      "CATEGORY": "Externí kategorie"
+    },
+    "externalName": "Externí název",
+    "currency": "Měna",
+    "account": "Účet",
+    "ignored": "Ignorovat",
+    "empty": "Není co mapovat. Obnovte mapování ze zdroje.",
+    "parentNode": "Vytvořit pod",
+    "createMissing": "Vytvořit chybějící účty",
+    "refresh": "Obnovit ze zdroje",
+    "error": "Operace s mapováním selhala",
+    "fallbackTitle": "Účty pro záznamy bez namapované kategorie",
+    "fallbackExpense": "Nákladový účet",
+    "fallbackRevenue": "Výnosový účet",
+    "saveFallback": "Uložit záložní účty"
+  },
+  "syncRun": {
+    "startedAt": "Začátek",
+    "finishedAt": "Konec",
+    "trigger": "Spuštění",
+    "status": "Stav",
+    "counts": {
+      "fetched": "Staženo",
+      "created": "Nové",
+      "updated": "Změněné",
+      "deleted": "Smazané",
+      "posted": "Zaúčtované",
+      "errors": "Chyby"
+    },
+    "errorMessage": "Chyba",
+    "triggers": {
+      "SCHEDULED": "Plánované",
+      "MANUAL": "Ruční"
+    },
+    "statuses": {
+      "RUNNING": "Běží",
+      "SUCCESS": "Úspěch",
+      "PARTIAL": "Částečně",
+      "FAILED": "Selhalo"
+    },
+    "empty": "Zatím neproběhla žádná synchronizace.",
+    "error": "Načtení historie synchronizací selhalo"
+  },
+  "importRecord": {
+    "date": "Datum",
+    "amount": "Částka",
+    "description": "Popis",
+    "status": "Stav",
+    "reason": "Důvod",
+    "statuses": {
+      "NEW": "Čeká",
+      "ERROR": "Chyba",
+      "CONFLICT": "Konflikt"
+    },
+    "reasons": {
+      "NEW": "Účet nebo kategorie nejsou namapované",
+      "ERROR": "Zaúčtování selhalo",
+      "CONFLICT": "Transakce byla změněna ve FRP"
+    },
+    "retry": "Zkusit znovu",
+    "ignore": "Ignorovat",
+    "keepFrp": "Ponechat verzi z FRP",
+    "useSource": "Použít verzi ze zdroje",
+    "empty": "Žádné záznamy nevyžadují pozornost.",
+    "error": "Operace se záznamem importu selhala"
   }
 }

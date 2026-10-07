@@ -20,6 +20,14 @@ vi.mock('./AccountDetailPage', () => ({
   AccountDetailPage: () => <div>MockAccountDetailPage</div>,
 }))
 
+vi.mock('./Connections/ConnectionsPage', () => ({
+  ConnectionsPage: () => <div>MockConnectionsPage</div>,
+}))
+
+vi.mock('./Connections/ConnectionDetailPage', () => ({
+  ConnectionDetailPage: () => <div>MockConnectionDetailPage</div>,
+}))
+
 describe('AccountingModule', () => {
   it('renders dashboard at root', () => {
     render(
@@ -28,6 +36,7 @@ describe('AccountingModule', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText('currency.title')).toBeDefined()
+    expect(screen.getByText('connection.title')).toBeDefined()
     expect(screen.getByText('MockAccountTree')).toBeDefined()
   })
 
@@ -47,5 +56,23 @@ describe('AccountingModule', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText('MockAccountDetailPage')).toBeDefined()
+  })
+
+  it('renders connections at /connections', () => {
+    render(
+      <MemoryRouter initialEntries={['/connections']}>
+        <AccountingModule />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('MockConnectionsPage')).toBeDefined()
+  })
+
+  it('renders connection detail at /connections/:connectionId', () => {
+    render(
+      <MemoryRouter initialEntries={['/connections/7']}>
+        <AccountingModule />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('MockConnectionDetailPage')).toBeDefined()
   })
 })

@@ -2,13 +2,14 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError } from '../../../api/core/ApiError'
+import { apiError } from '../../../test/apiError'
 import { AccountingService } from '../../../api/services/AccountingService'
 import { AccountDetailPage } from './AccountDetailPage'
 
 vi.mock('../../../api/services/AccountingService')
 
-const translate = (key: string) => key
+const translate = (key: string, options?: { name?: string | number }) =>
+  options?.name === undefined ? key : `${key} ${options.name}`
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: translate }),
 }))
@@ -45,13 +46,6 @@ const transactions = [
   },
 ]
 
-const apiError = (message: string) =>
-  new ApiError(
-    { method: 'GET', url: '/api' } as never,
-    { url: '/api', ok: false, status: 400, statusText: 'Bad Request', body: { message } },
-    message,
-  )
-
 const renderPage = (accountId = '10') =>
   render(
     <MemoryRouter initialEntries={[`/accounts/${accountId}`]}>
@@ -66,6 +60,24 @@ describe('AccountDetailPage', () => {
     vi.clearAllMocks()
     vi.mocked(AccountingService.getTree).mockResolvedValue(tree as never)
     vi.mocked(AccountingService.getAllTransactions).mockResolvedValue(transactions)
+    vi.mocked(AccountingService.getConnections).mockResolvedValue([{ id: 7, name: 'Wallet' }])
+  })
+
+  it('marks imported transactions with the name of their source connection', async () => {
+    vi.mocked(AccountingService.getAllTransactions).mockResolvedValue([
+      { ...transactions[0], sourceConnectionId: 7, sourceExternalId: 'w-1' },
+    ])
+    renderPage()
+
+    expect(await screen.findByText('PAY-001')).toBeInTheDocument()
+    expect(screen.getByText('transaction.importedFrom Wallet')).toBeInTheDocument()
+  })
+
+  it('does not mark transactions entered in FRP as imported', async () => {
+    renderPage()
+
+    expect(await screen.findByText('PAY-001')).toBeInTheDocument()
+    expect(screen.queryByText(/transaction.importedFrom/)).not.toBeInTheDocument()
   })
 
   it('shows account summaries and only related transactions', async () => {

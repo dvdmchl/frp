@@ -75,7 +75,8 @@
     "delete": "Delete",
     "close": "Close",
     "none": "None",
-    "id": "ID"
+    "id": "ID",
+    "reload": "Reload"
   },
   "user": {
     "fullName": "Full Name",
@@ -171,7 +172,8 @@
     "empty": "No transactions match the selected account and filters.",
     "balanceSummary": "Credits: {{credit}} · Debits: {{debit}}",
     "deleteConfirm": "Are you sure you want to delete this transaction?",
-    "error": "Transaction operation failed"
+    "error": "Transaction operation failed",
+    "importedFrom": "Imported from {{name}}"
   },
   "journal": {
     "title": "Journal entries",
@@ -211,5 +213,118 @@
       "dropConfirm": "Are you sure you want to drop the selected schemas? This action is irreversible and will delete all data in those schemas.",
       "dropSuccess": "Selected schemas dropped successfully."
     }
+  },
+  "connection": {
+    "title": "Connections",
+    "createTitle": "Add connection",
+    "editTitle": "Edit connection",
+    "connectorType": "Source",
+    "connectorTypes": {
+      "WALLET": "BudgetBakers Wallet"
+    },
+    "name": "Name",
+    "credentialsHint": "Stored credentials are never shown. Fill in the fields only to replace them.",
+    "syncInterval": "Sync interval (minutes)",
+    "importStartDate": "Import records from",
+    "save": "Save",
+    "saveSuccess": "Connection saved",
+    "error": "Connection operation failed",
+    "stateTitle": "State",
+    "state": {
+      "active": "Active",
+      "disabled": "Disabled",
+      "noCredentials": "No credentials",
+      "credentialsRejected": "Credentials rejected"
+    },
+    "lastSync": "Last sync",
+    "nextSync": "Next sync",
+    "enable": "Enable",
+    "disable": "Disable",
+    "enableSuccess": "Connection enabled",
+    "disableSuccess": "Connection disabled",
+    "test": "Test",
+    "testSuccess": "The source accepted the credentials",
+    "syncNow": "Sync now",
+    "syncStarted": "Synchronization started; its result appears in the sync history.",
+    "deleteConfirm": "Delete this connection? Its posted transactions stay.",
+    "deleteSuccess": "Connection deleted",
+    "empty": "No connections yet.",
+    "backToAccounting": "Back to accounting",
+    "backToList": "Back to connections",
+    "notFound": "Connection not found.",
+    "tabs": {
+      "records": "Records to review",
+      "mappings": "Mapping",
+      "runs": "Sync history"
+    }
+  },
+  "mapping": {
+    "kinds": {
+      "ACCOUNT": "External accounts",
+      "CATEGORY": "External categories"
+    },
+    "externalName": "External name",
+    "currency": "Currency",
+    "account": "Account",
+    "ignored": "Ignore",
+    "empty": "Nothing to map. Refresh the mapping from the source.",
+    "parentNode": "Create under",
+    "createMissing": "Create missing accounts",
+    "refresh": "Refresh from source",
+    "error": "Mapping operation failed",
+    "fallbackTitle": "Accounts for records without a mapped category",
+    "fallbackExpense": "Expense account",
+    "fallbackRevenue": "Revenue account",
+    "saveFallback": "Save fallback accounts"
+  },
+  "syncRun": {
+    "startedAt": "Started",
+    "finishedAt": "Finished",
+    "trigger": "Trigger",
+    "status": "Status",
+    "counts": {
+      "fetched": "Fetched",
+      "created": "New",
+      "updated": "Updated",
+      "deleted": "Deleted",
+      "posted": "Posted",
+      "errors": "Errors"
+    },
+    "errorMessage": "Error",
+    "triggers": {
+      "SCHEDULED": "Scheduled",
+      "MANUAL": "Manual"
+    },
+    "statuses": {
+      "RUNNING": "Running",
+      "SUCCESS": "Success",
+      "PARTIAL": "Partial",
+      "FAILED": "Failed"
+    },
+    "empty": "No synchronization has run yet.",
+    "error": "Loading the sync history failed"
+  },
+  "importRecord": {
+    "date": "Date",
+    "amount": "Amount",
+    "description": "Description",
+    "status": "Status",
+    "reason": "Reason",
+    "statuses": {
+      "NEW": "Waiting",
+      "ERROR": "Error",
+      "CONFLICT": "Conflict"
+    },
+    "reasons": {
+      "NEW": "Account or category is not mapped",
+      "ERROR": "Posting failed",
+      "CONFLICT": "The transaction was changed in FRP"
+    },
+    "retry": "Retry",
+    "ignore": "Ignore",
+    "keepFrp": "Keep FRP version",
+    "useSource": "Use source version",
+    "empty": "No records need attention.",
+    "error": "Import record operation failed"
   }
 }

@@ -14,6 +14,8 @@ export const Paths = {
   MODULES: '/modules/:moduleCode',
   ACCOUNTING_CURRENCIES: 'currencies',
   ACCOUNTING_ACCOUNT: 'accounts/:accountId',
+  ACCOUNTING_CONNECTIONS: 'connections',
+  ACCOUNTING_CONNECTION: 'connections/:connectionId',
   CURRENT: '.',
   PARENT: '..',
   WILDCARD: '*',
