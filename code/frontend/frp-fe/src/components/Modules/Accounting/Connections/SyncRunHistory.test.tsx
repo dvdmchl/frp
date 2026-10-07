@@ -84,7 +84,7 @@ describe('SyncRunHistory', () => {
       await vi.advanceTimersByTimeAsync(RUNNING_REFRESH_MS)
 
       expect(await screen.findByText('syncRun.statuses.SUCCESS')).toBeInTheDocument()
-      expect(onRunFinished).toHaveBeenCalledTimes(1)
+      await waitFor(() => expect(onRunFinished).toHaveBeenCalledTimes(1))
       await vi.advanceTimersByTimeAsync(RUNNING_REFRESH_MS * 2)
       expect(AccountingService.getRuns).toHaveBeenCalledTimes(2)
     })
