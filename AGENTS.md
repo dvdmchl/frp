@@ -44,6 +44,9 @@ relying on this file.
 - **Commits.** Message format `#<issue> - <description>` (e.g. `#72 - Add transaction and journal account page`).
   Agents may commit and push to `main` themselves once the relevant tests and checks pass.
   Commit only your own changes; never revert, stash or discard work you did not make.
+- **Review before commit.** Before every commit, review your own diff and fix the findings, then rerun the
+  relevant tests. Claude Code runs the `/code-review` skill, Codex `/review`; without such a tool, go through the
+  diff yourself (bugs, missed edge cases, duplication, rules in this file).
 - **Issues.** Work is tracked in GitHub issues in dvdmchl/frp. Every new issue must also be added to the linked
   GitHub Project **FRP** (https://github.com/users/dvdmchl/projects/10) with a Status; an issue only in the repo
   is not tracked. The gh token needs the `project` scope (`gh auth refresh -s project`, ask the user to run it).
