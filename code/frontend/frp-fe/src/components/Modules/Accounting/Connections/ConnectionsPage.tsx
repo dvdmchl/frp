@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import {
   Badge,
   Button,
@@ -21,6 +22,7 @@ import { H2Title, LinkText, TextSuccess } from '../../../UIComponent/Text'
 import { Paths } from '../../../../constants/Paths'
 import { formatDateTime, useApiAction } from '../accountingUtils'
 import { ConnectionForm } from './ConnectionForm'
+import { RUNS_TAB, connectionDetailPath } from './connectionPaths'
 
 const connectionState = (connection: AccConnectionDto) => {
   if (connection.credentialsRejected) return { key: 'connection.state.credentialsRejected', color: 'failure' }
@@ -35,6 +37,7 @@ export const ConnectionsPage: React.FC = () => {
   const [connectors, setConnectors] = useState<AccConnectorDto[]>([])
   const [loading, setLoading] = useState(true)
   const [success, setSuccess] = useState<string | null>(null)
+  const [syncedConnectionId, setSyncedConnectionId] = useState<number | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editedConnection, setEditedConnection] = useState<AccConnectionDto | undefined>()
   const { busy, error, run } = useApiAction('connection.error')
@@ -55,10 +58,12 @@ export const ConnectionsPage: React.FC = () => {
     load()
   }, [load])
 
-  const runAction = async (action: () => Promise<unknown>, successKey: string) => {
+  const runAction = async (action: () => Promise<unknown>, successKey: string, syncedId: number | null = null) => {
     setSuccess(null)
+    setSyncedConnectionId(null)
     if (await run(action)) {
       setSuccess(t(successKey))
+      setSyncedConnectionId(syncedId)
       await load()
     }
   }
@@ -66,12 +71,14 @@ export const ConnectionsPage: React.FC = () => {
   const openForm = (connection?: AccConnectionDto) => {
     setEditedConnection(connection)
     setSuccess(null)
+    setSyncedConnectionId(null)
     setFormOpen(true)
   }
 
   const handleSaved = async () => {
     setFormOpen(false)
     setSuccess(t('connection.saveSuccess'))
+    setSyncedConnectionId(null)
     await load()
   }
 
@@ -100,6 +107,11 @@ export const ConnectionsPage: React.FC = () => {
 
       {error && <ErrorDisplay error={error} />}
       {success && <TextSuccess message={success} />}
+      {syncedConnectionId !== null && (
+        <div className="text-center text-sm">
+          <LinkText to={connectionDetailPath(syncedConnectionId, RUNS_TAB)}>{t('connection.showSyncHistory')}</LinkText>
+        </div>
+      )}
 
       <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
         <Table>
@@ -120,7 +132,7 @@ export const ConnectionsPage: React.FC = () => {
               return (
                 <TableRow key={id} className="bg-white">
                   <TableCell className="font-medium text-gray-900">
-                    <LinkText to={String(id)}>{connection.name}</LinkText>
+                    <LinkText to={connectionDetailPath(id)}>{connection.name}</LinkText>
                   </TableCell>
                   <TableCell>
                     {t(`connection.connectorTypes.${connection.connectorType}`, {
@@ -134,6 +146,9 @@ export const ConnectionsPage: React.FC = () => {
                   <TableCell>{formatDateTime(connection.nextSyncAt)}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-2">
+                      <Button as={Link} to={connectionDetailPath(id)} size="xs" color="light">
+                        {t('connection.detail')}
+                      </Button>
                       <Button size="xs" color="light" onClick={() => openForm(connection)}>
                         {t('common.edit')}
                       </Button>
@@ -161,7 +176,7 @@ export const ConnectionsPage: React.FC = () => {
                       <Button
                         size="xs"
                         disabled={busy || !connection.enabled}
-                        onClick={() => runAction(() => AccountingService.syncNow(id), 'connection.syncStarted')}
+                        onClick={() => runAction(() => AccountingService.syncNow(id), 'connection.syncStarted', id)}
                       >
                         {t('connection.syncNow')}
                       </Button>

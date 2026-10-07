@@ -13,9 +13,9 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: translate }),
 }))
 
-const renderPage = () =>
+const renderPage = (path = '/connections/7') =>
   render(
-    <MemoryRouter initialEntries={['/connections/7']}>
+    <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route path="connections/:connectionId" element={<ConnectionDetailPage />} />
       </Routes>
@@ -55,6 +55,19 @@ describe('ConnectionDetailPage', () => {
     expect(await screen.findByText('connection.syncStarted')).toBeInTheDocument()
     expect(AccountingService.syncNow).toHaveBeenCalledWith(7)
     await waitFor(() => expect(AccountingService.getRecords).toHaveBeenCalledTimes(2))
+    expect(screen.getByRole('tab', { name: 'connection.tabs.runs' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('opens the records tab by default', async () => {
+    renderPage()
+
+    expect(await screen.findByRole('tab', { name: 'connection.tabs.records' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('opens the sync history tab requested in the address', async () => {
+    renderPage('/connections/7?tab=runs')
+
+    expect(await screen.findByRole('tab', { name: 'connection.tabs.runs' })).toHaveAttribute('aria-selected', 'true')
   })
 
   it('shows the error when the synchronization cannot start', async () => {

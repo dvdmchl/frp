@@ -7,6 +7,7 @@
 @theme {
   --color-bgForm: #f9fafb;
   --color-bgMenu: #f3f4f6;
+  --color-textLink: #1d4ed8;
 }
 
 #root {

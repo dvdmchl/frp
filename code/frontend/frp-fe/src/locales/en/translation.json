@@ -249,6 +249,8 @@
     "testSuccess": "The source accepted the credentials",
     "syncNow": "Sync now",
     "syncStarted": "Synchronization started; its result appears in the sync history.",
+    "showSyncHistory": "Show the sync history",
+    "detail": "Detail",
     "deleteConfirm": "Delete this connection? Its posted transactions stay.",
     "deleteSuccess": "Connection deleted",
     "empty": "No connections yet.",

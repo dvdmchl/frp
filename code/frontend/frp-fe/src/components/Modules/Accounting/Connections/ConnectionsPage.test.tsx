@@ -123,6 +123,29 @@ describe('ConnectionsPage', () => {
 
     await waitFor(() => expect(AccountingService.syncNow).toHaveBeenCalledWith(1))
     expect(await screen.findByText('connection.syncStarted')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'connection.showSyncHistory' })).toHaveAttribute('href', '/1?tab=runs')
+  })
+
+  it('links each connection to its detail', async () => {
+    renderPage()
+
+    const activeRow = within(await row('Active wallet'))
+    expect(activeRow.getByRole('link', { name: 'Active wallet' })).toHaveAttribute('href', '/1')
+    expect(activeRow.getByRole('link', { name: 'connection.detail' })).toHaveAttribute('href', '/1')
+  })
+
+  it('hides the sync history link after another action', async () => {
+    const user = userEvent.setup()
+    vi.mocked(AccountingService.syncNow).mockResolvedValue(undefined)
+    vi.mocked(AccountingService.testConnection).mockResolvedValue(undefined)
+    renderPage()
+    await user.click(within(await row('Active wallet')).getByRole('button', { name: 'connection.syncNow' }))
+    await screen.findByRole('link', { name: 'connection.showSyncHistory' })
+
+    await user.click(within(await row('Active wallet')).getByRole('button', { name: 'connection.test' }))
+
+    expect(await screen.findByText('connection.testSuccess')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'connection.showSyncHistory' })).not.toBeInTheDocument()
   })
 
   it('deletes a connection after confirmation', async () => {

@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Button, Spinner, TabItem, Tabs } from 'flowbite-react'
+import { Button, Spinner, TabItem, Tabs, type TabsRef } from 'flowbite-react'
 import { AccountingService } from '../../../../api/services/AccountingService'
 import type { AccConnectionDto } from '../../../../api/models/AccConnectionDto'
 import { ErrorDisplay } from '../../../UIComponent/ErrorDisplay'
@@ -11,10 +11,16 @@ import { useApiAction } from '../accountingUtils'
 import { ConnectionMappings } from './ConnectionMappings'
 import { ImportRecordReview } from './ImportRecordReview'
 import { SyncRunHistory } from './SyncRunHistory'
+import { RUNS_TAB, TAB_PARAM } from './connectionPaths'
+
+const RUNS_TAB_INDEX = 2
 
 export const ConnectionDetailPage: React.FC = () => {
   const { t } = useTranslation()
   const connectionId = Number(useParams().connectionId)
+  const [searchParams] = useSearchParams()
+  const runsTabOpened = searchParams.get(TAB_PARAM) === RUNS_TAB
+  const tabsRef = useRef<TabsRef>(null)
   const [connection, setConnection] = useState<AccConnectionDto | null>(null)
   const [loading, setLoading] = useState(true)
   const [syncStarted, setSyncStarted] = useState(false)
@@ -35,6 +41,7 @@ export const ConnectionDetailPage: React.FC = () => {
     if (await run(() => AccountingService.syncNow(connectionId))) {
       setSyncStarted(true)
       setRefreshKey((key) => key + 1)
+      tabsRef.current?.setActiveTab(RUNS_TAB_INDEX)
     }
   }
 
@@ -70,14 +77,14 @@ export const ConnectionDetailPage: React.FC = () => {
       </div>
       {error && <ErrorDisplay error={error} />}
       {syncStarted && <TextSuccess message={t('connection.syncStarted')} />}
-      <Tabs variant="underline">
-        <TabItem active title={t('connection.tabs.records')}>
+      <Tabs variant="underline" ref={tabsRef}>
+        <TabItem active={!runsTabOpened} title={t('connection.tabs.records')}>
           <ImportRecordReview connectionId={connectionId} refreshKey={refreshKey} />
         </TabItem>
         <TabItem title={t('connection.tabs.mappings')}>
           <ConnectionMappings connection={connection} onConnectionChange={setConnection} />
         </TabItem>
-        <TabItem title={t('connection.tabs.runs')}>
+        <TabItem active={runsTabOpened} title={t('connection.tabs.runs')}>
           <SyncRunHistory connectionId={connectionId} refreshKey={refreshKey} />
         </TabItem>
       </Tabs>
