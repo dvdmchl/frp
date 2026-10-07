@@ -4,6 +4,11 @@ import org.dreamabout.sw.frp.be.module.accounting.config.ConnectorProperties;
 import org.dreamabout.sw.frp.be.module.accounting.connector.ConnectorCredentials;
 import org.junit.jupiter.api.Test;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
@@ -86,12 +91,68 @@ class ConnectorCredentialCipherTest {
     }
 
     @Test
-    void shouldRejectKeyOfInvalidLength() {
+    void shouldUseBase64AesKeyAsIsSoExistingCredentialsStayReadable() throws Exception {
+        var nonce = new byte[12];
+        var aes = Cipher.getInstance("AES/GCM/NoPadding");
+        aes.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(Base64.getDecoder().decode(KEY_V1), "AES"),
+                new GCMParameterSpec(128, nonce));
+        var ciphertext = aes.doFinal("{\"token\":\"secret-token\"}".getBytes(StandardCharsets.UTF_8));
+        var data = ByteBuffer.allocate(nonce.length + ciphertext.length).put(nonce).put(ciphertext).array();
+        var stored = new EncryptedCredentials(1, Base64.getEncoder().encodeToString(data));
+
+        assertThat(cipher(KEY_V1, 1, Map.of()).decrypt(stored)).isEqualTo(CREDENTIALS);
+    }
+
+    @Test
+    void shouldAcceptPlainTextKey() {
+        var cipher = cipher("secret_frp_connector_key", 1, Map.of());
+
+        var encrypted = cipher.encrypt(CREDENTIALS);
+
+        assertThat(cipher.decrypt(encrypted)).isEqualTo(CREDENTIALS);
+    }
+
+    @Test
+    void shouldDeriveSameKeyFromSamePlainText() {
+        var encrypted = cipher("secret_frp_connector_key", 1, Map.of()).encrypt(CREDENTIALS);
+        var restarted = cipher("secret_frp_connector_key", 1, Map.of());
+
+        assertThat(restarted.decrypt(encrypted)).isEqualTo(CREDENTIALS);
+    }
+
+    @Test
+    void shouldNotDecryptWithDifferentPlainTextKey() {
+        var encrypted = cipher("secret_frp_connector_key", 1, Map.of()).encrypt(CREDENTIALS);
+        var other = cipher("other_frp_connector_key", 1, Map.of());
+
+        assertThatThrownBy(() -> other.decrypt(encrypted))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("key version 1");
+    }
+
+    @Test
+    void shouldTreatBase64OfInvalidAesLengthAsPlainText() {
         var shortKey = Base64.getEncoder().encodeToString(new byte[10]);
+        var cipher = cipher(shortKey, 1, Map.of());
 
-        Map<Integer, String> noPreviousKeys = Map.of();
+        var encrypted = cipher.encrypt(CREDENTIALS);
 
-        assertThatThrownBy(() -> cipher(shortKey, 1, noPreviousKeys))
+        assertThat(cipher.decrypt(encrypted)).isEqualTo(CREDENTIALS);
+    }
+
+    @Test
+    void shouldDecryptWithPlainTextPreviousKeyAfterRotation() {
+        var encrypted = cipher("old passphrase", 1, Map.of()).encrypt(CREDENTIALS);
+        var rotated = cipher(KEY_V2, 2, Map.of(1, "old passphrase"));
+
+        assertThat(rotated.decrypt(encrypted)).isEqualTo(CREDENTIALS);
+    }
+
+    @Test
+    void shouldRejectBlankPreviousKey() {
+        Map<Integer, String> blankPreviousKey = Map.of(1, " ");
+
+        assertThatThrownBy(() -> cipher(KEY_V2, 2, blankPreviousKey))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("version 1");
     }

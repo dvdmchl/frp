@@ -15,7 +15,8 @@ import java.util.Map;
 @Setter
 public class ConnectorProperties {
     /**
-     * Base64 encoded AES key (16, 24 or 32 bytes) encrypting connection credentials. Never commit it.
+     * Secret encrypting connection credentials: any text (hashed with SHA-256) or a Base64 encoded 16, 24 or 32 byte
+     * AES key used as is. Never commit it.
      */
     private String encryptionKey;
 

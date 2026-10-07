@@ -11,16 +11,21 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
- * Encrypts connection credentials at rest with AES-GCM. The key comes from {@code frp.connector.encryption-key};
- * its version is stored with each ciphertext, so credentials encrypted with a retired key
+ * Encrypts connection credentials at rest with AES-GCM. The key comes from {@code frp.connector.encryption-key}:
+ * a Base64 encoded 16, 24 or 32 byte AES key is used as is, any other text is hashed with SHA-256 into a 256-bit key.
+ * The key's version is stored with each ciphertext, so credentials encrypted with a retired key
  * ({@code frp.connector.previous-encryption-keys}) stay readable after a rotation.
  * Error messages never contain credential values.
  */
@@ -87,22 +92,27 @@ public final class ConnectorCredentialCipher {
         }
     }
 
-    private static SecretKey toKey(int version, String base64Key) {
-        byte[] bytes;
-        try {
-            bytes = Base64.getDecoder().decode(base64Key);
-        } catch (IllegalArgumentException e) {
-            throw invalidKey(version, e);
+    private static SecretKey toKey(int version, String key) {
+        if (key == null || key.isBlank()) {
+            throw new IllegalStateException("Connector encryption key version " + version + " must not be blank");
         }
-        if (!AES_KEY_BYTES.contains(bytes.length)) {
-            throw invalidKey(version, null);
-        }
-        return new SecretKeySpec(bytes, "AES");
+        return new SecretKeySpec(decodeAesKey(key).orElseGet(() -> sha256(key)), "AES");
     }
 
-    private static IllegalStateException invalidKey(int version, Exception cause) {
-        return new IllegalStateException(
-                "Connector encryption key version " + version + " must be a Base64 encoded 16, 24 or 32 byte AES key",
-                cause);
+    private static Optional<byte[]> decodeAesKey(String key) {
+        try {
+            byte[] bytes = Base64.getDecoder().decode(key);
+            return AES_KEY_BYTES.contains(bytes.length) ? Optional.of(bytes) : Optional.empty();
+        } catch (IllegalArgumentException _) {
+            return Optional.empty();
+        }
+    }
+
+    private static byte[] sha256(String key) {
+        try {
+            return MessageDigest.getInstance("SHA-256").digest(key.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is not available", e);
+        }
     }
 }
